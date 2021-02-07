@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">StocksApp</string>
+    <string name="destination_home">Home</string>
+    <string name="destination_search">Search</string>
+    <string name="destination_cart">Cart</string>
+    <string name="destination_profile">Profile</string>
+</resources>
