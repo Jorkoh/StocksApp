@@ -17,6 +17,17 @@ import dev.chrisbanes.accompanist.insets.statusBarsPadding
 @Composable
 fun HomeScreen(modifier: Modifier) {
     Surface(modifier.fillMaxSize()) {
-        TickerCardPreview()
+        Column(
+            modifier = Modifier.statusBarsPadding(),
+            verticalArrangement = Arrangement.SpaceEvenly,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                "Home destination",
+                style = MaterialTheme.typography.h5,
+                textAlign = TextAlign.Center
+            )
+            TickerCardPreview()
+        }
     }
 }
