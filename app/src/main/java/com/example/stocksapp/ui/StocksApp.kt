@@ -15,6 +15,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.compose.*
 import com.example.stocksapp.ui.components.CustomBottomBar
 import com.example.stocksapp.ui.screens.CartScreen
+import com.example.stocksapp.ui.screens.HomeScreen
 import com.example.stocksapp.ui.screens.ProfileScreen
 import com.example.stocksapp.ui.screens.SearchScreen
 import com.example.stocksapp.ui.theme.StocksAppTheme
@@ -57,19 +58,7 @@ fun StocksApp() {
                 val modifier = Modifier.padding(innerPadding)
 
                 NavHost(navController, NavigableDestination.StartDestination.route) {
-                    composable(NavigableDestination.Home.route) {
-                        Surface(modifier.fillMaxSize()) {
-                            Text(
-                                "Home destination",
-                                style = MaterialTheme.typography.h5,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .statusBarsPadding()
-                                    .fillMaxHeight()
-                                    .wrapContentSize()
-                            )
-                        }
-                    }
+                    composable(NavigableDestination.Home.route) { HomeScreen(modifier) }
                     composable(NavigableDestination.Search.route) { SearchScreen(modifier) }
                     composable(NavigableDestination.Cart.route) { CartScreen(modifier) }
                     composable(NavigableDestination.Profile.route) { ProfileScreen(modifier) }
