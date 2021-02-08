@@ -13,17 +13,16 @@ import com.example.stocksapp.ui.components.charts.line.LineChartUtils.calculateD
 import com.example.stocksapp.ui.components.charts.line.LineChartUtils.calculateLinePath
 import com.example.stocksapp.ui.components.charts.line.LineChartUtils.calculatePointLocation
 import com.example.stocksapp.ui.components.charts.line.LineChartUtils.calculateXAxisDrawableArea
-import com.example.stocksapp.ui.components.charts.line.LineChartUtils.calculateXAxisLabelsDrawableArea
 import com.example.stocksapp.ui.components.charts.line.LineChartUtils.calculateYAxisDrawableArea
 import com.example.stocksapp.ui.components.charts.line.LineChartUtils.withProgress
-import com.example.stocksapp.ui.components.charts.line.renderer.xaxis.SimpleXAxisDrawer
-import com.example.stocksapp.ui.components.charts.line.renderer.xaxis.XAxisDrawer
-import com.github.tehras.charts.line.renderer.line.LineDrawer
-import com.github.tehras.charts.line.renderer.line.SolidLineDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.point.FilledCircularPointDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.point.PointDrawer
+import com.example.stocksapp.ui.components.charts.line.renderer.xaxis.SimpleXAxisDrawer
+import com.example.stocksapp.ui.components.charts.line.renderer.xaxis.XAxisDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.SimpleYAxisDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.YAxisDrawer
+import com.github.tehras.charts.line.renderer.line.LineDrawer
+import com.github.tehras.charts.line.renderer.line.SolidLineDrawer
 
 @Composable
 fun LineChart(
@@ -33,14 +32,8 @@ fun LineChart(
     pointDrawer: PointDrawer = FilledCircularPointDrawer(),
     lineDrawer: LineDrawer = SolidLineDrawer(),
     xAxisDrawer: XAxisDrawer = SimpleXAxisDrawer(),
-    yAxisDrawer: YAxisDrawer = SimpleYAxisDrawer(),
-    horizontalOffset: Float = 5f
+    yAxisDrawer: YAxisDrawer = SimpleYAxisDrawer()
 ) {
-    check(horizontalOffset in 0f..25f) {
-        "Horizontal offset is the % offset from sides, " +
-                "and should be between 0%-25%"
-    }
-
     val transitionProgress = animatedFloat(initVal = 0f)
     DisposableEffect(lineChartData.points) {
         transitionProgress.animateTo(1f, anim = animation)
@@ -58,15 +51,10 @@ fun LineChart(
                 labelHeight = xAxisDrawer.requiredHeight(this),
                 size = size
             )
-            val xAxisLabelsDrawableArea = calculateXAxisLabelsDrawableArea(
-                xAxisDrawableArea = xAxisDrawableArea,
-                offset = horizontalOffset
-            )
             val chartDrawableArea = calculateDrawableArea(
                 xAxisDrawableArea = xAxisDrawableArea,
                 yAxisDrawableArea = yAxisDrawableArea,
-                size = size,
-                offset = horizontalOffset
+                size = size
             )
 
             // Draw the chart line.
@@ -99,6 +87,7 @@ fun LineChart(
                 }
             }
 
+            // TODO add options for not drawing axis
             // Draw the X Axis line.
             xAxisDrawer.drawAxisLine(
                 drawScope = this,
@@ -109,7 +98,7 @@ fun LineChart(
             xAxisDrawer.drawAxisLabels(
                 drawScope = this,
                 canvas = canvas,
-                drawableArea = xAxisLabelsDrawableArea,
+                drawableArea = xAxisDrawableArea,
                 labels = lineChartData.points.map { it.label }
             )
 

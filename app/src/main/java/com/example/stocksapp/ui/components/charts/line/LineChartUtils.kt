@@ -1,5 +1,6 @@
 package com.example.stocksapp.ui.components.charts.line
 
+import android.util.Log
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -11,19 +12,15 @@ object LineChartUtils {
     fun calculateDrawableArea(
         xAxisDrawableArea: Rect,
         yAxisDrawableArea: Rect,
-        size: Size,
-        offset: Float
-    ): Rect {
-        val horizontalOffset = xAxisDrawableArea.width * offset / 100f
+        size: Size
+    ) = Rect(
+        left = yAxisDrawableArea.right,
+        top = 0f,
+        bottom = xAxisDrawableArea.top,
+        right = size.width
+    )
 
-        return Rect(
-            left = yAxisDrawableArea.right + horizontalOffset,
-            top = 0f,
-            bottom = xAxisDrawableArea.top,
-            right = size.width - horizontalOffset
-        )
-    }
-
+    // TODO size calculation should go into the drawer classes not here
     fun calculateXAxisDrawableArea(
         yAxisWidth: Float,
         labelHeight: Float,
@@ -36,20 +33,6 @@ object LineChartUtils {
             top = top,
             bottom = size.height,
             right = size.width
-        )
-    }
-
-    fun calculateXAxisLabelsDrawableArea(
-        xAxisDrawableArea: Rect,
-        offset: Float
-    ): Rect {
-        val horizontalOffset = xAxisDrawableArea.width * offset / 100f
-
-        return Rect(
-            left = xAxisDrawableArea.left + horizontalOffset,
-            top = xAxisDrawableArea.top,
-            bottom = xAxisDrawableArea.bottom,
-            right = xAxisDrawableArea.right - horizontalOffset
         )
     }
 
@@ -75,7 +58,9 @@ object LineChartUtils {
         index: Int
     ): Offset {
         val x = (index.toFloat() / (lineChartData.points.size - 1))
-        val y = ((point.value - lineChartData.minYValue) / lineChartData.yRange)
+
+        val range = lineChartData.maxYValue - lineChartData.minYValue
+        val y = (point.value - lineChartData.minYValue) / range
 
         return Offset(
             x = (x * drawableArea.width) + drawableArea.left,
@@ -89,26 +74,28 @@ object LineChartUtils {
         transitionProgress: Float,
         showWithProgress: (progress: Float) -> Unit
     ) {
-        val size = lineChartData.points.size
-        val toIndex = (size * transitionProgress).toInt() + 1
+        val nextToReachIndex = (lineChartData.points.size * transitionProgress).toInt() + 1
 
-        if (index == toIndex) {
-            // Get the left over.
-            val sizeF = lineChartData.points.size.toFloat()
-            val perIndex = (1f / sizeF)
+        if (index == nextToReachIndex) {
+            // It's the next to reach
+            val perIndex = 1f / lineChartData.points.size
             val down = (index - 1) * perIndex
 
             showWithProgress((transitionProgress - down) / perIndex)
-        } else if (index < toIndex) {
+        } else if (index < nextToReachIndex) {
+            // Point has already been passed
             showWithProgress(1f)
         }
+        // If it's beyond the next to reach don't show it
     }
 
+    // TODO understand the progress system and move to [StraightLinePathCalculator]
     fun calculateLinePath(
         drawableArea: Rect,
         lineChartData: LineChartData,
         transitionProgress: Float
     ): Path = Path().apply {
+        Log.d("TESTING CHARTS", "CALCULATING LINE PATH")
         var prevPointLocation: Offset? = null
         lineChartData.points.forEachIndexed { index, point ->
             withProgress(
@@ -122,11 +109,12 @@ object LineChartUtils {
                     point = point,
                     index = index
                 )
-
-                if (index == 0) {
-                    moveTo(pointLocation.x, pointLocation.y)
-                } else {
-                    if (progress <= 1f) {
+                when {
+                    index == 0 -> {
+                        // First point
+                        moveTo(pointLocation.x, pointLocation.y)
+                    }
+                    progress <= 1f -> {
                         // We have to change the `dy` based on the progress
                         val prevX = prevPointLocation!!.x
                         val prevY = prevPointLocation!!.y
@@ -135,11 +123,12 @@ object LineChartUtils {
                         val y = (pointLocation.y - prevY) * progress + prevY
 
                         lineTo(x, y)
-                    } else {
+                    }
+                    else -> {
+                        // Point has already been passed
                         lineTo(pointLocation.x, pointLocation.y)
                     }
                 }
-
                 prevPointLocation = pointLocation
             }
         }
