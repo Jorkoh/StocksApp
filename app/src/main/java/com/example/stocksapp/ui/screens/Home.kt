@@ -41,6 +41,7 @@ fun TickerCardTest() {
         chartData = LineChartData(
             points = (1..15).map { LineChartData.Point(randomYValue(), "#$it") }
         ),
+        // TODO this won't work on landscape btw
         modifier = Modifier.fillMaxWidth(0.8f)
     )
 }

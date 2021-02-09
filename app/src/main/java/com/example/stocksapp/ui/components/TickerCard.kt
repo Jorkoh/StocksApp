@@ -40,34 +40,19 @@ fun TickerCard(
                 Spacer(modifier.height(20.dp))
                 LineChart(
                     lineChartData = chartData,
-                    linePathCalculator = StraightLinePathCalculator(),
-                    lineDrawer = SolidLineDrawer(color = Color.Green),
-                    xAxisDrawer = NoXAxisDrawer,
-                    yAxisDrawer = NoYAxisDrawer
-                )
-            }
-        }
-        Spacer(Modifier.height(20.dp))
-        Card(modifier.aspectRatio(1f)) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(
-                    "$${symbol.toUpperCase(Locale.getDefault())}",
-                    style = MaterialTheme.typography.h6
-                )
-                Spacer(modifier.height(20.dp))
-                LineChart(
-                    lineChartData = chartData,
                     linePathCalculator = BezierLinePathCalculator(),
-                    lineDrawer = SolidLineDrawer(color = Color.Green),
+                    lineDrawer = SolidLineDrawer(
+                        color = if (chartData.points.first().value > chartData.points.last().value) {
+                            Color.Red
+                        } else {
+                            Color.Green
+                        }
+                    ),
                     xAxisDrawer = NoXAxisDrawer,
                     yAxisDrawer = NoYAxisDrawer
                 )
             }
         }
-
     }
 }
 

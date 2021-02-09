@@ -7,7 +7,7 @@ import com.example.stocksapp.ui.components.charts.line.LineChartData
 interface LinePathCalculator {
     fun calculateLinePath(
         drawableArea: Rect,
-        lineChartData: LineChartData,
+        data: LineChartData,
         transitionProgress: Float,
     ): Path
 }

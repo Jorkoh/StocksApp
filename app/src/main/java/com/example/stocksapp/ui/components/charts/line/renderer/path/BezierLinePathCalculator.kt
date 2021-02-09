@@ -29,21 +29,20 @@ class BezierLinePathCalculator : LinePathCalculator {
                 )
                 moveTo(firstLocation.x, firstLocation.y)
 
-                // TODO this can be written better
-                data.points.drop(1).foldIndexed(firstLocation) { index, previousLocation, current ->
-                    val currentLocation = LineChartUtils.calculatePointLocation(
+                data.points.drop(1).foldIndexed(firstLocation) { index, previousLoc, current ->
+                    val currentLoc = LineChartUtils.calculatePointLocation(
                         drawableArea = drawableArea,
                         lineChartData = data,
                         point = current,
                         index = index + 1
                     )
-                    val cpx = previousLocation.x + (currentLocation.x - previousLocation.x) / 2f
+                    val controlPointX = (currentLoc.x - previousLoc.x) / 1.3f
                     cubicTo(
-                        cpx, previousLocation.y,
-                        cpx, currentLocation.y,
-                        currentLocation.x, currentLocation.y
+                        previousLoc.x + controlPointX, previousLoc.y,
+                        currentLoc.x - controlPointX, currentLoc.y,
+                        currentLoc.x, currentLoc.y
                     )
-                    currentLocation
+                    currentLoc
                 }
             }
             pathMeasure.setPath(path, false)

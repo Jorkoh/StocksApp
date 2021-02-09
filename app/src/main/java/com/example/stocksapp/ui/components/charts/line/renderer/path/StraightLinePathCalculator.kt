@@ -15,16 +15,16 @@ class StraightLinePathCalculator : LinePathCalculator {
 
     override fun calculateLinePath(
         drawableArea: Rect,
-        lineChartData: LineChartData,
+        data: LineChartData,
         transitionProgress: Float
     ): Path {
-        if (lineChartData != previousLineChartData || drawableArea != previousDrawableArea) {
+        if (data != previousLineChartData || drawableArea != previousDrawableArea) {
             // Only recalculate the path it it has actually changed
             path = Path().apply {
-                lineChartData.points.forEachIndexed { index, point ->
+                data.points.forEachIndexed { index, point ->
                     val pointLocation = calculatePointLocation(
                         drawableArea = drawableArea,
-                        lineChartData = lineChartData,
+                        lineChartData = data,
                         point = point,
                         index = index
                     )
@@ -36,7 +36,7 @@ class StraightLinePathCalculator : LinePathCalculator {
                 }
             }
             pathMeasure.setPath(path, false)
-            previousLineChartData = lineChartData
+            previousLineChartData = data
             previousDrawableArea = drawableArea
         }
 

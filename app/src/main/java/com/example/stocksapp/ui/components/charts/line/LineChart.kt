@@ -70,7 +70,7 @@ fun LineChart(
                 canvas = canvas,
                 linePath = linePathCalculator.calculateLinePath(
                     drawableArea = chartDrawableArea,
-                    lineChartData = lineChartData,
+                    data = lineChartData,
                     transitionProgress = transitionProgress.value
                 )
             )
