@@ -32,36 +32,27 @@ class SimpleYAxisDrawer(
     }
     private val textBounds = android.graphics.Rect()
 
-    override fun drawAxisLine(
-        drawScope: DrawScope,
-        canvas: Canvas,
-        drawableArea: Rect
-    ) = with(drawScope) {
-        val lineThickness = axisLineThickness.toPx()
-        val x = drawableArea.right - (lineThickness / 2f)
-
-        canvas.drawLine(
-            p1 = Offset(
-                x = x,
-                y = drawableArea.top
-            ),
-            p2 = Offset(
-                x = x,
-                y = drawableArea.bottom
-            ),
-            paint = axisLinePaint.apply {
-                strokeWidth = lineThickness
-            }
-        )
+    override fun calculateWidth(drawScope: DrawScope) = with(drawScope) {
+        minOf(50.dp.toPx(), size.width * 10f / 100f)
     }
 
-    override fun drawAxisLabels(
+    override fun draw(
         drawScope: DrawScope,
         canvas: Canvas,
         drawableArea: Rect,
         minValue: Float,
         maxValue: Float
     ) = with(drawScope) {
+        // Draw axis
+        val lineThickness = axisLineThickness.toPx()
+        val axisX = drawableArea.right - lineThickness / 2f
+        canvas.drawLine(
+            p1 = Offset(x = axisX, y = drawableArea.top),
+            p2 = Offset(x = axisX, y = drawableArea.bottom),
+            paint = axisLinePaint.apply { strokeWidth = lineThickness }
+        )
+
+        // Draw labels
         val labelPaint = textPaint.apply {
             textSize = labelTextSize.toPx()
             textAlign = android.graphics.Paint.Align.RIGHT
@@ -74,13 +65,12 @@ class SimpleYAxisDrawer(
             val value = minValue + (i * ((maxValue - minValue) / labelCount))
 
             val label = labelValueFormatter(value)
-            val x =
-                drawableArea.right - axisLineThickness.toPx() - (labelTextSize.toPx() / 2f)
+            val x = drawableArea.right - axisLineThickness.toPx() - labelTextSize.toPx() / 2f
 
             labelPaint.getTextBounds(label, 0, label.length, textBounds)
 
-            val y =
-                drawableArea.bottom - (i * (totalHeight / labelCount)) + (textBounds.height() / 2f)
+            val y = drawableArea.bottom - (i * (totalHeight / labelCount)) +
+                    (textBounds.height() / 2f)
 
             canvas.nativeCanvas.drawText(label, x, y, labelPaint)
         }

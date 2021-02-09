@@ -1,10 +1,8 @@
 package com.example.stocksapp.ui.components
 
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.TweenSpec
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,12 +24,16 @@ fun TickerCard(
     chartData: LineChartData,
     modifier: Modifier = Modifier
 ) {
-    Card(modifier) {
+    Card(modifier.aspectRatio(1f)) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(16.dp)
         ) {
-            Text("$${symbol.toUpperCase(Locale.getDefault())}")
+            Text(
+                "$${symbol.toUpperCase(Locale.getDefault())}",
+                style = MaterialTheme.typography.h6
+            )
+            Spacer(modifier.height(20.dp))
             LineChart(
                 lineChartData = chartData,
                 lineDrawer = SolidLineDrawer(color = Color.Green),
@@ -48,7 +50,7 @@ fun TickerCardPreview() {
     TickerCard(
         symbol = "GME",
         chartData = LineChartData(
-            points = (1..15).map { LineChartData.Point(randomYValue(), "Label $it") }
+            points = (1..15).map { LineChartData.Point(randomYValue(), "#$it") }
         )
     )
 }

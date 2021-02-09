@@ -7,7 +7,6 @@ import com.example.stocksapp.ui.components.charts.line.LineChartData
 import com.example.stocksapp.ui.components.charts.line.LineChartUtils.calculatePointLocation
 
 class StraightLinePathCalculator : LinePathCalculator {
-
     private var previousDrawableArea: Rect? = null
     private var previousLineChartData: LineChartData? = null
 

@@ -28,56 +28,38 @@ class SimpleXAxisDrawer(
         color = labelTextColor.toArgb()
     }
 
-    override fun requiredHeight(drawScope: DrawScope): Float {
-        return with(drawScope) {
-            (3f / 2f) * (labelTextSize.toPx() + axisLineThickness.toPx())
-        }
+    override fun calculateHeight(drawScope: DrawScope) = with(drawScope) {
+        (3f / 2f) * (labelTextSize.toPx() + axisLineThickness.toPx())
     }
 
-    override fun drawAxisLine(
-        drawScope: DrawScope,
-        canvas: Canvas,
-        drawableArea: Rect
-    ) {
-        with(drawScope) {
-            val lineThickness = axisLineThickness.toPx()
-            val y = drawableArea.top + (lineThickness / 2f)
-
-            canvas.drawLine(
-                p1 = Offset(
-                    x = drawableArea.left,
-                    y = y
-                ),
-                p2 = Offset(
-                    x = drawableArea.right,
-                    y = y
-                ),
-                paint = axisLinePaint.apply {
-                    strokeWidth = lineThickness
-                }
-            )
-        }
-    }
-
-    override fun drawAxisLabels(
+    override fun draw(
         drawScope: DrawScope,
         canvas: Canvas,
         drawableArea: Rect,
         labels: List<String>
     ) {
         with(drawScope) {
+            // Draw axis
+            val lineThickness = axisLineThickness.toPx()
+            val axisY = drawableArea.top + (lineThickness / 2f)
+            canvas.drawLine(
+                p1 = Offset(x = drawableArea.left, y = axisY),
+                p2 = Offset(x = drawableArea.right, y = axisY),
+                paint = axisLinePaint.apply { strokeWidth = lineThickness }
+            )
+
+            // Draw labels
             val labelPaint = textPaint.apply {
                 textSize = labelTextSize.toPx()
                 textAlign = android.graphics.Paint.Align.CENTER
             }
-
             val labelIncrements = drawableArea.width / (labels.size - 1)
             labels.forEachIndexed { index, label ->
                 if (index.rem(labelRatio) == 0) {
-                    val x = drawableArea.left + (labelIncrements * (index))
-                    val y = drawableArea.bottom
+                    val labelX = drawableArea.left + (labelIncrements * (index))
+                    val labelY = drawableArea.bottom
 
-                    canvas.nativeCanvas.drawText(label, x, y, labelPaint)
+                    canvas.nativeCanvas.drawText(label, labelX, labelY, labelPaint)
                 }
             }
         }

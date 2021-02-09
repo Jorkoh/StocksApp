@@ -5,11 +5,9 @@ import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.drawscope.DrawScope
 
 object NoYAxisDrawer : YAxisDrawer{
-    override fun drawAxisLine(drawScope: DrawScope, canvas: Canvas, drawableArea: Rect) {
-        // Leave empty on purpose, we do not want to draw anything.
-    }
+    override fun calculateWidth(drawScope: DrawScope) = 0f
 
-    override fun drawAxisLabels(
+    override fun draw(
         drawScope: DrawScope,
         canvas: Canvas,
         drawableArea: Rect,

@@ -11,13 +11,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.dp
-import com.example.stocksapp.ui.components.charts.line.LineChartUtils.calculateDrawableArea
-import com.example.stocksapp.ui.components.charts.line.LineChartUtils.calculateXAxisDrawableArea
-import com.example.stocksapp.ui.components.charts.line.LineChartUtils.calculateYAxisDrawableArea
 import com.example.stocksapp.ui.components.charts.line.renderer.line.LineDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.line.SolidLineDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.path.LinePathCalculator
@@ -49,19 +43,25 @@ fun LineChart(
     Canvas(modifier = modifier.fillMaxSize()) {
         drawIntoCanvas { canvas ->
             // Measure stuff
-            val yAxisDrawableArea = calculateYAxisDrawableArea(
-                xAxisLabelSize = xAxisDrawer.requiredHeight(this),
-                size = size
+            val yAxisWidth = yAxisDrawer.calculateWidth(this)
+            val xAxisHeight = xAxisDrawer.calculateHeight(this)
+            val xAxisDrawableArea = Rect(
+                left = yAxisWidth,
+                top = size.height - xAxisHeight,
+                right = size.width,
+                bottom = size.height
             )
-            val xAxisDrawableArea = calculateXAxisDrawableArea(
-                yAxisWidth = yAxisDrawableArea.width,
-                labelHeight = xAxisDrawer.requiredHeight(this),
-                size = size
+            val yAxisDrawableArea = Rect(
+                left = 0f,
+                top = 0f,
+                right = yAxisWidth,
+                bottom = size.height - xAxisHeight
             )
-            val chartDrawableArea = calculateDrawableArea(
-                xAxisDrawableArea = xAxisDrawableArea,
-                yAxisDrawableArea = yAxisDrawableArea,
-                size = size
+            val chartDrawableArea = Rect(
+                left = yAxisWidth,
+                top = 0f,
+                right = size.width,
+                bottom = size.height - xAxisHeight
             )
 
             // Draw stuff
@@ -74,23 +74,13 @@ fun LineChart(
                     transitionProgress = transitionProgress.value
                 )
             )
-            xAxisDrawer.drawAxisLine(
-                drawScope = this,
-                drawableArea = xAxisDrawableArea,
-                canvas = canvas
-            )
-            xAxisDrawer.drawAxisLabels(
+            xAxisDrawer.draw(
                 drawScope = this,
                 canvas = canvas,
                 drawableArea = xAxisDrawableArea,
                 labels = lineChartData.points.map { it.label }
             )
-            yAxisDrawer.drawAxisLine(
-                drawScope = this,
-                canvas = canvas,
-                drawableArea = yAxisDrawableArea
-            )
-            yAxisDrawer.drawAxisLabels(
+            yAxisDrawer.draw(
                 drawScope = this,
                 canvas = canvas,
                 drawableArea = yAxisDrawableArea,
@@ -102,48 +92,6 @@ fun LineChart(
 }
 
 object LineChartUtils {
-    fun calculateDrawableArea(
-        xAxisDrawableArea: Rect,
-        yAxisDrawableArea: Rect,
-        size: Size
-    ) = Rect(
-        left = yAxisDrawableArea.right,
-        top = 0f,
-        bottom = xAxisDrawableArea.top,
-        right = size.width
-    )
-
-    // TODO size calculation should go into the drawer classes not here
-    fun calculateXAxisDrawableArea(
-        yAxisWidth: Float,
-        labelHeight: Float,
-        size: Size
-    ): Rect {
-        val top = size.height - labelHeight
-
-        return Rect(
-            left = yAxisWidth,
-            top = top,
-            bottom = size.height,
-            right = size.width
-        )
-    }
-
-    fun Density.calculateYAxisDrawableArea(
-        xAxisLabelSize: Float,
-        size: Size
-    ): Rect {
-        // Either 50dp or 10% of the chart width.
-        val right = minOf(50.dp.toPx(), size.width * 10f / 100f)
-
-        return Rect(
-            left = 0f,
-            top = 0f,
-            bottom = size.height - xAxisLabelSize,
-            right = right
-        )
-    }
-
     fun calculatePointLocation(
         drawableArea: Rect,
         lineChartData: LineChartData,

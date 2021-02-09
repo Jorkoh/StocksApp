@@ -3,6 +3,7 @@ package com.example.stocksapp.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -38,9 +39,9 @@ fun TickerCardTest() {
     TickerCard(
         symbol = "GME",
         chartData = LineChartData(
-            points = (1..15).map { LineChartData.Point(randomYValue(), "Label $it") }
+            points = (1..15).map { LineChartData.Point(randomYValue(), "#$it") }
         ),
-        modifier = Modifier.fillMaxSize(0.8f)
+        modifier = Modifier.fillMaxWidth(0.8f)
     )
 }
 
