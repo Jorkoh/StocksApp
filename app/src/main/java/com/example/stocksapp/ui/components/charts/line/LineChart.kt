@@ -98,7 +98,7 @@ object LineChartUtils {
         point: LineChartData.Point,
         index: Int
     ): Offset {
-        val x = index.toFloat() / (lineChartData.points.size - 1)
+        val x = index / (lineChartData.points.size - 1f)
 
         val range = lineChartData.maxYValue - lineChartData.minYValue
         val y = (point.value - lineChartData.minYValue) / range
