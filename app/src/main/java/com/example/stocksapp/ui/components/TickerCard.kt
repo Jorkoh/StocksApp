@@ -14,8 +14,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.stocksapp.ui.components.charts.line.LineChart
 import com.example.stocksapp.ui.components.charts.line.LineChartData
-import com.example.stocksapp.ui.components.charts.line.renderer.xaxis.SimpleXAxisDrawer
-import com.github.tehras.charts.line.renderer.line.SolidLineDrawer
+import com.example.stocksapp.ui.components.charts.line.renderer.line.SolidLineDrawer
+import com.example.stocksapp.ui.components.charts.line.renderer.xaxis.NoXAxisDrawer
+import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.NoYAxisDrawer
 import java.util.*
 import kotlin.random.Random
 
@@ -33,8 +34,9 @@ fun TickerCard(
             Text("$${symbol.toUpperCase(Locale.getDefault())}")
             LineChart(
                 lineChartData = chartData,
-                animation = TweenSpec(10000, easing = LinearOutSlowInEasing),
-                lineDrawer = SolidLineDrawer(color = Color.Green)
+                lineDrawer = SolidLineDrawer(color = Color.Green),
+                xAxisDrawer = NoXAxisDrawer,
+                yAxisDrawer = NoYAxisDrawer
             )
         }
     }

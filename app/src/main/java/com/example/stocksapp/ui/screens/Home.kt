@@ -38,8 +38,7 @@ fun TickerCardTest() {
     TickerCard(
         symbol = "GME",
         chartData = LineChartData(
-            points = (1..15).map { LineChartData.Point(randomYValue(), "Label $it") },
-            topPaddingRatio = 0f
+            points = (1..15).map { LineChartData.Point(randomYValue(), "Label $it") }
         ),
         modifier = Modifier.fillMaxSize(0.8f)
     )

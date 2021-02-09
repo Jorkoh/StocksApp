@@ -1,4 +1,4 @@
-package com.github.tehras.charts.line.renderer.line
+package com.example.stocksapp.ui.components.charts.line.renderer.line
 
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.DrawScope
