@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
@@ -71,7 +72,7 @@ fun CustomBottomBar(
                     CustomBottomBarItem(
                         icon = {
                             Icon(
-                                imageVector = section.icon,
+                                imageVector = vectorResource(section.icon),
                                 tint = tint,
                                 contentDescription = null
                             )

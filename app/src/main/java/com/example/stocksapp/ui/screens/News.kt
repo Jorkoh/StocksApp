@@ -12,10 +12,10 @@ import androidx.compose.ui.text.style.TextAlign
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
 
 @Composable
-fun CartScreen(modifier: Modifier){
+fun NewsScreen(modifier: Modifier){
     Surface(modifier.fillMaxSize()) {
         Text(
-            "Cart destination",
+            "News destination",
             style = MaterialTheme.typography.h5,
             textAlign = TextAlign.Center,
             modifier = Modifier

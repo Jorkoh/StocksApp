@@ -1,35 +1,30 @@
 package com.example.stocksapp.ui
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.stocksapp.R
 
 data class Destination(
     @StringRes val title: Int,
-    val icon: ImageVector
+    @DrawableRes val icon: Int
 )
 
 enum class NavigableDestination(val route: String, val destination: Destination) {
     Home(
         route = "home",
-        destination = Destination(R.string.destination_home, Icons.Outlined.Home)
+        destination = Destination(R.string.destination_home, R.drawable.ic_home)
     ),
     Search(
         route = "search",
-        destination = Destination(R.string.destination_search, Icons.Outlined.Search)
+        destination = Destination(R.string.destination_search, R.drawable.ic_search)
     ),
     Cart(
-        route = "cart",
-        destination = Destination(R.string.destination_cart, Icons.Outlined.ShoppingCart)
+        route = "news",
+        destination = Destination(R.string.destination_news, R.drawable.ic_news)
     ),
     Profile(
         route = "profile",
-        destination = Destination(R.string.destination_profile, Icons.Outlined.AccountCircle)
+        destination = Destination(R.string.destination_profile, R.drawable.ic_profile)
     );
 
     companion object {
@@ -38,8 +33,8 @@ enum class NavigableDestination(val route: String, val destination: Destination)
 }
 
 val previewDestinations = listOf(
-    Destination(R.string.destination_home, Icons.Outlined.Home),
-    Destination(R.string.destination_search, Icons.Outlined.Search),
-    Destination(R.string.destination_cart, Icons.Outlined.ShoppingCart),
-    Destination(R.string.destination_profile, Icons.Outlined.AccountCircle),
+    Destination(R.string.destination_home, R.drawable.ic_home),
+    Destination(R.string.destination_search, R.drawable.ic_search),
+    Destination(R.string.destination_news, R.drawable.ic_news),
+    Destination(R.string.destination_profile, R.drawable.ic_profile),
 )
