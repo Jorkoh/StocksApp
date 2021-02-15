@@ -3,7 +3,10 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
+    id 'org.jetbrains.kotlin.plugin.serialization' version "1.4.30"
 }
+
+apply from: "$rootDir/versions.gradle"
 
 android {
     compileSdkVersion 30
@@ -11,14 +14,18 @@ android {
 
     defaultConfig {
         applicationId "com.example.stocksapp"
-        minSdkVersion 23
-        targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion versions.min_sdk
+        targetSdkVersion versions.compile_sdk
+        versionCode versions.version_code
+        versionName versions.version_name
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
         buildConfigField("String", "IEX_PUBLISHABLE_TOKEN", "\"" + getPropertyOrDefault(IEX_PUBLISHABLE_TOKEN, "") + "\"")
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation" : "$projectDir/schemas".toString()]
+            }
+        }
     }
 
     buildTypes {
@@ -34,13 +41,15 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
         useIR = true
+        // Enable Coroutines and Flow APIs
+        freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
+        freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.FlowPreview"
     }
     buildFeatures {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion compose_version
-        kotlinCompilerVersion '1.4.30'
+        kotlinCompilerExtensionVersion versions.compose_version
     }
 }
 
@@ -50,22 +59,32 @@ dependencies {
     implementation "androidx.appcompat:appcompat:1.2.0"
     implementation "com.google.android.material:material:1.3.0"
     implementation "androidx.activity:activity-compose:1.3.0-alpha02"
-    implementation "androidx.compose.ui:ui:$compose_version"
-    implementation "androidx.compose.material:material:$compose_version"
-    implementation "androidx.compose.ui:ui-tooling:$compose_version"
-    implementation "androidx.compose.ui:ui-util:$compose_version"
+    implementation "androidx.compose.ui:ui:$versions.compose_version"
+    implementation "androidx.compose.material:material:$versions.compose_version"
+    implementation "androidx.compose.ui:ui-tooling:$versions.compose_version"
+    implementation "androidx.compose.ui:ui-util:$versions.compose_version"
     implementation "androidx.navigation:navigation-compose:1.0.0-alpha07"
     implementation "dev.chrisbanes.accompanist:accompanist-insets:0.5.1"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.3.0"
 
     implementation 'com.jakewharton.timber:timber:4.7.1'
 
-    implementation "com.google.dagger:hilt-android:$hilt_version"
-    kapt "com.google.dagger:hilt-android-compiler:$hilt_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions.coroutines_version"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions.coroutines_version"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$versions.coroutines_version"
+
+    implementation "com.google.dagger:hilt-android:$versions.hilt_version"
+    kapt "com.google.dagger:hilt-android-compiler:$versions.hilt_version"
 
     implementation "com.squareup.okhttp3:okhttp:4.9.0"
-    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
-    implementation "com.squareup.retrofit2:converter-moshi:$retrofit_version"
+    implementation "com.squareup.retrofit2:retrofit:$versions.retrofit_version"
+    implementation "com.squareup.retrofit2:converter-moshi:$versions.retrofit_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$versions.kotlinx_serialization"
+    implementation "com.github.skydoves:sandwich:1.0.9"
+
+    kapt "androidx.room:room-compiler:$versions.room_version"
+    implementation "androidx.room:room-runtime:$versions.room_version"
+    implementation "androidx.room:room-ktx:$versions.room_version"
 
     testImplementation "junit:junit:4.13.1"
     androidTestImplementation "androidx.test.ext:junit:1.1.2"

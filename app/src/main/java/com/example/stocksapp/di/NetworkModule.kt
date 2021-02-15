@@ -9,9 +9,9 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object IEXModule {
+object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideIEXService() = IEXService.create()
+    fun provideIEXService(): IEXService = IEXService.create()
 }
