@@ -1,13 +1,14 @@
 package com.example.stocksapp.ui.components.charts.line
 
-import androidx.compose.animation.animatedFloat
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -34,11 +35,10 @@ fun LineChart(
     xAxisDrawer: XAxisDrawer = SimpleXAxisDrawer(),
     yAxisDrawer: YAxisDrawer = SimpleYAxisDrawer()
 ) {
-    // TODO fix this deprecation
-    val transitionProgress = animatedFloat(initVal = 0f)
-    DisposableEffect(lineChartData.points) {
-        transitionProgress.animateTo(1f, anim = animation)
-        onDispose { transitionProgress.snapTo(0f) }
+    val transitionProgress = remember(lineChartData.points) { Animatable(initialValue = 0f) }
+    LaunchedEffect(lineChartData.points) {
+        transitionProgress.snapTo(0f)
+        transitionProgress.animateTo(1f, animationSpec = animation)
     }
 
     Canvas(modifier = modifier.fillMaxSize()) {
