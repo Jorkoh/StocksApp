@@ -7,10 +7,23 @@ import androidx.compose.runtime.Providers
 import androidx.compose.runtime.remember
 import androidx.core.view.WindowCompat
 import com.example.stocksapp.ui.StocksApp
+import com.example.stocksapp.ui.screens.stockdetail.StockDetailViewModelFactory
 import com.example.stocksapp.ui.utils.LocalSysUiController
 import com.example.stocksapp.ui.utils.SystemUiController
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.components.ActivityComponent
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @EntryPoint
+    @InstallIn(ActivityComponent::class)
+    interface ViewModelFactoryProvider {
+        fun stockDetailViewModelFactory(): StockDetailViewModelFactory
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

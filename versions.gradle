@@ -12,6 +12,7 @@ ext.versions = [
         timber               : '4.7.1',
         retrofit             : '2.9.0',
         hilt                 : '2.32-alpha',
+        hilt_navigation      : '1.0.0-alpha03',
         room                 : '2.3.0-beta01',
         coroutines           : '1.4.2',
         kotlinx_serialization: '1.1.0-RC'

@@ -1,6 +1,5 @@
 package com.example.stocksapp.ui
 
-import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
@@ -8,21 +7,26 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.HiltViewModelFactory
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import com.example.stocksapp.ui.components.CustomBottomBar
 import com.example.stocksapp.ui.screens.NavigableDestinations
 import com.example.stocksapp.ui.screens.NavigableScreens
-import com.example.stocksapp.ui.screens.home.HomeScreen
+import com.example.stocksapp.ui.screens.home.Home
 import com.example.stocksapp.ui.screens.news.NewsScreen
 import com.example.stocksapp.ui.screens.profile.ProfileScreen
 import com.example.stocksapp.ui.screens.search.SearchScreen
-import com.example.stocksapp.ui.screens.stockdetail.StockDetailScreen
+import com.example.stocksapp.ui.screens.stockdetail.StockDetail
+import com.example.stocksapp.ui.screens.stockdetail.stockDetailViewModel
 import com.example.stocksapp.ui.theme.StocksAppTheme
 import com.example.stocksapp.ui.utils.LocalSysUiController
 import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
-import timber.log.Timber
 
 @Composable
 fun StocksApp() {
@@ -53,9 +57,7 @@ private fun NavigableContent(
     NavHost(navController, NavigableDestinations.StartDestination.route) {
         // Base destinations
         composable(NavigableDestinations.Home.route) {
-            HomeScreen(padding) { symbol ->
-                navController.navigate(NavigableScreens.StockDetail.buildRoute(symbol))
-            }
+            Home(it.hiltNavGraphViewModel(), navController, padding)
         }
         composable(NavigableDestinations.Search.route) { SearchScreen(padding) }
         composable(NavigableDestinations.News.route) { NewsScreen(padding) }
@@ -71,8 +73,7 @@ private fun NavigableContent(
             val symbol = requireNotNull(
                 backStackEntry.arguments?.getString(NavigableScreens.StockDetail.argument)
             )
-            // TODO get this symbol to the view model
-            StockDetailScreen()
+            StockDetail(stockDetailViewModel(symbol), navController)
         }
     }
 }
@@ -100,4 +101,11 @@ private fun NavigableBottomBar(navController: NavHostController) {
         },
         destinations = NavigableDestinations.toList().map { it.destination },
     )
+}
+
+// https://kotlinlang.slack.com/archives/CJLTWPH7S/p1604071670473700?thread_ts=1604043017.440100&cid=CJLTWPH7S
+@Composable
+inline fun <reified VM : ViewModel> NavBackStackEntry.hiltNavGraphViewModel(): VM {
+    val viewModelFactory = HiltViewModelFactory(LocalContext.current, this)
+    return ViewModelProvider(this, viewModelFactory).get(VM::class.java)
 }

@@ -8,7 +8,7 @@ import com.skydoves.sandwich.onException
 import com.skydoves.sandwich.suspendOnSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 
 class StocksRepository @Inject constructor(
@@ -19,6 +19,7 @@ class StocksRepository @Inject constructor(
     @WorkerThread
     fun fetchCompanyInfo(
         symbol: String,
+        onStart: () -> Unit,
         onSuccess: () -> Unit,
         onError: (String?) -> Unit
     ) = flow {
@@ -41,5 +42,5 @@ class StocksRepository @Inject constructor(
             emit(companyInfo)
             onSuccess()
         }
-    }.flowOn(Dispatchers.IO)
+    }.onStart { onStart() }.flowOn(Dispatchers.IO)
 }

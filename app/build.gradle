@@ -76,7 +76,8 @@ dependencies {
 
     // DI
     implementation "com.google.dagger:hilt-android:$versions.hilt"
-    kapt "com.google.dagger:hilt-android-compiler:$versions.hilt"
+    implementation "androidx.hilt:hilt-navigation-fragment:$versions.hilt_navigation"
+    kapt "com.google.dagger:hilt-compiler:$versions.hilt"
 
     // Network stuff
     implementation "com.squareup.okhttp3:okhttp:4.9.0"
