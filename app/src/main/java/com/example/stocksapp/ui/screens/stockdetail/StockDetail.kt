@@ -1,4 +1,4 @@
-package com.example.stocksapp.ui.screens
+package com.example.stocksapp.ui.screens.stockdetail
 
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,10 +12,10 @@ import androidx.compose.ui.text.style.TextAlign
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
 
 @Composable
-fun ProfileScreen(modifier: Modifier) {
+fun StockDetailScreen(modifier: Modifier = Modifier) {
     Surface(modifier.fillMaxSize()) {
         Text(
-            "Profile destination",
+            "Stock detail destination",
             style = MaterialTheme.typography.h5,
             textAlign = TextAlign.Center,
             modifier = Modifier

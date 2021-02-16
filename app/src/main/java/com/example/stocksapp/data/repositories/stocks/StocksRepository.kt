@@ -1,5 +1,6 @@
 package com.example.stocksapp.data.repositories.stocks
 
+import androidx.annotation.WorkerThread
 import com.example.stocksapp.data.database.StocksDao
 import com.skydoves.sandwich.message
 import com.skydoves.sandwich.onError
@@ -15,6 +16,7 @@ class StocksRepository @Inject constructor(
     private val stocksDao: StocksDao
 ) {
 
+    @WorkerThread
     fun fetchCompanyInfo(
         symbol: String,
         onSuccess: () -> Unit,

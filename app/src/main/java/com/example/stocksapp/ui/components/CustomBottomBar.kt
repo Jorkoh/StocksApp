@@ -24,13 +24,13 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.*
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
-import com.example.stocksapp.ui.Destination
-import com.example.stocksapp.ui.previewDestinations
+import com.example.stocksapp.ui.screens.Destination
+import com.example.stocksapp.ui.screens.NavigableDestinations
 import com.example.stocksapp.ui.theme.StocksAppTheme
 import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
 import dev.chrisbanes.accompanist.insets.navigationBarsPadding
@@ -72,7 +72,7 @@ fun CustomBottomBar(
                     CustomBottomBarItem(
                         icon = {
                             Icon(
-                                imageVector = vectorResource(section.icon),
+                                painter = painterResource(section.icon),
                                 tint = tint,
                                 contentDescription = null
                             )
@@ -285,3 +285,5 @@ private fun CustomBottomBarPreviewDark() {
         }
     }
 }
+
+val previewDestinations = NavigableDestinations.toList().map { it.destination }

@@ -1,9 +1,9 @@
-package com.example.stocksapp.ui
+package com.example.stocksapp.ui.utils
 
 import android.os.Build
 import android.view.View
 import android.view.Window
-import androidx.compose.runtime.staticAmbientOf
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.luminance
@@ -93,9 +93,9 @@ class SystemUiController(private val window: Window) {
 
 /**
  * An [androidx.compose.Ambient] holding the current [SystemUiController] or throws an error if none
- * is [provided][androidx.compose.Providers].
+ * is [provided][androidx.compose.runtime.CompositionLocalProvider].
  */
-val AmbientSystemUiController = staticAmbientOf<SystemUiController> {
+val LocalSysUiController = staticCompositionLocalOf<SystemUiController> {
     error("No SystemUiController provided")
 }
 

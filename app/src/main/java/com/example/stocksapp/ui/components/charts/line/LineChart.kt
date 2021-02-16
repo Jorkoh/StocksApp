@@ -34,6 +34,7 @@ fun LineChart(
     xAxisDrawer: XAxisDrawer = SimpleXAxisDrawer(),
     yAxisDrawer: YAxisDrawer = SimpleYAxisDrawer()
 ) {
+    // TODO fix this deprecation
     val transitionProgress = animatedFloat(initVal = 0f)
     DisposableEffect(lineChartData.points) {
         transitionProgress.animateTo(1f, anim = animation)

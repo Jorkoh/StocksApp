@@ -49,42 +49,46 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion versions.compose_version
+        kotlinCompilerExtensionVersion versions.compose
     }
 }
 
 dependencies {
 
     implementation "androidx.core:core-ktx:1.3.2"
-    implementation "androidx.appcompat:appcompat:1.2.0"
     implementation "com.google.android.material:material:1.3.0"
     implementation "androidx.activity:activity-compose:1.3.0-alpha02"
-    implementation "androidx.compose.ui:ui:$versions.compose_version"
-    implementation "androidx.compose.material:material:$versions.compose_version"
-    implementation "androidx.compose.ui:ui-tooling:$versions.compose_version"
-    implementation "androidx.compose.ui:ui-util:$versions.compose_version"
-    implementation "androidx.navigation:navigation-compose:1.0.0-alpha07"
-    implementation "dev.chrisbanes.accompanist:accompanist-insets:0.5.1"
+    implementation "androidx.compose.ui:ui:$versions.compose"
+    implementation "androidx.compose.material:material:$versions.compose"
+    implementation "androidx.compose.ui:ui-tooling:$versions.compose"
+    implementation "androidx.compose.ui:ui-util:$versions.compose"
+    implementation "androidx.navigation:navigation-compose:$versions.compose_navigation"
+    implementation "dev.chrisbanes.accompanist:accompanist-insets:$versions.accompanist_insets"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.3.0"
 
-    implementation 'com.jakewharton.timber:timber:4.7.1'
+    // Logging
+    implementation "com.jakewharton.timber:timber:$versions.timber"
 
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions.coroutines_version"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions.coroutines_version"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$versions.coroutines_version"
+    // Coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions.coroutines"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions.coroutines"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$versions.coroutines"
 
-    implementation "com.google.dagger:hilt-android:$versions.hilt_version"
-    kapt "com.google.dagger:hilt-android-compiler:$versions.hilt_version"
+    // DI
+    implementation "com.google.dagger:hilt-android:$versions.hilt"
+    kapt "com.google.dagger:hilt-android-compiler:$versions.hilt"
 
+    // Network stuff
     implementation "com.squareup.okhttp3:okhttp:4.9.0"
-    implementation "com.squareup.retrofit2:retrofit:$versions.retrofit_version"
-    implementation "com.squareup.retrofit2:converter-moshi:$versions.retrofit_version"
+    implementation "com.squareup.retrofit2:retrofit:$versions.retrofit"
+    implementation "com.squareup.retrofit2:converter-moshi:$versions.retrofit"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$versions.kotlinx_serialization"
     implementation "com.github.skydoves:sandwich:1.0.9"
 
-    kapt "androidx.room:room-compiler:$versions.room_version"
-    implementation "androidx.room:room-runtime:$versions.room_version"
-    implementation "androidx.room:room-ktx:$versions.room_version"
+    // Room
+    kapt "androidx.room:room-compiler:$versions.room"
+    implementation "androidx.room:room-runtime:$versions.room"
+    implementation "androidx.room:room-ktx:$versions.room"
 
     testImplementation "junit:junit:4.13.1"
     androidTestImplementation "androidx.test.ext:junit:1.1.2"

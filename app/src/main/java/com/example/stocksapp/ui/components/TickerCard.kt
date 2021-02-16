@@ -1,6 +1,5 @@
 package com.example.stocksapp.ui.components
 
-import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
@@ -15,7 +14,6 @@ import com.example.stocksapp.ui.components.charts.line.LineChart
 import com.example.stocksapp.ui.components.charts.line.LineChartData
 import com.example.stocksapp.ui.components.charts.line.renderer.line.SolidLineDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.path.BezierLinePathCalculator
-import com.example.stocksapp.ui.components.charts.line.renderer.path.StraightLinePathCalculator
 import com.example.stocksapp.ui.components.charts.line.renderer.xaxis.NoXAxisDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.NoYAxisDrawer
 import java.util.*
