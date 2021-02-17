@@ -2,12 +2,12 @@ package com.example.stocksapp.data.repositories.stocks
 
 import androidx.annotation.WorkerThread
 import com.example.stocksapp.data.database.StocksDao
-import com.skydoves.sandwich.message
 import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onException
 import com.skydoves.sandwich.suspendOnSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 
@@ -20,8 +20,7 @@ class StocksRepository @Inject constructor(
     fun fetchCompanyInfo(
         symbol: String,
         onStart: () -> Unit,
-        onSuccess: () -> Unit,
-        onError: (String?) -> Unit
+        onError: (String) -> Unit
     ) = flow {
         // TODO time the data when inserted on Room and get it only if recent as a cache (1 day?)
         val companyInfo = stocksDao.getCompanyInfo(symbol)
@@ -31,16 +30,14 @@ class StocksRepository @Inject constructor(
                 data?.let { response ->
                     stocksDao.insertCompanyInfo(response)
                     emit(response)
-                    onSuccess()
                 }
             }.onError {
-                onError("[Error code ${statusCode.code}]: ${message()}")
+                onError("Request failed with code ${statusCode.code}: $raw")
             }.onException {
-                onError(message)
+                onError("Error while requesting: $message")
             }
         } else {
             emit(companyInfo)
-            onSuccess()
         }
     }.onStart { onStart() }.flowOn(Dispatchers.IO)
 }

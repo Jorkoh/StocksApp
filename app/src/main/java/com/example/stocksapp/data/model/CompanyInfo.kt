@@ -20,7 +20,7 @@ data class CompanyInfo(
     @Json(name = "issueType") val issueType: String,
     @Json(name = "sector") val sector: String,
     @Json(name = "primarySicCode") val primarySicCode: Int,
-    @Json(name = "employees") val employees: Int,
+    @Json(name = "employees") val employees: Int?,
     @Json(name = "tags") val tags: List<String>,
     @Json(name = "address") val address: String,
     @Json(name = "address2") val address2: String?,

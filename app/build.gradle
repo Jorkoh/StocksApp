@@ -20,10 +20,10 @@ android {
         versionName versions.version_name
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "IEX_PUBLISHABLE_TOKEN", "\"" + getPropertyOrDefault(IEX_PUBLISHABLE_TOKEN, "") + "\"")
+        buildConfigField "String", "IEX_PUBLISHABLE_TOKEN", "\"" + getPropertyOrDefault("IEX_PUBLISHABLE_TOKEN", "") + "\""
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments += ["room.schemaLocation" : "$projectDir/schemas".toString()]
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
             }
         }
     }
@@ -85,6 +85,8 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-moshi:$versions.retrofit"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$versions.kotlinx_serialization"
     implementation "com.github.skydoves:sandwich:1.0.9"
+    implementation "com.squareup.moshi:moshi-kotlin:$versions.moshi"
+    kapt "com.squareup.moshi:moshi-kotlin-codegen:$versions.moshi"
 
     // Room
     kapt "androidx.room:room-compiler:$versions.room"
@@ -96,7 +98,7 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:3.3.0"
 }
 
-def getPropertyOrDefault(String propertyName, Object defaultValue) {
+Object getPropertyOrDefault(String propertyName, Object defaultValue) {
     def propertyValue = project.properties[propertyName]
     return propertyValue != null ? propertyValue : defaultValue
 }

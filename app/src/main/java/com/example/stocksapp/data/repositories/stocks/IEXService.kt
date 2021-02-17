@@ -4,6 +4,7 @@ import com.example.stocksapp.BuildConfig
 import com.example.stocksapp.data.model.CompanyInfo
 import com.example.stocksapp.data.repositories.utils.HttpRequestInterceptor
 import com.skydoves.sandwich.ApiResponse
+import com.skydoves.sandwich.coroutines.CoroutinesResponseCallAdapterFactory
 import okhttp3.*
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -19,7 +20,7 @@ interface IEXService {
     ): ApiResponse<CompanyInfo>
 
     companion object {
-        private const val BASE_URL = "https://cloud.iexapis.com/"
+        private const val BASE_URL = "https://cloud.iexapis.com/stable/"
 
         fun create(): IEXService = Retrofit.Builder()
             .client(
@@ -40,6 +41,7 @@ interface IEXService {
             )
             .baseUrl(BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create())
+            .addCallAdapterFactory(CoroutinesResponseCallAdapterFactory())
             .build()
             .create(IEXService::class.java)
     }

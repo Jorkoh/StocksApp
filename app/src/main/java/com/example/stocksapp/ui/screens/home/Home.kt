@@ -26,9 +26,6 @@ fun Home(
     navController: NavController,
     modifier: Modifier = Modifier,
 ) {
-    // TODO bind viewModel data and events to arguments/callbacks like the codelab
-    // https://github.com/googlecodelabs/android-compose-codelabs/blob/main/StateCodelab/finished/src/main/java/com/codelabs/state/todo/TodoActivity.kt
-    // https://github.com/googlecodelabs/android-compose-codelabs/blob/main/StateCodelab/finished/src/main/java/com/codelabs/state/todo/TodoScreen.kt
     HomeScreen(
         modifier = modifier,
         openStockDetail = { symbol ->

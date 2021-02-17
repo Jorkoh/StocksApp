@@ -26,7 +26,10 @@ fun TickerCard(
     modifier: Modifier = Modifier
 ) {
     Column {
-        Card(modifier.aspectRatio(1f)) {
+        Card(
+            modifier = modifier.aspectRatio(1f),
+            elevation = 4.dp
+        ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(16.dp)

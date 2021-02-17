@@ -1,13 +1,14 @@
 package com.example.stocksapp.ui.screens.stockdetail
 
 import android.app.Activity
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -23,26 +24,56 @@ fun StockDetail(
     navController: NavController,
     modifier: Modifier = Modifier
 ) {
-    // TODO bind viewModel data and events to arguments/callbacks like the codelab
-    // https://github.com/googlecodelabs/android-compose-codelabs/blob/main/StateCodelab/finished/src/main/java/com/codelabs/state/todo/TodoActivity.kt
-    // https://github.com/googlecodelabs/android-compose-codelabs/blob/main/StateCodelab/finished/src/main/java/com/codelabs/state/todo/TodoScreen.kt
     StockDetailScreen(
-        modifier = modifier
+        companyInfoUIState = viewModel.companyInfoUIState.collectAsState(),
+        modifier = modifier,
+        onUpButtonPressed = { navController.navigateUp() }
     )
 }
 
 @Composable
-fun StockDetailScreen(modifier: Modifier = Modifier) {
+fun StockDetailScreen(
+    companyInfoUIState: State<CompanyInfoUIState>,
+    modifier: Modifier = Modifier,
+    onUpButtonPressed: () -> Unit
+) {
     Surface(modifier.fillMaxSize()) {
-        Text(
-            "Stock detail destination",
-            style = MaterialTheme.typography.h5,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .statusBarsPadding()
-                .fillMaxHeight()
-                .wrapContentSize()
-        )
+        Column(
+            modifier = Modifier.statusBarsPadding(),
+            verticalArrangement = Arrangement.SpaceEvenly,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                "Stock detail destination",
+                style = MaterialTheme.typography.h5,
+                textAlign = TextAlign.Center
+            )
+            when (companyInfoUIState.value) {
+                CompanyInfoUIState.Loading -> {
+                    Text(
+                        "LOADING...",
+                        style = MaterialTheme.typography.body1,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                is CompanyInfoUIState.Success -> {
+                    val state = companyInfoUIState.value as CompanyInfoUIState.Success
+                    Text(
+                        "SUCCESS: ${state.companyInfo.companyName}",
+                        style = MaterialTheme.typography.body1,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                is CompanyInfoUIState.Error -> {
+                    val state = companyInfoUIState.value as CompanyInfoUIState.Error
+                    Text(
+                        "ERROR: ${state.message}",
+                        style = MaterialTheme.typography.body1,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
     }
 }
 
