@@ -48,7 +48,7 @@ fun StockDetailScreen(
                 style = MaterialTheme.typography.h5,
                 textAlign = TextAlign.Center
             )
-            when (companyInfoUIState.value) {
+            when (val state = companyInfoUIState.value) {
                 CompanyInfoUIState.Loading -> {
                     Text(
                         "LOADING...",
@@ -57,7 +57,6 @@ fun StockDetailScreen(
                     )
                 }
                 is CompanyInfoUIState.Success -> {
-                    val state = companyInfoUIState.value as CompanyInfoUIState.Success
                     Text(
                         "SUCCESS: ${state.companyInfo.companyName}",
                         style = MaterialTheme.typography.body1,
@@ -65,7 +64,6 @@ fun StockDetailScreen(
                     )
                 }
                 is CompanyInfoUIState.Error -> {
-                    val state = companyInfoUIState.value as CompanyInfoUIState.Error
                     Text(
                         "ERROR: ${state.message}",
                         style = MaterialTheme.typography.body1,
