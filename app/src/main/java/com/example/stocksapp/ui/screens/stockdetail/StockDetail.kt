@@ -1,7 +1,9 @@
 package com.example.stocksapp.ui.screens.stockdetail
 
 import android.app.Activity
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -48,29 +50,16 @@ fun StockDetailScreen(
                 style = MaterialTheme.typography.h5,
                 textAlign = TextAlign.Center
             )
-            when (val state = companyInfoUIState.value) {
-                CompanyInfoUIState.Loading -> {
-                    Text(
-                        "LOADING...",
-                        style = MaterialTheme.typography.body1,
-                        textAlign = TextAlign.Center
-                    )
-                }
-                is CompanyInfoUIState.Success -> {
-                    Text(
-                        "SUCCESS: ${state.companyInfo.companyName}",
-                        style = MaterialTheme.typography.body1,
-                        textAlign = TextAlign.Center
-                    )
-                }
-                is CompanyInfoUIState.Error -> {
-                    Text(
-                        "ERROR: ${state.message}",
-                        style = MaterialTheme.typography.body1,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
+
+            Text(
+                text = when (val state = companyInfoUIState.value) {
+                    CompanyInfoUIState.Loading -> "LOADING..."
+                    is CompanyInfoUIState.Success -> "SUCCESS: ${state.companyInfo.companyName}"
+                    is CompanyInfoUIState.Error -> "ERROR: ${state.message}"
+                },
+                style = MaterialTheme.typography.body1,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
