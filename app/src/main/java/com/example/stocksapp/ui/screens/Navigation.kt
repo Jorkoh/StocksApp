@@ -4,7 +4,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.example.stocksapp.R
 
-
 sealed class NavigableScreens(val route: String) {
 
     // TODO this is kinda scuffed tbh

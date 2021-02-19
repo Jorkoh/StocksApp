@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">StocksApp</string>
+
     <string name="destination_home">Home</string>
     <string name="destination_search">Search</string>
     <string name="destination_news">News</string>
     <string name="destination_profile">Profile</string>
+
+    <string name="label_back">Back</string>
 </resources>

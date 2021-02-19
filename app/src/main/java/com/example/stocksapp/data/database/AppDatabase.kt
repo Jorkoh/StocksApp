@@ -6,8 +6,10 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.stocksapp.data.model.CompanyInfo
+import com.example.stocksapp.data.model.MostActiveSymbols
+import com.example.stocksapp.data.model.Quote
 
-@Database(entities = [CompanyInfo::class], version = 1, exportSchema = true)
+@Database(entities = [CompanyInfo::class, MostActiveSymbols::class, Quote::class], version = 1, exportSchema = true)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 

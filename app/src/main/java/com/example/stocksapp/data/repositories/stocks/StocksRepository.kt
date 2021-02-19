@@ -2,34 +2,41 @@ package com.example.stocksapp.data.repositories.stocks
 
 import androidx.annotation.WorkerThread
 import com.example.stocksapp.data.database.StocksDao
+import com.example.stocksapp.data.model.CompanyInfo
+import com.example.stocksapp.data.model.MostActiveSymbols
+import com.example.stocksapp.data.model.Quote
+import com.example.stocksapp.data.model.network.QuoteResponse
+import com.example.stocksapp.data.model.utils.map
 import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onException
 import com.skydoves.sandwich.suspendOnSuccess
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.*
+import timber.log.Timber
+import java.util.*
 import javax.inject.Inject
 
 class StocksRepository @Inject constructor(
     private val IEXService: IEXService,
     private val stocksDao: StocksDao
 ) {
-
     @WorkerThread
-    fun fetchCompanyInfo(
-        symbol: String,
+    fun fetchMostActiveSymbols(
+        count: Int = 20,
         onStart: () -> Unit,
         onError: (String) -> Unit
     ) = flow {
-        // TODO time the data when inserted on Room and get it only if recent as a cache (1 day?)
-        val companyInfo = stocksDao.getCompanyInfo(symbol)
-        if (companyInfo == null) {
-            val response = IEXService.fetchCompanyInfo(symbol)
-            response.suspendOnSuccess {
-                data?.let { response ->
-                    stocksDao.insertCompanyInfo(response)
-                    emit(response)
+        Timber.d("Fetching most active symbols")
+        val cachedMostActiveSymbols = stocksDao.getMostActiveSymbols(1.hoursToTimestampCutoff())
+        if (cachedMostActiveSymbols == null) {
+            Timber.d("No cached most active symbols, fetching them from service")
+            IEXService.fetchMostActiveSymbols(count).suspendOnSuccess {
+                data?.let { quotesResponse ->
+                    val newMostActiveSymbols = MostActiveSymbols(quotesResponse.map(QuoteResponse::symbol))
+                    stocksDao.refreshMostActiveSymbols(newMostActiveSymbols)
+                    val quotes = quotesResponse.map(QuoteResponse::map)
+                    stocksDao.insertQuotes(quotes)
+                    emit(quotes)
                 }
             }.onError {
                 onError("Request failed with code ${statusCode.code}: $raw")
@@ -37,7 +44,70 @@ class StocksRepository @Inject constructor(
                 onError("Error while requesting: $message")
             }
         } else {
-            emit(companyInfo)
+            Timber.d("Cached most active symbols, fetching quotes")
+            emit(cachedMostActiveSymbols.symbols.map { symbol ->
+                fetchQuote(symbol, {}, onError).single()
+            })
+        }
+    }.onStart { onStart() }.flowOn(Dispatchers.IO)
+
+    @WorkerThread
+    fun fetchQuote(
+        symbol: String,
+        onStart: () -> Unit,
+        onError: (String) -> Unit
+    ) = flow {
+        Timber.d("Fetching quote")
+        val cachedQuote = stocksDao.getQuote(symbol, 1.hoursToTimestampCutoff())
+        if (cachedQuote == null) {
+            Timber.d("No cached quote, fetching it from service")
+            IEXService.fetchQuote(symbol).suspendOnSuccess {
+                data?.let { quoteResponse ->
+                    val quote = quoteResponse.map()
+                    stocksDao.insertQuotes(listOf(quote))
+                    emit(quote)
+                }
+            }.onError {
+                onError("Request failed with code ${statusCode.code}: $raw")
+            }.onException {
+                onError("Error while requesting: $message")
+            }
+        } else {
+            Timber.d("Cached quote")
+            emit(cachedQuote)
+        }
+    }.onStart { onStart() }.flowOn(Dispatchers.IO)
+
+
+    @WorkerThread
+    fun fetchCompanyInfo(
+        symbol: String,
+        onStart: () -> Unit,
+        onError: (String) -> Unit
+    ) = flow {
+        Timber.d("Fetching company info")
+        val cachedCompanyInfo = stocksDao.getCompanyInfo(symbol, 7.daysToTimestampCutoff())
+        if (cachedCompanyInfo == null) {
+            Timber.d("No cached company info, fetching it from service")
+            IEXService.fetchCompanyInfo(symbol).suspendOnSuccess {
+                data?.let { companyInfoResponse ->
+                    val companyInfo = companyInfoResponse.map()
+                    stocksDao.insertCompanyInfo(companyInfo)
+                    emit(companyInfo)
+                }
+            }.onError {
+                onError("Request failed with code ${statusCode.code}: $raw")
+            }.onException {
+                onError("Error while requesting: $message")
+            }
+        } else {
+            Timber.d("Cached company info")
+            emit(cachedCompanyInfo)
         }
     }.onStart { onStart() }.flowOn(Dispatchers.IO)
 }
+
+// TODO: this isn't elegant at all
+private fun Int.daysToTimestampCutoff() = (this * 24).hoursToTimestampCutoff()
+private fun Int.hoursToTimestampCutoff() = (this * 60).minutesToTimestampCutoff()
+private fun Int.minutesToTimestampCutoff() = Date().time - (this * 60000)
