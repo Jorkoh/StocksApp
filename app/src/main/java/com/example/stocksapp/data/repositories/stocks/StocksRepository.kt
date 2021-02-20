@@ -2,7 +2,6 @@ package com.example.stocksapp.data.repositories.stocks
 
 import androidx.annotation.WorkerThread
 import com.example.stocksapp.data.database.StocksDao
-import com.example.stocksapp.data.model.CompanyInfo
 import com.example.stocksapp.data.model.MostActiveSymbols
 import com.example.stocksapp.data.model.Quote
 import com.example.stocksapp.data.model.network.QuoteResponse
@@ -45,9 +44,7 @@ class StocksRepository @Inject constructor(
             }
         } else {
             Timber.d("Cached most active symbols, fetching quotes")
-            emit(cachedMostActiveSymbols.symbols.map { symbol ->
-                fetchQuote(symbol, {}, onError).single()
-            })
+            emit(fetchQuotes(cachedMostActiveSymbols.symbols, {}, onError).toList())
         }
     }.onStart { onStart() }.flowOn(Dispatchers.IO)
 
@@ -57,10 +54,10 @@ class StocksRepository @Inject constructor(
         onStart: () -> Unit,
         onError: (String) -> Unit
     ) = flow {
-        Timber.d("Fetching quote")
+        Timber.d("Fetching quote for symbol $symbol")
         val cachedQuote = stocksDao.getQuote(symbol, 1.hoursToTimestampCutoff())
         if (cachedQuote == null) {
-            Timber.d("No cached quote, fetching it from service")
+            Timber.d("No cached quote for symbol $symbol, fetching it from service")
             IEXService.fetchQuote(symbol).suspendOnSuccess {
                 data?.let { quoteResponse ->
                     val quote = quoteResponse.map()
@@ -73,8 +70,36 @@ class StocksRepository @Inject constructor(
                 onError("Error while requesting: $message")
             }
         } else {
-            Timber.d("Cached quote")
+            Timber.d("Cached quote for symbol $symbol")
             emit(cachedQuote)
+        }
+    }.onStart { onStart() }.flowOn(Dispatchers.IO)
+
+    @WorkerThread
+    fun fetchQuotes(
+        symbols: List<String>,
+        onStart: () -> Unit,
+        onError: (String) -> Unit
+    ) = flow {
+        Timber.d("Fetching quotes for ${symbols.size} symbols")
+        val cachedQuotes = stocksDao.getQuotes(symbols, 1.hoursToTimestampCutoff())
+        Timber.d("Cached quotes for ${cachedQuotes.size} symbols")
+        cachedQuotes.forEach { emit(it) }
+        val nonCachedSymbols = symbols.minus(cachedQuotes.map(Quote::symbol))
+        if (nonCachedSymbols.isNotEmpty()) {
+            Timber.d("No cached quotes for ${nonCachedSymbols.size} symbols, fetching them from service")
+            val symbolsQueryString = nonCachedSymbols.joinToString(",")
+            IEXService.fetchQuotes(symbolsQueryString).suspendOnSuccess {
+                data?.let { quoteResponse ->
+                    val quotes = quoteResponse.map(QuoteResponse::map)
+                    stocksDao.insertQuotes(quotes)
+                    quotes.forEach { emit(it) }
+                }
+            }.onError {
+                onError("Request failed with code ${statusCode.code}: $raw")
+            }.onException {
+                onError("Error while requesting: $message")
+            }
         }
     }.onStart { onStart() }.flowOn(Dispatchers.IO)
 

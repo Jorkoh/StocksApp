@@ -8,13 +8,13 @@ ext.versions = [
 
         compose              : '1.0.0-alpha12',
         compose_navigation   : '1.0.0-alpha07',
-        accompanist_insets   : '0.5.1',
+        accompanist          : '0.5.1',
         timber               : '4.7.1',
         retrofit             : '2.9.0',
         moshi                : '1.11.0',
         hilt                 : '2.32-alpha',
         hilt_navigation      : '1.0.0-alpha03',
-        room                 : '2.3.0-beta01',
+        room                 : '2.3.0-beta02',
         coroutines           : '1.4.2',
         kotlinx_serialization: '1.1.0-RC'
 ]

@@ -29,6 +29,9 @@ interface StocksDao {
     @Query("SELECT * FROM quotes WHERE symbol = :symbol AND timestamp >= :timestampCutoff")
     suspend fun getQuote(symbol: String, timestampCutoff: Long = 0L) : Quote?
 
+    @Query("SELECT * FROM quotes WHERE symbol IN (:symbols) AND timestamp >= :timestampCutoff")
+    suspend fun getQuotes(symbols: List<String>, timestampCutoff: Long = 0L) : List<Quote>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCompanyInfo(companyInfo: CompanyInfo)
 

@@ -27,7 +27,7 @@ data class QuoteResponse(
     @Json(name = "latestTime") val latestTime: String?,
     @Json(name = "latestUpdate") val latestUpdate: Long?,
     @Json(name = "latestVolume") val latestVolume: Long?,
-    @Json(name = "iexRealtimePrice") val iexRealtimePrice: Double,
+    @Json(name = "iexRealtimePrice") val iexRealtimePrice: Double?,
     @Json(name = "iexRealtimeSize") val iexRealtimeSize: Long?,
     @Json(name = "iexLastUpdated") val iexLastUpdated: Long?,
     @Json(name = "delayedPrice") val delayedPrice: Double?,
