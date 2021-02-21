@@ -18,7 +18,7 @@ class StockDetailViewModel @AssistedInject constructor(
     @Assisted private val symbol: String
 ) : ViewModel() {
 
-    private val _companyInfoUIState = MutableStateFlow<CompanyInfoUIState>(CompanyInfoUIState.Loading)
+    private val _companyInfoUIState = MutableStateFlow<CompanyInfoUIState>(CompanyInfoUIState.Loading(symbol))
     val companyInfoUIState: StateFlow<CompanyInfoUIState> = _companyInfoUIState
 
     init {
@@ -30,10 +30,14 @@ class StockDetailViewModel @AssistedInject constructor(
     private suspend fun getCompanyInfo(symbol: String) {
         stocksRepository.fetchCompanyInfo(
             symbol = symbol,
-            onStart = { _companyInfoUIState.value = CompanyInfoUIState.Loading },
-            onError = { _companyInfoUIState.value = CompanyInfoUIState.Error(it) }
+            onStart = {
+                _companyInfoUIState.value = CompanyInfoUIState.Loading(symbol)
+            },
+            onError = { message ->
+                _companyInfoUIState.value = CompanyInfoUIState.Error(symbol, message)
+            }
         ).collect { companyInfo ->
-            _companyInfoUIState.value = CompanyInfoUIState.Success(companyInfo)
+            _companyInfoUIState.value = CompanyInfoUIState.Success(symbol, companyInfo)
         }
     }
 
@@ -50,10 +54,10 @@ class StockDetailViewModel @AssistedInject constructor(
     }
 }
 
-sealed class CompanyInfoUIState {
-    object Loading : CompanyInfoUIState()
-    data class Success(val companyInfo: CompanyInfo) : CompanyInfoUIState()
-    data class Error(val message: String) : CompanyInfoUIState()
+sealed class CompanyInfoUIState(val symbol: String) {
+    class Loading(symbol: String) : CompanyInfoUIState(symbol)
+    class Success(symbol: String, val companyInfo: CompanyInfo) : CompanyInfoUIState(symbol)
+    class Error(symbol: String, val message: String) : CompanyInfoUIState(symbol)
 }
 
 @AssistedFactory

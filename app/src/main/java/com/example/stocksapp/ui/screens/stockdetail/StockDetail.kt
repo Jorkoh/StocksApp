@@ -77,10 +77,7 @@ fun StockDetailTopBar(
                 )
             }
             Text(
-                text = when (val state = companyInfoUIState.value) {
-                    is CompanyInfoUIState.Success -> state.companyInfo.symbol
-                    else -> ""
-                },
+                text = companyInfoUIState.value.symbol,
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.h6,
                 modifier = Modifier.align(Alignment.Center)

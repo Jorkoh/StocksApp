@@ -24,11 +24,6 @@ interface IEXService {
         @Query("listLimit") numberReturned: Int = 20
     ): ApiResponse<List<QuoteResponse>>
 
-    @GET("stock/{symbol}/quote")
-    suspend fun fetchQuote(
-        @Path("symbol") symbol: String
-    ): ApiResponse<QuoteResponse>
-
     @GET("stock/market/batch?types=quote")
     @BatchedQuotes
     suspend fun fetchQuotes(

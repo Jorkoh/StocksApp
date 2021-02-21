@@ -14,7 +14,7 @@ data class Quote(
     val companyName: String,
     val primaryExchange: String,
 
-    val openPrice : Double,
+    val openPrice: Double,
     val openTime: Long,
     val closePrice: Double,
     val closeTime: Long,
@@ -48,5 +48,6 @@ data class Quote(
     val ytdChange: Double,
     val lastTradeTime: Long,
     val isUSMarketOpen: Boolean,
+
     val timestamp: Long = Date().time
 )

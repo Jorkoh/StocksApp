@@ -48,6 +48,7 @@ fun CustomBottomBar(
 ) {
     Surface(
         color = backgroundColor,
+        elevation = 8.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         val springSpec = remember { SpringSpec<Float>(stiffness = 300f) }
@@ -253,10 +254,10 @@ private fun MeasureScope.placeTextAndIcon(
 }
 
 private val TextIconSpacing = 4.dp
-private val BottomNavHeight = 70.dp
+private val BottomNavHeight = 64.dp
 private val BottomNavLabelTransformOrigin = TransformOrigin(0f, 0.5f)
 private val CustomBottomBarIndicatorShape = RoundedCornerShape(percent = 50)
-private val CustomBottomBarItemPadding = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
+private val CustomBottomBarItemPadding = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
 
 @Preview
 @Composable

@@ -1,7 +1,9 @@
 package com.example.stocksapp.ui.screens.home
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Surface
@@ -11,10 +13,9 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.navigate
-import com.example.stocksapp.data.model.Quote
+import com.example.stocksapp.ui.components.QuoteListItem
 import com.example.stocksapp.ui.components.TickerCard
 import com.example.stocksapp.ui.components.charts.line.LineChartData
 import com.example.stocksapp.ui.screens.NavigableScreens
@@ -65,34 +66,11 @@ fun ActiveSymbols(
             items(
                 items = state.quotes,
                 key = { it.symbol },
-                itemContent = { SymbolListItem(it, onSymbolSelected) },
+                itemContent = { QuoteListItem(it, onSymbolSelected) },
             )
         }
     }
 
-}
-
-@Composable
-fun SymbolListItem(
-    quote: Quote,
-    onSymbolSelected: (String) -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth()
-            .clickable(onClick = { onSymbolSelected(quote.symbol) })
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column {
-            Text(quote.companyName)
-            Text(quote.symbol)
-        }
-        Column {
-            Text("${quote.latestPrice}")
-            Text("${quote.change}%")
-        }
-    }
 }
 
 @Composable

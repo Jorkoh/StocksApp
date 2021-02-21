@@ -49,33 +49,6 @@ class StocksRepository @Inject constructor(
     }.onStart { onStart() }.flowOn(Dispatchers.IO)
 
     @WorkerThread
-    fun fetchQuote(
-        symbol: String,
-        onStart: () -> Unit,
-        onError: (String) -> Unit
-    ) = flow {
-        Timber.d("Fetching quote for symbol $symbol")
-        val cachedQuote = stocksDao.getQuote(symbol, 1.hoursToTimestampCutoff())
-        if (cachedQuote == null) {
-            Timber.d("No cached quote for symbol $symbol, fetching it from service")
-            IEXService.fetchQuote(symbol).suspendOnSuccess {
-                data?.let { quoteResponse ->
-                    val quote = quoteResponse.map()
-                    stocksDao.insertQuotes(listOf(quote))
-                    emit(quote)
-                }
-            }.onError {
-                onError("Request failed with code ${statusCode.code}: $raw")
-            }.onException {
-                onError("Error while requesting: $message")
-            }
-        } else {
-            Timber.d("Cached quote for symbol $symbol")
-            emit(cachedQuote)
-        }
-    }.onStart { onStart() }.flowOn(Dispatchers.IO)
-
-    @WorkerThread
     fun fetchQuotes(
         symbols: List<String>,
         onStart: () -> Unit,
