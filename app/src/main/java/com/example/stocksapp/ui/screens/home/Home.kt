@@ -1,20 +1,24 @@
 package com.example.stocksapp.ui.screens.home
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Surface
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.navigate
+import com.example.stocksapp.R
+import com.example.stocksapp.ui.components.LoadingIndicator
 import com.example.stocksapp.ui.components.QuoteListItem
 import com.example.stocksapp.ui.components.TickerCard
 import com.example.stocksapp.ui.components.charts.line.LineChartData
@@ -43,34 +47,40 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onSymbolSelected: (String) -> Unit
 ) {
-    Surface(modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier.statusBarsPadding(),
-            verticalArrangement = Arrangement.SpaceEvenly,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            ActiveSymbols(activeSymbolsUIState, onSymbolSelected)
+    LazyColumn(modifier.fillMaxSize().statusBarsPadding()) {
+        activeSymbolsSection(activeSymbolsUIState, onSymbolSelected)
+    }
+}
+
+private fun LazyListScope.activeSymbolsSection(
+    activeSymbolsUIState: State<ActiveSymbolsUIState>,
+    onSymbolSelected: (String) -> Unit,
+) {
+    item { HomeScreenSectionTitle(stringResource(R.string.active_symbols_section_title)) }
+    when (val state = activeSymbolsUIState.value) {
+        is ActiveSymbolsUIState.Loading -> item { LoadingIndicator(Modifier.padding(top = 24.dp)) }
+        is ActiveSymbolsUIState.Error -> item { Text(state.message) }
+        is ActiveSymbolsUIState.Success -> {
+            items(
+                items = state.quotes,
+                key = { it.symbol }
+            ) { quote ->
+                QuoteListItem(quote, onSymbolSelected)
+            }
         }
     }
 }
 
 @Composable
-fun ActiveSymbols(
-    activeSymbolsUIState: State<ActiveSymbolsUIState>,
-    onSymbolSelected: (String) -> Unit
+fun HomeScreenSectionTitle(
+    text: String,
+    modifier: Modifier = Modifier
 ) {
-    when (val state = activeSymbolsUIState.value) {
-        is ActiveSymbolsUIState.Loading -> Text("LOADING")
-        is ActiveSymbolsUIState.Error -> Text(state.message)
-        is ActiveSymbolsUIState.Success -> LazyColumn {
-            items(
-                items = state.quotes,
-                key = { it.symbol },
-                itemContent = { QuoteListItem(it, onSymbolSelected) },
-            )
-        }
-    }
-
+    Text(
+        text = text,
+        style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
+        modifier = modifier.padding(start = 24.dp, bottom = 12.dp, top = 24.dp)
+    )
 }
 
 @Composable
