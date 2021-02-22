@@ -1,11 +1,9 @@
 package com.example.stocksapp.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Providers
 import androidx.compose.ui.Alignment
@@ -13,10 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.transform.CircleCropTransformation
 import com.example.stocksapp.data.model.Quote
+import com.example.stocksapp.ui.theme.greenStock
+import com.example.stocksapp.ui.theme.redStock
 import dev.chrisbanes.accompanist.coil.CoilImage
-import kotlin.math.absoluteValue
+import kotlin.math.sign
 
 @Composable
 fun QuoteListItem(
@@ -26,9 +27,9 @@ fun QuoteListItem(
     Row(
         modifier = Modifier.fillMaxWidth()
             .clickable(onClick = { onSymbolSelected(quote.symbol) })
-            .padding(horizontal = 24.dp, vertical = 16.dp)
+            .padding(horizontal = 24.dp, vertical = 14.dp)
             .height(48.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
     ) {
         CoilImage(
             data = "https://storage.googleapis.com/iexcloud-hl37opg/api/logos/${quote.symbol}.png",
@@ -36,10 +37,8 @@ fun QuoteListItem(
             requestBuilder = { transformations(CircleCropTransformation()) },
             modifier = Modifier.preferredSize(48.dp)
         )
-        Spacer(modifier = Modifier.preferredWidth(16.dp).fillMaxHeight())
         Column(
-            modifier = Modifier.weight(1f, true).fillMaxHeight(),
-            verticalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier.weight(1f, true).padding(start = 16.dp)
         ) {
             Text(
                 text = quote.symbol,
@@ -48,29 +47,36 @@ fun QuoteListItem(
             Providers(LocalContentAlpha provides ContentAlpha.medium) {
                 Text(
                     text = quote.companyName,
-                    style = MaterialTheme.typography.body2,
+                    style = MaterialTheme.typography.caption,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
         }
-        Spacer(modifier = Modifier.preferredWidth(16.dp).fillMaxHeight())
         Column(
-            modifier = Modifier.fillMaxHeight(),
-            horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier.padding(start = 16.dp),
+            horizontalAlignment = Alignment.End
         ) {
             Text(
-                text = "${"%.2f".format(quote.changePercent * 100)}%",
-                style = MaterialTheme.typography.subtitle1,
+                text = "%.2f".format(quote.latestPrice),
+                style = MaterialTheme.typography.h6,
                 textAlign = TextAlign.End
             )
-            Providers(LocalContentAlpha provides ContentAlpha.medium) {
-                val sign = if (quote.change < 0) "-" else ""
+            val changeColor = when (quote.change.sign) {
+                -1.0 -> redStock
+                1.0 -> greenStock
+                else -> LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+            }
+            val backgroundModifier = Modifier.background(
+                shape = MaterialTheme.shapes.small,
+                color = changeColor.copy(alpha = 0.1f)
+            )
+            Box(modifier = backgroundModifier.padding(horizontal = 2.dp)) {
                 Text(
-                    text = "$sign$${"%.2f".format(quote.change.absoluteValue)}",
-                    style = MaterialTheme.typography.body2,
-                    textAlign = TextAlign.End
+                    text = "${"%+.2f".format(quote.changePercent * 100)}%",
+                    style = MaterialTheme.typography.caption,
+                    textAlign = TextAlign.End,
+                    color = changeColor
                 )
             }
         }
