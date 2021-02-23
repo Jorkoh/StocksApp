@@ -27,7 +27,7 @@ fun LineChart(
     lineChartData: LineChartData,
     modifier: Modifier = Modifier,
     animation: AnimationSpec<Float> = TweenSpec(
-        durationMillis = 2000,
+        durationMillis = 1500,
         easing = LinearOutSlowInEasing
     ),
     linePathCalculator: LinePathCalculator = StraightLinePathCalculator(),

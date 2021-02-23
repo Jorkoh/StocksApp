@@ -1,5 +1,6 @@
 package com.example.stocksapp.ui.components
 
+import androidx.compose.animation.core.SnapSpec
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Providers
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -17,19 +19,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.transform.CircleCropTransformation
 import com.example.stocksapp.data.model.Quote
+import com.example.stocksapp.ui.components.charts.line.LineChart
+import com.example.stocksapp.ui.components.charts.line.LineChartData
+import com.example.stocksapp.ui.components.charts.line.renderer.line.SolidLineDrawer
+import com.example.stocksapp.ui.components.charts.line.renderer.path.BezierLinePathCalculator
+import com.example.stocksapp.ui.components.charts.line.renderer.xaxis.NoXAxisDrawer
+import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.NoYAxisDrawer
 import com.example.stocksapp.ui.theme.StocksAppTheme
 import com.example.stocksapp.ui.theme.greenStock
 import com.example.stocksapp.ui.theme.redStock
 import dev.chrisbanes.accompanist.coil.CoilImage
+import java.util.*
 import kotlin.math.sign
+import kotlin.random.Random
 
 @Composable
 fun QuoteListItem(
     quote: Quote,
+    modifier: Modifier = Modifier,
     onSymbolSelected: (String) -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
             .clickable(onClick = { onSymbolSelected(quote.symbol) })
             .padding(horizontal = 24.dp, vertical = 14.dp)
             .height(48.dp),
@@ -87,6 +98,44 @@ fun QuoteListItem(
     }
 }
 
+@Composable
+fun QuoteWithChartCard(
+    symbol: String,
+    chartData: LineChartData,
+    modifier: Modifier = Modifier,
+    onSymbolSelected: (String) -> Unit
+) {
+    Card(
+        modifier = modifier.clickable(onClick = { onSymbolSelected(symbol) }).size(164.dp),
+        elevation = 4.dp
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(8.dp)
+        ) {
+            Text(
+                text = symbol,
+                style = MaterialTheme.typography.h6
+            )
+            Spacer(modifier.height(20.dp))
+            LineChart(
+                lineChartData = chartData,
+                linePathCalculator = BezierLinePathCalculator(),
+                lineDrawer = SolidLineDrawer(
+                    color = if (chartData.points.first().value > chartData.points.last().value) {
+                        Color.Red
+                    } else {
+                        Color.Green
+                    }
+                ),
+                xAxisDrawer = NoXAxisDrawer,
+                yAxisDrawer = NoYAxisDrawer,
+                animation = SnapSpec(0)
+            )
+        }
+    }
+}
+
 @Preview
 @Composable
 fun QuoteListItemsPreview() {
@@ -139,3 +188,17 @@ fun QuoteListItemsPreview() {
         }
     }
 }
+
+@Preview
+@Composable
+fun TickerCardPreview() {
+    QuoteWithChartCard(
+        symbol = "AMD",
+        chartData = LineChartData(
+            points = (1..7).map { LineChartData.Point(randomYValue(), "#$it") }
+        ),
+        onSymbolSelected = {}
+    )
+}
+
+private fun randomYValue() = Random.nextDouble(5.0, 20.0).toFloat()

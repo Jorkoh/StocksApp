@@ -1,10 +1,9 @@
 package com.example.stocksapp.ui.screens.home
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -20,11 +19,9 @@ import androidx.navigation.compose.navigate
 import com.example.stocksapp.R
 import com.example.stocksapp.ui.components.LoadingIndicator
 import com.example.stocksapp.ui.components.QuoteListItem
-import com.example.stocksapp.ui.components.TickerCard
-import com.example.stocksapp.ui.components.charts.line.LineChartData
+import com.example.stocksapp.ui.components.TickerCardPreview
 import com.example.stocksapp.ui.screens.NavigableScreens
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
-import kotlin.random.Random
 
 @Composable
 fun Home(
@@ -47,8 +44,35 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onSymbolSelected: (String) -> Unit
 ) {
-    LazyColumn(modifier.fillMaxSize().statusBarsPadding()) {
+    LazyColumn(modifier.fillMaxSize()) {
+        item { Spacer(modifier = Modifier.statusBarsPadding()) }
+        userSymbolsSection(activeSymbolsUIState, onSymbolSelected)
         activeSymbolsSection(activeSymbolsUIState, onSymbolSelected)
+    }
+}
+
+// TODO pass actual state and quotes with charts here
+private fun LazyListScope.userSymbolsSection(
+    userSymbolsUIState: State<ActiveSymbolsUIState>,
+    onSymbolSelected: (String) -> Unit,
+) {
+    item { HomeScreenSectionTitle(stringResource(R.string.user_symbols_section_title)) }
+    when (val state = userSymbolsUIState.value) {
+        is ActiveSymbolsUIState.Loading -> item { LoadingIndicator(Modifier.padding(top = 24.dp)) }
+        is ActiveSymbolsUIState.Error -> item { Text(state.message) }
+        is ActiveSymbolsUIState.Success -> item {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(
+                    items = state.quotes,
+                    key = { it.symbol }
+                ) { quote ->
+                    TickerCardPreview()
+                }
+            }
+        }
     }
 }
 
@@ -65,7 +89,7 @@ private fun LazyListScope.activeSymbolsSection(
                 items = state.quotes,
                 key = { it.symbol }
             ) { quote ->
-                QuoteListItem(quote, onSymbolSelected)
+                QuoteListItem(quote = quote, onSymbolSelected = onSymbolSelected)
             }
         }
     }
@@ -79,20 +103,6 @@ fun HomeScreenSectionTitle(
     Text(
         text = text,
         style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
-        modifier = modifier.padding(start = 24.dp, bottom = 12.dp, top = 24.dp)
+        modifier = modifier.padding(start = 24.dp, bottom = 12.dp, top = 32.dp)
     )
 }
-
-@Composable
-fun TickerCardTest() {
-    TickerCard(
-        symbol = "GME",
-        chartData = LineChartData(
-            points = (1..15).map { LineChartData.Point(randomYValue(), "#$it") }
-        ),
-        // TODO: this won't work on landscape btw
-        modifier = Modifier.fillMaxWidth(0.8f)
-    )
-}
-
-private fun randomYValue() = Random.nextDouble(5.0, 20.0).toFloat()

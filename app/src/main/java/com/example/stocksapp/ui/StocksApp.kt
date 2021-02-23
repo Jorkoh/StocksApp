@@ -33,7 +33,7 @@ fun StocksApp() {
     val navController = rememberNavController()
 
     LocalSysUiController.current.setSystemBarsColor(
-        color = MaterialTheme.colors.surface.copy(alpha = 0.8f)
+        color = MaterialTheme.colors.surface.copy(alpha = 0.85f)
     )
 
     ProvideWindowInsets {

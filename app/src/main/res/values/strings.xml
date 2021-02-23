@@ -6,6 +6,7 @@
     <string name="destination_news">News</string>
     <string name="destination_profile">Profile</string>
 
+    <string name="user_symbols_section_title">Your picks</string>
     <string name="active_symbols_section_title">The market</string>
 
     <string name="label_back">Back</string>
