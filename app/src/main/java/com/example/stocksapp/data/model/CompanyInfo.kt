@@ -2,7 +2,6 @@ package com.example.stocksapp.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.util.*
 
 @Entity(tableName = "company_infos")
 data class CompanyInfo(
@@ -22,5 +21,5 @@ data class CompanyInfo(
     val city: String,
     val zip: String,
     val country: String,
-    val timestamp: Long = Date().time
+    val timestamp: Long
 )

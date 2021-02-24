@@ -30,7 +30,9 @@ class StocksRepository @Inject constructor(
                     Timber.d("No cached top active quotes, fetching them from service")
                     IEXService.fetchMostActiveSymbols().suspendOnSuccess {
                         data?.let { quotesResponse ->
-                            val newQuotes = quotesResponse.map { it.mapToQuote(isTopActive = true) }
+                            val newQuotes = quotesResponse.map {
+                                it.mapToQuote(Date().time, true)
+                            }
                             Timber.d("Storing new top active quotes in DB")
                             stocksDao.refreshTopActiveQuotes(newQuotes)
                         }
@@ -53,24 +55,27 @@ class StocksRepository @Inject constructor(
         onError: (String) -> Unit
     ) = flow {
         Timber.d("Fetching company info")
-        val cachedCompanyInfo = stocksDao.getCompanyInfo(symbol, 7.daysToTimestampCutoff())
-        if (cachedCompanyInfo == null) {
-            Timber.d("No cached company info, fetching it from service")
-            IEXService.fetchCompanyInfo(symbol).suspendOnSuccess {
-                data?.let { companyInfoResponse ->
-                    val companyInfo = companyInfoResponse.mapToCompanyInfo()
-                    stocksDao.insertCompanyInfo(companyInfo)
+        stocksDao.getCompanyInfo(symbol = symbol, timestampCutoff = 7.daysToTimestampCutoff())
+            .distinctUntilChanged()
+            .collect { companyInfo ->
+                if (companyInfo == null) {
+                    Timber.d("No cached company info, fetching them from service")
+                    IEXService.fetchCompanyInfo(symbol).suspendOnSuccess {
+                        data?.let { companyInfoResponse ->
+                            val newCompanyInfo = companyInfoResponse.mapToCompanyInfo(Date().time)
+                            Timber.d("Storing new company info in DB")
+                            stocksDao.insertCompanyInfo(newCompanyInfo)
+                        }
+                    }.onError {
+                        onError("Request failed with code ${statusCode.code}: $raw")
+                    }.onException {
+                        onError("Error while requesting: $message")
+                    }
+                } else {
+                    Timber.d("Emitting company info from DB")
                     emit(companyInfo)
                 }
-            }.onError {
-                onError("Request failed with code ${statusCode.code}: $raw")
-            }.onException {
-                onError("Error while requesting: $message")
             }
-        } else {
-            Timber.d("Cached company info")
-            emit(cachedCompanyInfo)
-        }
     }.onStart { onStart() }.flowOn(Dispatchers.IO)
 }
 

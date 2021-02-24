@@ -173,7 +173,8 @@ fun QuoteListItemsPreview() {
             ytdChange = 0.0,
             lastTradeTime = 0,
             isUSMarketOpen = true,
-            isTopActive = false
+            isTopActive = false,
+            timestamp = Date().time
         )
     }
     StocksAppTheme {

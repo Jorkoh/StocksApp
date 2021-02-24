@@ -50,5 +50,5 @@ data class Quote(
     val isUSMarketOpen: Boolean,
 
     val isTopActive: Boolean,
-    val timestamp: Long = Date().time
+    val timestamp: Long
 )
