@@ -5,7 +5,7 @@ import com.example.stocksapp.data.model.Quote
 import com.example.stocksapp.data.model.network.CompanyInfoResponse
 import com.example.stocksapp.data.model.network.QuoteResponse
 
-fun CompanyInfoResponse.map() = CompanyInfo(
+fun CompanyInfoResponse.mapToCompanyInfo() = CompanyInfo(
     symbol = symbol,
     companyName = companyName.orUnknown(),
     exchange = exchange.orUnknown(),
@@ -23,7 +23,7 @@ fun CompanyInfoResponse.map() = CompanyInfo(
     country = country.orUnknown()
 )
 
-fun QuoteResponse.map() = Quote(
+fun QuoteResponse.mapToQuote(isTopActive : Boolean = false) = Quote(
     symbol = symbol,
     companyName = companyName.orUnknown(),
     primaryExchange = primaryExchange.orUnknown(),
@@ -55,7 +55,8 @@ fun QuoteResponse.map() = Quote(
     week52Low = week52Low.orUnknown(),
     ytdChange = ytdChange.orUnknown(),
     lastTradeTime = lastTradeTime.orUnknown(),
-    isUSMarketOpen = isUSMarketOpen.orUnknown()
+    isUSMarketOpen = isUSMarketOpen.orUnknown(),
+    isTopActive = isTopActive
 )
 
 private fun String?.orUnknown(): String = this ?: "-"

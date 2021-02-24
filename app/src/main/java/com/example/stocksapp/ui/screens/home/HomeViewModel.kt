@@ -20,12 +20,12 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            getMostActiveSymbols()
+            getTopActiveQuotes()
         }
     }
 
-    private suspend fun getMostActiveSymbols() {
-        stocksRepository.fetchMostActiveSymbols(
+    private suspend fun getTopActiveQuotes() {
+        stocksRepository.fetchTopActiveQuotes(
             onStart = { _activeSymbolsUIState.value = ActiveSymbolsUIState.Loading },
             onError = { _activeSymbolsUIState.value = ActiveSymbolsUIState.Error(it) }
         ).collect { quotes ->

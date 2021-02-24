@@ -172,7 +172,8 @@ fun QuoteListItemsPreview() {
             week52Low = 0.0,
             ytdChange = 0.0,
             lastTradeTime = 0,
-            isUSMarketOpen = true
+            isUSMarketOpen = true,
+            isTopActive = false
         )
     }
     StocksAppTheme {

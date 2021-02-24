@@ -2,35 +2,29 @@ package com.example.stocksapp.data.database
 
 import androidx.room.*
 import com.example.stocksapp.data.model.CompanyInfo
-import com.example.stocksapp.data.model.MostActiveSymbols
 import com.example.stocksapp.data.model.Quote
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface StocksDao {
 
     @Transaction
-    suspend fun refreshMostActiveSymbols(mostActiveSymbols: MostActiveSymbols) {
-        deleteMostActiveSymbols()
-        insertMostActiveSymbols(mostActiveSymbols)
+    suspend fun refreshTopActiveQuotes(topActiveQuotes: List<Quote>) {
+        removeTopActiveMarks()
+        insertQuotes(topActiveQuotes)
     }
 
-    @Query("DELETE FROM most_active_symbols")
-    suspend fun deleteMostActiveSymbols()
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMostActiveSymbols(mostActiveSymbols: MostActiveSymbols)
-
-    @Query("SELECT * FROM most_active_symbols WHERE timestamp >= :timestampCutoff ORDER BY timestamp DESC")
-    suspend fun getMostActiveSymbols(timestampCutoff: Long = 0L): MostActiveSymbols?
+    @Query("UPDATE quotes SET isTopActive=0")
+    fun removeTopActiveMarks()
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertQuotes(quotes: List<Quote>)
 
-    @Query("SELECT * FROM quotes WHERE symbol = :symbol AND timestamp >= :timestampCutoff")
-    suspend fun getQuote(symbol: String, timestampCutoff: Long = 0L) : Quote?
-
     @Query("SELECT * FROM quotes WHERE symbol IN (:symbols) AND timestamp >= :timestampCutoff")
-    suspend fun getQuotes(symbols: List<String>, timestampCutoff: Long = 0L) : List<Quote>
+    suspend fun getQuotesBySymbol(symbols: List<String>, timestampCutoff: Long = 0L): List<Quote>
+
+    @Query("SELECT * FROM quotes WHERE isTopActive = :isTopActive AND timestamp >= :timestampCutoff")
+    fun getQuotesByActivity(isTopActive: Boolean, timestampCutoff: Long = 0L): Flow<List<Quote>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCompanyInfo(companyInfo: CompanyInfo)
