@@ -12,7 +12,7 @@ import androidx.compose.ui.text.style.TextAlign
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
 
 @Composable
-fun SearchScreen(modifier: Modifier = Modifier){
+fun SearchScreen(modifier: Modifier = Modifier) {
     Surface(modifier.fillMaxSize()) {
         Text(
             "Search destination",

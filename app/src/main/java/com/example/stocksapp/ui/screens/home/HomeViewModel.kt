@@ -15,7 +15,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val stocksRepository: StocksRepository
 ) : ViewModel() {
-    private val _activeSymbolsUIState = MutableStateFlow<ActiveSymbolsUIState>(ActiveSymbolsUIState.Loading)
+    private val _activeSymbolsUIState =
+        MutableStateFlow<ActiveSymbolsUIState>(ActiveSymbolsUIState.Loading)
     val activeSymbolsUIState: StateFlow<ActiveSymbolsUIState> = _activeSymbolsUIState
 
     init {

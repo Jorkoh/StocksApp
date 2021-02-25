@@ -4,7 +4,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.drawscope.DrawScope
 
-object NoYAxisDrawer : YAxisDrawer{
+object NoYAxisDrawer : YAxisDrawer {
     override fun calculateWidth(drawScope: DrawScope) = 0f
 
     override fun draw(

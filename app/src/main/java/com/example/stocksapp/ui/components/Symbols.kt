@@ -3,12 +3,25 @@ package com.example.stocksapp.ui.components
 import androidx.compose.animation.core.SnapSpec
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.LocalContentColor
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,7 +42,7 @@ import com.example.stocksapp.ui.theme.StocksAppTheme
 import com.example.stocksapp.ui.theme.greenStock
 import com.example.stocksapp.ui.theme.redStock
 import dev.chrisbanes.accompanist.coil.CoilImage
-import java.util.*
+import java.util.Date
 import kotlin.math.sign
 import kotlin.random.Random
 
@@ -40,7 +53,8 @@ fun QuoteListItem(
     onSymbolSelected: (String) -> Unit
 ) {
     Row(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
             .clickable(onClick = { onSymbolSelected(quote.symbol) })
             .padding(horizontal = 24.dp, vertical = 14.dp)
             .height(48.dp),
@@ -50,16 +64,18 @@ fun QuoteListItem(
             data = "https://storage.googleapis.com/iexcloud-hl37opg/api/logos/${quote.symbol}.png",
             contentDescription = "${quote.symbol} logo",
             requestBuilder = { transformations(CircleCropTransformation()) },
-            modifier = Modifier.preferredSize(48.dp)
+            modifier = Modifier.size(48.dp)
         )
         Column(
-            modifier = Modifier.weight(1f, true).padding(start = 16.dp)
+            modifier = Modifier
+                .weight(1f, true)
+                .padding(start = 16.dp)
         ) {
             Text(
                 text = quote.symbol,
                 style = MaterialTheme.typography.h6
             )
-            Providers(LocalContentAlpha provides ContentAlpha.medium) {
+            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
                 Text(
                     text = quote.companyName,
                     style = MaterialTheme.typography.caption.copy(fontSize = 13.sp),
@@ -106,7 +122,9 @@ fun QuoteWithChartCard(
     onSymbolSelected: (String) -> Unit
 ) {
     Card(
-        modifier = modifier.clickable(onClick = { onSymbolSelected(symbol) }).size(164.dp),
+        modifier = modifier
+            .clickable(onClick = { onSymbolSelected(symbol) })
+            .size(164.dp),
         elevation = 4.dp
     ) {
         Column(

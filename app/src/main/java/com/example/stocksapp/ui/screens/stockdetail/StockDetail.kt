@@ -1,8 +1,17 @@
 package com.example.stocksapp.ui.screens.stockdetail
 
 import android.app.Activity
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -43,7 +52,9 @@ fun StockDetailScreen(
         topBar = { StockDetailTopBar(companyInfoUIState, onUpButtonPressed) }
     ) { innerPadding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
             verticalArrangement = Arrangement.SpaceEvenly,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -82,7 +93,6 @@ fun StockDetailTopBar(
                 style = MaterialTheme.typography.h6,
                 modifier = Modifier.align(Alignment.Center)
             )
-
         }
     }
 }

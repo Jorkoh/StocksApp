@@ -49,4 +49,3 @@ data class Destination(
     @StringRes val title: Int,
     @DrawableRes val icon: Int
 )
-

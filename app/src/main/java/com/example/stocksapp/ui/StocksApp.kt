@@ -14,7 +14,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
-import androidx.navigation.compose.*
+import androidx.navigation.compose.KEY_ROUTE
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.navArgument
+import androidx.navigation.compose.navigate
+import androidx.navigation.compose.rememberNavController
 import com.example.stocksapp.ui.components.CustomBottomBar
 import com.example.stocksapp.ui.screens.NavigableDestinations
 import com.example.stocksapp.ui.screens.NavigableScreens
@@ -66,9 +72,11 @@ private fun NavigableContent(
         // Deeper screens, don't use padding because the bottom bar won't be present
         composable(
             route = NavigableScreens.StockDetail.routeWithArgument,
-            arguments = listOf(navArgument(NavigableScreens.StockDetail.argument) {
-                type = NavType.StringType
-            })
+            arguments = listOf(
+                navArgument(NavigableScreens.StockDetail.argument) {
+                    type = NavType.StringType
+                }
+            )
         ) { backStackEntry ->
             val symbol = requireNotNull(
                 backStackEntry.arguments?.getString(NavigableScreens.StockDetail.argument)

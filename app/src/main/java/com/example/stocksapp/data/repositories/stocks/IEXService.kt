@@ -30,6 +30,12 @@ interface IEXService {
         @Query("symbols") symbols: String
     ): ApiResponse<List<QuoteResponse>>
 
+    @GET("stock/{symbol}/chart/{range}")
+    suspend fun fetchChart(
+        @Query("symbol") symbol: String,
+        @Query("range") range: ChartRanges
+    )
+
     @GET("stock/{symbol}/company")
     suspend fun fetchCompanyInfo(
         @Path("symbol") symbol: String
@@ -42,17 +48,19 @@ interface IEXService {
             return Retrofit.Builder()
                 .client(
                     OkHttpClient.Builder()
-                        .addInterceptor(Interceptor { chain ->
-                            // Add the API token to the request
-                            val originalRequest = chain.request()
-                            val urlWithToken = originalRequest.url.newBuilder()
-                                .addQueryParameter("token", BuildConfig.IEX_PUBLISHABLE_TOKEN)
-                                .build()
-                            val requestWithToken = originalRequest.newBuilder()
-                                .url(urlWithToken)
-                                .build()
-                            chain.proceed(requestWithToken)
-                        })
+                        .addInterceptor(
+                            Interceptor { chain ->
+                                // Add the API token to the request
+                                val originalRequest = chain.request()
+                                val urlWithToken = originalRequest.url.newBuilder()
+                                    .addQueryParameter("token", BuildConfig.IEX_PUBLISHABLE_TOKEN)
+                                    .build()
+                                val requestWithToken = originalRequest.newBuilder()
+                                    .url(urlWithToken)
+                                    .build()
+                                chain.proceed(requestWithToken)
+                            }
+                        )
                         .addInterceptor(HttpRequestInterceptor())
                         .build()
                 )

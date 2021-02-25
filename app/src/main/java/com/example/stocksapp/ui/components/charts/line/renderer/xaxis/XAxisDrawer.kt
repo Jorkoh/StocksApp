@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.drawscope.DrawScope
 
 interface XAxisDrawer {
-    fun calculateHeight(drawScope: DrawScope) : Float
+    fun calculateHeight(drawScope: DrawScope): Float
 
     fun draw(
         drawScope: DrawScope,

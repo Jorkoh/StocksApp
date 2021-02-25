@@ -18,7 +18,8 @@ class StockDetailViewModel @AssistedInject constructor(
     @Assisted private val symbol: String
 ) : ViewModel() {
 
-    private val _companyInfoUIState = MutableStateFlow<CompanyInfoUIState>(CompanyInfoUIState.Loading(symbol))
+    private val _companyInfoUIState =
+        MutableStateFlow<CompanyInfoUIState>(CompanyInfoUIState.Loading(symbol))
     val companyInfoUIState: StateFlow<CompanyInfoUIState> = _companyInfoUIState
 
     init {

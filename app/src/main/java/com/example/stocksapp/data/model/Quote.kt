@@ -2,12 +2,8 @@ package com.example.stocksapp.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
-import java.util.*
 
 @Entity(tableName = "quotes")
-@JsonClass(generateAdapter = true)
 data class Quote(
     @PrimaryKey
     val symbol: String,

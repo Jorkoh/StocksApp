@@ -1,15 +1,22 @@
 package com.example.stocksapp.data.repositories.utils
 
 import com.example.stocksapp.data.model.network.QuoteResponse
-import com.squareup.moshi.*
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonQualifier
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.ToJson
 
 @Retention(AnnotationRetention.RUNTIME)
 @JsonQualifier
 annotation class BatchedQuotes
 
 class BatchedQuotesAdapter {
-    companion object{
-        val adapter: JsonAdapter<QuoteResponse> = Moshi.Builder().build().adapter(QuoteResponse::class.java)
+    companion object {
+        val adapter: JsonAdapter<QuoteResponse> = Moshi.Builder().build().adapter(
+            QuoteResponse::class.java
+        )
     }
 
     @BatchedQuotes

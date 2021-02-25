@@ -8,9 +8,13 @@ import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onException
 import com.skydoves.sandwich.suspendOnSuccess
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onStart
 import timber.log.Timber
-import java.util.*
+import java.util.Date
 import javax.inject.Inject
 
 class StocksRepository @Inject constructor(
@@ -23,7 +27,10 @@ class StocksRepository @Inject constructor(
         onError: (String) -> Unit
     ) = flow {
         Timber.d("Fetching top active quotes")
-        stocksDao.getQuotesByActivity(isTopActive = true, timestampCutoff = 1.hoursToTimestampCutoff())
+        stocksDao.getQuotesByActivity(
+            isTopActive = true,
+            timestampCutoff = 1.hoursToTimestampCutoff()
+        )
             .distinctUntilChanged()
             .collect { quotes ->
                 if (quotes.isEmpty()) {
@@ -83,3 +90,15 @@ class StocksRepository @Inject constructor(
 private fun Int.daysToTimestampCutoff() = (this * 24).hoursToTimestampCutoff()
 private fun Int.hoursToTimestampCutoff() = (this * 60).minutesToTimestampCutoff()
 private fun Int.minutesToTimestampCutoff() = Date().time - (this * 60000)
+
+enum class ChartRanges(val urlString: String) {
+    FiveDays("5d"),
+    OneMonth("1m"),
+    ThreeMonths("3m"),
+    OneYear("1y"),
+    All("max");
+
+    override fun toString(): String {
+        return urlString
+    }
+}

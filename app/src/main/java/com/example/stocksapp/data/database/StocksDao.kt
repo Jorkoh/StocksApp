@@ -1,6 +1,10 @@
 package com.example.stocksapp.data.database
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Transaction
 import com.example.stocksapp.data.model.CompanyInfo
 import com.example.stocksapp.data.model.Quote
 import kotlinx.coroutines.flow.Flow
