@@ -40,9 +40,10 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
         useIR = true
-        // Enable Coroutines and Flow APIs
+        // Enable Coroutines, Flow and Compose animation APIs
         freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
         freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.FlowPreview"
+        freeCompilerArgs += "-Xopt-in=androidx.compose.animation.ExperimentalAnimationApi"
     }
     buildFeatures {
         compose true

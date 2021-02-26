@@ -1,7 +1,6 @@
 package com.example.stocksapp.ui
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -97,7 +96,6 @@ private fun NavigableContent(
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun NavigableBottomBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -112,11 +110,11 @@ private fun NavigableBottomBar(navController: NavHostController) {
         visible = isNavigableDestination,
         enter = slideInVertically(
             initialOffsetY = { fullHeight -> fullHeight },
-            animationSpec = tween(durationMillis = 125, easing = LinearOutSlowInEasing)
+            animationSpec = tween(durationMillis = 100, easing = LinearOutSlowInEasing)
         ),
         exit = slideOutVertically(
             targetOffsetY = { fullHeight -> fullHeight },
-            animationSpec = tween(durationMillis = 175, easing = FastOutLinearInEasing)
+            animationSpec = tween(durationMillis = 125, easing = FastOutLinearInEasing)
         )
     ) {
         if (isNavigableDestination) {
