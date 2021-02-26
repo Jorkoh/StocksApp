@@ -1,13 +1,24 @@
 package com.example.stocksapp.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.util.fastAny
 import androidx.hilt.navigation.HiltViewModelFactory
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -86,29 +97,47 @@ private fun NavigableContent(
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun NavigableBottomBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.arguments?.getString(KEY_ROUTE)
-        ?: NavigableDestinations.StartDestination.route
+    var lastNavigableDestination by remember {
+        mutableStateOf<NavigableDestinations>(NavigableDestinations.StartDestination)
+    }
 
-    // If the current route is not part of the bottom bar don't compose
-    if (!NavigableDestinations.toList().map { it.route }.contains(currentRoute)) return
+    val currentRoute = navBackStackEntry?.arguments?.getString(KEY_ROUTE) ?: return
+    val isNavigableDestination = NavigableDestinations.toList().fastAny { it.route == currentRoute }
 
-    val currentDestination = NavigableDestinations.toList().first { it.route == currentRoute }
-
-    CustomBottomBar(
-        currentDestination = currentDestination.destination,
-        onDestinationSelected = { destination ->
-            val route = NavigableDestinations.toList()
-                .first { it.destination == destination }.route
-            navController.navigate(route) {
-                popUpTo = navController.graph.startDestination
-                launchSingleTop = true
+    AnimatedVisibility(
+        visible = isNavigableDestination,
+        enter = slideInVertically(
+            initialOffsetY = { fullHeight -> fullHeight },
+            animationSpec = tween(durationMillis = 125, easing = LinearOutSlowInEasing)
+        ),
+        exit = slideOutVertically(
+            targetOffsetY = { fullHeight -> fullHeight },
+            animationSpec = tween(durationMillis = 175, easing = FastOutLinearInEasing)
+        )
+    ) {
+        if (isNavigableDestination) {
+            val currentDestination = NavigableDestinations.toList().first {
+                it.route == currentRoute
             }
-        },
-        destinations = NavigableDestinations.toList().map { it.destination },
-    )
+            lastNavigableDestination = currentDestination
+        }
+        CustomBottomBar(
+            currentDestination = lastNavigableDestination.destination,
+            onDestinationSelected = { destination ->
+                val route = NavigableDestinations.toList()
+                    .first { it.destination == destination }.route
+                navController.navigate(route) {
+                    popUpTo = navController.graph.startDestination
+                    launchSingleTop = true
+                }
+            },
+            destinations = NavigableDestinations.toList().map { it.destination },
+        )
+    }
 }
 
 // https://kotlinlang.slack.com/archives/CJLTWPH7S/p1604071670473700?thread_ts=1604043017.440100&cid=CJLTWPH7S
