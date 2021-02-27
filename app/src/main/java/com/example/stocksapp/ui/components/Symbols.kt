@@ -24,13 +24,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.transform.CircleCropTransformation
 import com.example.stocksapp.data.model.Quote
 import com.example.stocksapp.ui.components.charts.line.LineChart
 import com.example.stocksapp.ui.components.charts.line.LineChartData
@@ -63,8 +63,10 @@ fun QuoteListItem(
         CoilImage(
             data = "https://storage.googleapis.com/iexcloud-hl37opg/api/logos/${quote.symbol}.png",
             contentDescription = "${quote.symbol} logo",
-            requestBuilder = { transformations(CircleCropTransformation()) },
-            modifier = Modifier.size(48.dp)
+            fadeIn = true,
+            modifier = Modifier
+                .size(48.dp)
+                .clip(MaterialTheme.shapes.medium)
         )
         Column(
             modifier = Modifier
