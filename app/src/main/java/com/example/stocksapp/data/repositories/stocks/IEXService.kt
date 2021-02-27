@@ -2,7 +2,10 @@ package com.example.stocksapp.data.repositories.stocks
 
 import com.example.stocksapp.BuildConfig
 import com.example.stocksapp.data.model.network.CompanyInfoResponse
+import com.example.stocksapp.data.model.network.NewsResponse
 import com.example.stocksapp.data.model.network.QuoteResponse
+import com.example.stocksapp.data.repositories.utils.BatchedNews
+import com.example.stocksapp.data.repositories.utils.BatchedNewsAdapter
 import com.example.stocksapp.data.repositories.utils.BatchedQuotes
 import com.example.stocksapp.data.repositories.utils.BatchedQuotesAdapter
 import com.example.stocksapp.data.repositories.utils.HttpRequestInterceptor
@@ -35,6 +38,13 @@ interface IEXService {
         @Query("symbol") symbol: String,
         @Query("range") range: ChartRanges
     )
+
+    @GET("stock/market/batch?types=news")
+    @BatchedNews
+    suspend fun fetchNews(
+        @Query("symbols") symbols: String,
+        @Query("last") numberPerSymbol: Int = 2
+    ): ApiResponse<List<NewsResponse>>
 
     @GET("stock/{symbol}/company")
     suspend fun fetchCompanyInfo(
@@ -69,6 +79,7 @@ interface IEXService {
                     MoshiConverterFactory.create(
                         Moshi.Builder()
                             .add(BatchedQuotesAdapter())
+                            .add(BatchedNewsAdapter())
                             .build()
                     )
                 )

@@ -28,12 +28,12 @@ import com.example.stocksapp.ui.screens.NavigableScreens
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
 
 @Composable
-fun Home(
+fun HomeScreen(
     viewModel: HomeViewModel,
     navController: NavController,
     modifier: Modifier = Modifier,
 ) {
-    HomeScreen(
+    HomeContent(
         activeSymbolsUIState = viewModel.activeSymbolsUIState.collectAsState(),
         modifier = modifier,
         onSymbolSelected = { symbol ->
@@ -43,7 +43,7 @@ fun Home(
 }
 
 @Composable
-fun HomeScreen(
+fun HomeContent(
     activeSymbolsUIState: State<ActiveSymbolsUIState>,
     modifier: Modifier = Modifier,
     onSymbolSelected: (String) -> Unit

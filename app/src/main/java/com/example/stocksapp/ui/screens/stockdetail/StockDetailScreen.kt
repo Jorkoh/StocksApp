@@ -29,12 +29,12 @@ import dagger.hilt.android.EntryPointAccessors
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
 
 @Composable
-fun StockDetail(
+fun StockDetailScreen(
     viewModel: StockDetailViewModel,
     navController: NavController,
     modifier: Modifier = Modifier
 ) {
-    StockDetailScreen(
+    StockDetailContent(
         companyInfoUIState = viewModel.companyInfoUIState.collectAsState(),
         modifier = modifier,
         onUpButtonPressed = { navController.navigateUp() }
@@ -42,7 +42,7 @@ fun StockDetail(
 }
 
 @Composable
-fun StockDetailScreen(
+fun StockDetailContent(
     companyInfoUIState: State<CompanyInfoUIState>,
     modifier: Modifier = Modifier,
     onUpButtonPressed: () -> Unit

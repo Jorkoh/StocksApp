@@ -17,7 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.util.fastAny
+import androidx.compose.ui.util.fastFirstOrNull
 import androidx.hilt.navigation.HiltViewModelFactory
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -34,11 +34,11 @@ import androidx.navigation.compose.rememberNavController
 import com.example.stocksapp.ui.components.CustomBottomBar
 import com.example.stocksapp.ui.screens.NavigableDestinations
 import com.example.stocksapp.ui.screens.NavigableScreens
-import com.example.stocksapp.ui.screens.home.Home
+import com.example.stocksapp.ui.screens.home.HomeScreen
 import com.example.stocksapp.ui.screens.news.NewsScreen
 import com.example.stocksapp.ui.screens.profile.ProfileScreen
 import com.example.stocksapp.ui.screens.search.SearchScreen
-import com.example.stocksapp.ui.screens.stockdetail.StockDetail
+import com.example.stocksapp.ui.screens.stockdetail.StockDetailScreen
 import com.example.stocksapp.ui.screens.stockdetail.stockDetailViewModel
 import com.example.stocksapp.ui.theme.StocksAppTheme
 import com.example.stocksapp.ui.utils.LocalSysUiController
@@ -73,10 +73,12 @@ private fun NavigableContent(
     NavHost(navController, NavigableDestinations.StartDestination.route) {
         // Base destinations
         composable(NavigableDestinations.Home.route) {
-            Home(it.hiltNavGraphViewModel(), navController, padding)
+            HomeScreen(it.hiltNavGraphViewModel(), navController, padding)
         }
         composable(NavigableDestinations.Search.route) { SearchScreen(padding) }
-        composable(NavigableDestinations.News.route) { NewsScreen(padding) }
+        composable(NavigableDestinations.News.route) {
+            NewsScreen(it.hiltNavGraphViewModel(), navController, padding)
+        }
         composable(NavigableDestinations.Profile.route) { ProfileScreen(padding) }
 
         // Deeper screens, don't use padding because the bottom bar won't be present
@@ -91,7 +93,7 @@ private fun NavigableContent(
             val symbol = requireNotNull(
                 backStackEntry.arguments?.getString(NavigableScreens.StockDetail.argument)
             )
-            StockDetail(stockDetailViewModel(symbol), navController)
+            StockDetailScreen(stockDetailViewModel(symbol), navController)
         }
     }
 }
@@ -104,10 +106,14 @@ private fun NavigableBottomBar(navController: NavHostController) {
     }
 
     val currentRoute = navBackStackEntry?.arguments?.getString(KEY_ROUTE) ?: return
-    val isNavigableDestination = NavigableDestinations.toList().fastAny { it.route == currentRoute }
+    val currentNavigableDestination = NavigableDestinations.toList().fastFirstOrNull {
+        it.route == currentRoute
+    }?.let { currentNavigableDestination ->
+        lastNavigableDestination = currentNavigableDestination
+    }
 
     AnimatedVisibility(
-        visible = isNavigableDestination,
+        visible = currentNavigableDestination != null,
         enter = slideInVertically(
             initialOffsetY = { fullHeight -> fullHeight },
             animationSpec = tween(durationMillis = 100, easing = LinearOutSlowInEasing)
@@ -117,20 +123,17 @@ private fun NavigableBottomBar(navController: NavHostController) {
             animationSpec = tween(durationMillis = 125, easing = FastOutLinearInEasing)
         )
     ) {
-        if (isNavigableDestination) {
-            val currentDestination = NavigableDestinations.toList().first {
-                it.route == currentRoute
-            }
-            lastNavigableDestination = currentDestination
-        }
         CustomBottomBar(
             currentDestination = lastNavigableDestination.destination,
-            onDestinationSelected = { destination ->
-                val route = NavigableDestinations.toList()
-                    .first { it.destination == destination }.route
-                navController.navigate(route) {
-                    popUpTo = navController.graph.startDestination
-                    launchSingleTop = true
+            onDestinationSelected = { newDestination ->
+                if (lastNavigableDestination.destination != newDestination) {
+                    val newRoute = NavigableDestinations.toList().first {
+                        it.destination == newDestination
+                    }.route
+                    navController.navigate(newRoute) {
+                        popUpTo = navController.graph.startDestination
+                        launchSingleTop = true
+                    }
                 }
             },
             destinations = NavigableDestinations.toList().map { it.destination },

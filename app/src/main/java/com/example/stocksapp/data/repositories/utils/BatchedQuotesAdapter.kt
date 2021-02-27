@@ -22,19 +22,19 @@ class BatchedQuotesAdapter {
     @BatchedQuotes
     @FromJson
     fun fromJson(reader: JsonReader): List<QuoteResponse> {
-        val responses = mutableListOf<QuoteResponse>()
+        val quotes = mutableListOf<QuoteResponse>()
         reader.beginObject()
         while (reader.hasNext()) {
             reader.skipName()
             reader.beginObject()
             reader.skipName()
             adapter.fromJson(reader)?.let {
-                responses.add(it)
+                quotes.add(it)
             }
             reader.endObject()
         }
         reader.endObject()
-        return responses
+        return quotes
     }
 
     @ToJson
