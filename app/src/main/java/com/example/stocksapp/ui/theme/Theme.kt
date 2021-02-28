@@ -1,6 +1,7 @@
 package com.example.stocksapp.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
@@ -22,6 +23,12 @@ private val LightColorPalette = lightColors(
     onPrimary = Color.Black,
     onSecondary = Color.White
 )
+
+val Colors.profit: Color
+    get() = green
+
+val Colors.loss: Color
+    get() = red
 
 @Composable
 fun StocksAppTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {

@@ -1,17 +1,24 @@
 package com.example.stocksapp.ui.components.charts.line
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.TweenSpec
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import com.example.stocksapp.ui.components.charts.line.renderer.line.LineDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.line.SolidLineDrawer
@@ -21,24 +28,74 @@ import com.example.stocksapp.ui.components.charts.line.renderer.xaxis.SimpleXAxi
 import com.example.stocksapp.ui.components.charts.line.renderer.xaxis.XAxisDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.SimpleYAxisDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.YAxisDrawer
+import com.example.stocksapp.ui.theme.loss
+import com.example.stocksapp.ui.theme.profit
+import timber.log.Timber
 
 @Composable
 fun LineChart(
     lineChartData: LineChartData,
     modifier: Modifier = Modifier,
-    animation: AnimationSpec<Float> = TweenSpec(
-        durationMillis = 1500,
-        easing = LinearOutSlowInEasing
-    ),
     linePathCalculator: LinePathCalculator = StraightLinePathCalculator(),
     lineDrawer: LineDrawer = SolidLineDrawer(),
     xAxisDrawer: XAxisDrawer = SimpleXAxisDrawer(),
-    yAxisDrawer: YAxisDrawer = SimpleYAxisDrawer()
+    yAxisDrawer: YAxisDrawer = SimpleYAxisDrawer(),
+    profitColor: Color = MaterialTheme.colors.profit,
+    lossColor: Color = MaterialTheme.colors.loss,
+    neutralColor: Color = MaterialTheme.colors.onPrimary
 ) {
-    val transitionProgress = remember(lineChartData.points) { Animatable(initialValue = 0f) }
-    LaunchedEffect(lineChartData.points) {
-        transitionProgress.snapTo(0f)
-        transitionProgress.animateTo(1f, animationSpec = animation)
+    var previousData by remember { mutableStateOf(lineChartData) }
+    val transitionState = remember { MutableTransitionState(ChartState.Collapsed) }
+
+    if (transitionState.currentState == ChartState.Collapsed) {
+        Timber.d("Setting target: EXPANDED")
+        transitionState.targetState = ChartState.Expanded
+        previousData = lineChartData
+    }
+
+    if (previousData != lineChartData) {
+        Timber.d("Setting target: COLLAPSED")
+        transitionState.targetState = ChartState.Collapsed
+    }
+
+    val transition = updateTransition(transitionState)
+
+    val transitionProgress by transition.animateFloat(
+        transitionSpec = {
+            if (ChartState.Collapsed isTransitioningTo ChartState.Expanded) {
+                tween(1000, easing = LinearOutSlowInEasing)
+            } else {
+                tween(1000, easing = FastOutLinearInEasing)
+            }
+        }
+    ) { state ->
+        when (state) {
+            ChartState.Collapsed -> 0f
+            ChartState.Expanded -> 1f
+        }
+    }
+
+    val color by transition.animateColor(
+        transitionSpec = {
+            if (ChartState.Collapsed isTransitioningTo ChartState.Expanded) {
+                tween(1000, easing = LinearOutSlowInEasing)
+            } else {
+                tween(1000, easing = FastOutLinearInEasing)
+            }
+        }
+    ) { state ->
+        when (state) {
+            ChartState.Collapsed -> neutralColor
+            ChartState.Expanded -> {
+                val first = lineChartData.points.firstOrNull()?.value ?: 0f
+                val last = lineChartData.points.lastOrNull()?.value ?: 0f
+                when {
+                    last > first -> profitColor
+                    last < first -> lossColor
+                    else -> neutralColor
+                }
+            }
+        }
     }
 
     Canvas(modifier = modifier.fillMaxSize()) {
@@ -68,12 +125,16 @@ fun LineChart(
             // Draw stuff
             lineDrawer.drawLine(
                 drawScope = this,
-                canvas = canvas,
                 linePath = linePathCalculator.calculateLinePath(
                     drawableArea = chartDrawableArea,
-                    data = lineChartData,
-                    transitionProgress = transitionProgress.value
-                )
+                    data = if (transitionState.targetState == ChartState.Collapsed) {
+                        previousData
+                    } else {
+                        lineChartData
+                    },
+                    transitionProgress = transitionProgress
+                ),
+                color = color
             )
             xAxisDrawer.draw(
                 drawScope = this,
@@ -109,4 +170,9 @@ object LineChartUtils {
             y = drawableArea.height - y * drawableArea.height,
         )
     }
+}
+
+private enum class ChartState {
+    Collapsed,
+    Expanded
 }

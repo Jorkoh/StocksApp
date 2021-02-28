@@ -1,6 +1,5 @@
 package com.example.stocksapp.ui.components
 
-import androidx.compose.animation.core.SnapSpec
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -25,7 +24,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,8 +37,8 @@ import com.example.stocksapp.ui.components.charts.line.renderer.path.BezierLineP
 import com.example.stocksapp.ui.components.charts.line.renderer.xaxis.NoXAxisDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.NoYAxisDrawer
 import com.example.stocksapp.ui.theme.StocksAppTheme
-import com.example.stocksapp.ui.theme.greenStock
-import com.example.stocksapp.ui.theme.redStock
+import com.example.stocksapp.ui.theme.loss
+import com.example.stocksapp.ui.theme.profit
 import dev.chrisbanes.accompanist.coil.CoilImage
 import java.util.Date
 import kotlin.math.sign
@@ -96,8 +94,8 @@ fun QuoteListItem(
                 textAlign = TextAlign.End
             )
             val changeColor = when (quote.change.sign) {
-                -1.0 -> redStock
-                1.0 -> greenStock
+                -1.0 -> MaterialTheme.colors.loss
+                1.0 -> MaterialTheme.colors.profit
                 else -> LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
             }
             val backgroundModifier = Modifier.background(
@@ -141,16 +139,9 @@ fun QuoteWithChartCard(
             LineChart(
                 lineChartData = chartData,
                 linePathCalculator = BezierLinePathCalculator(),
-                lineDrawer = SolidLineDrawer(
-                    color = if (chartData.points.first().value > chartData.points.last().value) {
-                        Color.Red
-                    } else {
-                        Color.Green
-                    }
-                ),
+                lineDrawer = SolidLineDrawer(),
                 xAxisDrawer = NoXAxisDrawer,
-                yAxisDrawer = NoYAxisDrawer,
-                animation = SnapSpec(0)
+                yAxisDrawer = NoYAxisDrawer
             )
         }
     }

@@ -5,10 +5,12 @@ import com.example.stocksapp.data.database.StocksDao
 import com.example.stocksapp.data.model.utils.mapToCompanyInfo
 import com.example.stocksapp.data.model.utils.mapToNews
 import com.example.stocksapp.data.model.utils.mapToQuote
+import com.example.stocksapp.ui.components.charts.line.LineChartData
 import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onException
 import com.skydoves.sandwich.suspendOnSuccess
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
@@ -17,6 +19,7 @@ import kotlinx.coroutines.flow.onStart
 import timber.log.Timber
 import java.util.Date
 import javax.inject.Inject
+import kotlin.random.Random
 
 class StocksRepository @Inject constructor(
     private val IEXService: IEXService,
@@ -117,6 +120,22 @@ class StocksRepository @Inject constructor(
                 }
             }
     }.onStart { onStart() }.flowOn(Dispatchers.IO)
+
+    @WorkerThread
+    fun fetchChart(
+        symbol: String,
+        onStart: () -> Unit,
+        onError: (String) -> Unit
+    ) = flow {
+        delay(500)
+        emit(
+            LineChartData(
+                (1..10).map {
+                    LineChartData.Point(Random.nextDouble(5.0, 20.0).toFloat(), "#$it")
+                }
+            )
+        )
+    }
 }
 
 // TODO: this isn't elegant at all

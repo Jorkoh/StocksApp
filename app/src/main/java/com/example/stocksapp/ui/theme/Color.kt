@@ -7,5 +7,5 @@ val black = Color(0xFF141414)
 val lighterBlack = Color(0xFF222222)
 val blue = Color(0xFF4C7DF9)
 
-val greenStock = Color(0xFF56B49C)
-val redStock = Color(0xFFE25837)
+val green = Color(0xFF56B49C)
+val red = Color(0xFFE25837)

@@ -18,7 +18,9 @@ class BezierLinePathCalculator : LinePathCalculator {
         data: LineChartData,
         transitionProgress: Float
     ): Path {
-        if (data != previousLineChartData || drawableArea != previousDrawableArea) {
+        if ((data != previousLineChartData || drawableArea != previousDrawableArea) &&
+            data.points.isNotEmpty()
+        ) {
             // Only recalculate the path it it has actually changed
             path = Path().apply {
                 val firstLocation = LineChartUtils.calculatePointLocation(

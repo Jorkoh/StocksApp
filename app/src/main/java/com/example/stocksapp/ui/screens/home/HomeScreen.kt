@@ -60,7 +60,7 @@ fun HomeContent(
 
     LazyColumn(modifier.fillMaxSize()) {
         item { Spacer(modifier = Modifier.statusBarsPadding()) }
-        userSymbolsSection(activeSymbolsUIState, onSymbolSelected)
+        // userSymbolsSection(activeSymbolsUIState, onSymbolSelected)
         activeSymbolsSection(activeSymbolsUIState, scope, onSymbolSelected)
     }
 }
