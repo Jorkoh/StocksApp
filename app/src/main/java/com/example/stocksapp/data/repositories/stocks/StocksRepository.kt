@@ -127,7 +127,6 @@ class StocksRepository @Inject constructor(
         onStart: () -> Unit,
         onError: (String) -> Unit
     ) = flow {
-        delay(500)
         emit(
             LineChartData(
                 (1..10).map {

@@ -30,6 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.stocksapp.MainActivity
 import com.example.stocksapp.R
+import com.example.stocksapp.ui.components.LoadingIndicator
 import com.example.stocksapp.ui.components.charts.line.LineChart
 import com.example.stocksapp.ui.components.charts.line.renderer.line.SolidLineDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.path.BezierLinePathCalculator
@@ -50,7 +51,7 @@ fun StockDetailScreen(
         modifier = modifier,
         onUpButtonPressed = { navController.navigateUp() },
         // TODO: temp for testing
-        refreshChartData = { viewModel.refreshChartData() }
+        onChartRangeChange = { viewModel.refreshChartData() }
     )
 }
 
@@ -60,7 +61,7 @@ fun StockDetailContent(
     chartUIState: State<ChartUIState>,
     modifier: Modifier = Modifier,
     onUpButtonPressed: () -> Unit,
-    refreshChartData: () -> Unit
+    onChartRangeChange: () -> Unit
 ) {
     Scaffold(
         modifier = modifier,
@@ -72,36 +73,9 @@ fun StockDetailContent(
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            when (val state = chartUIState.value) {
-                is ChartUIState.Loading -> {
-                }
-                is ChartUIState.Success -> {
-                    LineChart(
-                        lineChartData = state.chartData,
-                        linePathCalculator = BezierLinePathCalculator(),
-                        lineDrawer = SolidLineDrawer(),
-                        xAxisDrawer = NoXAxisDrawer,
-                        yAxisDrawer = NoYAxisDrawer,
-                        modifier = Modifier
-                            .padding(64.dp)
-                            .fillMaxWidth()
-                            .aspectRatio(1f)
-                            .clickable { refreshChartData() }
-                    )
-                }
-                is ChartUIState.Error -> {
-                }
-            }
+            ChartSection(chartUIState, onChartRangeChange)
             Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                text = when (val state = companyInfoUIState.value) {
-                    is CompanyInfoUIState.Loading -> "LOADING..."
-                    is CompanyInfoUIState.Success -> "SUCCESS: ${state.companyInfo.companyName}"
-                    is CompanyInfoUIState.Error -> "ERROR: ${state.message}"
-                },
-                style = MaterialTheme.typography.body1,
-                textAlign = TextAlign.Center
-            )
+            CompanyInfoSection(companyInfoUIState)
         }
     }
 }
@@ -130,6 +104,48 @@ fun StockDetailTopBar(
             )
         }
     }
+}
+
+@Composable
+fun ChartSection(
+    chartUIState: State<ChartUIState>,
+    onChartRangeChange: () -> Unit
+) {
+    when (val state = chartUIState.value) {
+        is ChartUIState.Loading -> {
+            LoadingIndicator(Modifier.padding(vertical = 24.dp))
+        }
+        is ChartUIState.Success -> {
+            LineChart(
+                lineChartData = state.chartData,
+                linePathCalculator = BezierLinePathCalculator(),
+                lineDrawer = SolidLineDrawer(),
+                xAxisDrawer = NoXAxisDrawer,
+                yAxisDrawer = NoYAxisDrawer,
+                modifier = Modifier
+                    .padding(12.dp)
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .clickable { onChartRangeChange() }
+            )
+        }
+        is ChartUIState.Error -> {
+            Text("ERROR: ${state.message}")
+        }
+    }
+}
+
+@Composable
+fun CompanyInfoSection(companyInfoUIState: State<CompanyInfoUIState>) {
+    Text(
+        text = when (val state = companyInfoUIState.value) {
+            is CompanyInfoUIState.Loading -> "LOADING..."
+            is CompanyInfoUIState.Success -> "SUCCESS: ${state.companyInfo.companyName}"
+            is CompanyInfoUIState.Error -> "ERROR: ${state.message}"
+        },
+        style = MaterialTheme.typography.body1,
+        textAlign = TextAlign.Center
+    )
 }
 
 @Composable

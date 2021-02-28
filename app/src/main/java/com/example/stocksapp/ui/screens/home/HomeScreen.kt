@@ -72,7 +72,7 @@ private fun LazyListScope.userSymbolsSection(
 ) {
     item { HomeScreenSectionTitle(stringResource(R.string.user_symbols_section_title)) }
     when (val state = userSymbolsUIState.value) {
-        is ActiveSymbolsUIState.Loading -> item { LoadingIndicator(Modifier.padding(top = 24.dp)) }
+        is ActiveSymbolsUIState.Loading -> item { LoadingIndicator(Modifier.padding(vertical = 24.dp)) }
         is ActiveSymbolsUIState.Error -> item { Text(state.message) }
         is ActiveSymbolsUIState.Success -> item {
             LazyRow(

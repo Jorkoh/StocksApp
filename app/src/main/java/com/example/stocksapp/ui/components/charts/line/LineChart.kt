@@ -5,6 +5,7 @@ import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Canvas
@@ -42,18 +43,21 @@ fun LineChart(
     yAxisDrawer: YAxisDrawer = SimpleYAxisDrawer(),
     profitColor: Color = MaterialTheme.colors.profit,
     lossColor: Color = MaterialTheme.colors.loss,
-    neutralColor: Color = MaterialTheme.colors.onPrimary
+    neutralColor: Color = MaterialTheme.colors.onPrimary,
+    animate: Boolean = true
 ) {
     var previousData by remember { mutableStateOf(lineChartData) }
     val transitionState = remember { MutableTransitionState(ChartState.Collapsed) }
 
-    if (transitionState.currentState == ChartState.Collapsed) {
+    if (transitionState.currentState == ChartState.Collapsed
+        && transitionState.targetState == ChartState.Collapsed
+    ) {
         Timber.d("Setting target: EXPANDED")
         transitionState.targetState = ChartState.Expanded
         previousData = lineChartData
     }
 
-    if (previousData != lineChartData) {
+    if (previousData != lineChartData && transitionState.targetState != ChartState.Collapsed) {
         Timber.d("Setting target: COLLAPSED")
         transitionState.targetState = ChartState.Collapsed
     }
@@ -63,9 +67,9 @@ fun LineChart(
     val transitionProgress by transition.animateFloat(
         transitionSpec = {
             if (ChartState.Collapsed isTransitioningTo ChartState.Expanded) {
-                tween(1000, easing = LinearOutSlowInEasing)
+                if (animate) tween(1000, easing = LinearOutSlowInEasing) else snap()
             } else {
-                tween(1000, easing = FastOutLinearInEasing)
+                if (animate) tween(1000, easing = FastOutLinearInEasing) else snap()
             }
         }
     ) { state ->
@@ -78,9 +82,9 @@ fun LineChart(
     val color by transition.animateColor(
         transitionSpec = {
             if (ChartState.Collapsed isTransitioningTo ChartState.Expanded) {
-                tween(1000, easing = LinearOutSlowInEasing)
+                if (animate) tween(1000, easing = LinearOutSlowInEasing) else snap()
             } else {
-                tween(1000, easing = FastOutLinearInEasing)
+                if (animate) tween(1000, easing = FastOutLinearInEasing) else snap()
             }
         }
     ) { state ->
