@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.hilt.navigation.HiltViewModelFactory
 import androidx.lifecycle.ViewModel
@@ -55,10 +56,9 @@ fun StocksApp() {
     ProvideWindowInsets {
         StocksAppTheme {
             Scaffold(
-                bottomBar = { NavigableBottomBar(navController) }
-            ) { innerPadding ->
-                NavigableContent(innerPadding, navController)
-            }
+                bottomBar = { NavigableBottomBar(navController) },
+                content = { innerPadding -> NavigableContent(innerPadding, navController) }
+            )
         }
     }
 }
@@ -68,7 +68,8 @@ private fun NavigableContent(
     innerPadding: PaddingValues,
     navController: NavHostController
 ) {
-    val padding = Modifier.padding(innerPadding)
+    // Can't use Modifier.padding(innerPadding) because value doesn't update inside NavHost (bug)
+    val padding = Modifier.padding(bottom = 64.dp)
 
     NavHost(navController, NavigableDestinations.StartDestination.route) {
         // Base destinations

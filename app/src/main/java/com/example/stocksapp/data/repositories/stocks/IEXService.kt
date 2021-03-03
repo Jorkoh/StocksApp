@@ -43,7 +43,7 @@ interface IEXService {
     @BatchedNews
     suspend fun fetchNews(
         @Query("symbols") symbols: String,
-        @Query("last") numberPerSymbol: Int = 2
+        @Query("last") numberPerSymbol: Int = 5
     ): ApiResponse<List<NewsResponse>>
 
     @GET("stock/{symbol}/company")

@@ -49,8 +49,8 @@ fun LineChart(
     var previousData by remember { mutableStateOf(lineChartData) }
     val transitionState = remember { MutableTransitionState(ChartState.Collapsed) }
 
-    if (transitionState.currentState == ChartState.Collapsed
-        && transitionState.targetState == ChartState.Collapsed
+    if (transitionState.currentState == ChartState.Collapsed &&
+        transitionState.targetState == ChartState.Collapsed
     ) {
         Timber.d("Setting target: EXPANDED")
         transitionState.targetState = ChartState.Expanded

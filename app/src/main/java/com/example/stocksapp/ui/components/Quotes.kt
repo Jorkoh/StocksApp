@@ -54,9 +54,8 @@ fun QuoteListItem(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = { onSymbolSelected(quote.symbol) })
-            .padding(horizontal = 24.dp, vertical = 14.dp)
-            .height(48.dp),
-        verticalAlignment = Alignment.Top
+            .padding(horizontal = 24.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         CoilImage(
             data = "https://storage.googleapis.com/iexcloud-hl37opg/api/logos/${quote.symbol}.png",
