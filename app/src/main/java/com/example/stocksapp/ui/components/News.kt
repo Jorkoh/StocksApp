@@ -1,21 +1,26 @@
 package com.example.stocksapp.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.expandIn
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Button
+import androidx.compose.material.Card
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
@@ -23,27 +28,25 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.stocksapp.R
 import com.example.stocksapp.data.model.News
-import dev.chrisbanes.accompanist.coil.CoilImage
 import java.text.DateFormat
 import java.util.Date
-import kotlin.math.roundToInt
 
-fun <T> testSpec() = spring<T>()
+fun <T> testSpec() = tween<T>(durationMillis = 270)
+fun <T> testSpecDelayed() = tween<T>(durationMillis = 125, delayMillis = 300)
 
 @Composable
 fun NewsListItem(
@@ -53,118 +56,141 @@ fun NewsListItem(
     onClick: () -> Unit,
     onReadMoreClicked: () -> Unit
 ) {
-    Column(
+    val imageSize: Dp by animateDpAsState(
+        targetValue = when (itemState) {
+            ListItemState.Collapsed -> 84.dp
+            ListItemState.Expanded -> 120.dp
+        },
+        animationSpec = testSpecDelayed()
+    )
+
+    val readMoreSize: Dp by animateDpAsState(
+        targetValue = when (itemState) {
+            ListItemState.Collapsed -> 0.dp
+            ListItemState.Expanded -> 36.dp
+        },
+        animationSpec = testSpecDelayed()
+    )
+
+    val cardElevation: Dp by animateDpAsState(
+        targetValue = when (itemState) {
+            ListItemState.Collapsed -> 0.dp
+            ListItemState.Expanded -> 8.dp
+        },
+        animationSpec = testSpecDelayed()
+    )
+
+    Card(
+        elevation = cardElevation,
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 24.dp, vertical = 14.dp),
-        verticalArrangement = Arrangement.Bottom,
-        horizontalAlignment = Alignment.End
+            .padding(horizontal = 14.dp, vertical = 8.dp)
     ) {
-        val newsDate = remember(news.date) {
-            DateFormat.getDateTimeInstance(
-                DateFormat.SHORT,
-                DateFormat.SHORT
-            ).format(Date(news.date))
-        }
-        val density = LocalDensity.current
-        val startPaddingExpanding = remember(density) { with(density) { 100.dp.toPx() } }
-        val startPaddingCollapsing = remember(density) { with(density) { 140.dp.toPx() } }
+        Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) {
+            val newsDate = remember(news.date) {
+                DateFormat.getDateInstance(DateFormat.SHORT).format(Date(news.date))
+            }
 
-        AnimatedVisibility(
-            visible = itemState == ListItemState.Expanded,
-            enter = expandIn(
-                animationSpec = testSpec(),
-                expandFrom = Alignment.TopEnd,
-                initialSize = { IntSize((it.width - startPaddingExpanding).roundToInt(), 0) }
-            ) + fadeIn(animationSpec = testSpec()),
-            exit = shrinkOut(
-                animationSpec = testSpec(),
-                shrinkTowards = Alignment.TopEnd,
-                targetSize = { IntSize((it.width - startPaddingCollapsing).roundToInt(), 0) }
-            ) + fadeOut(animationSpec = testSpec())
-        ) {
-            Text(
-                text = news.headline,
-                style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
-                modifier = Modifier
-                    .padding(bottom = 8.dp)
-                    .fillMaxWidth()
-                    .align(Alignment.Start),
-            )
-        }
-        Row {
-            Column {
-                CoilImage(
-                    data = news.imageUrl,
-                    contentDescription = null,
-                    fadeIn = true,
-                    contentScale = ContentScale.Crop,
+            AnimatedVisibility(
+                visible = itemState == ListItemState.Expanded,
+                enter = expandVertically(
+                    animationSpec = testSpec(),
+                    expandFrom = Alignment.Top
+                ) + fadeIn(animationSpec = testSpec()),
+                exit = shrinkVertically(
+                    animationSpec = testSpec(),
+                    shrinkTowards = Alignment.Top
+                ) + fadeOut(animationSpec = testSpec())
+            ) {
+                Text(
+                    text = news.headline,
+                    style = MaterialTheme.typography.h6,
                     modifier = Modifier
-                        .size(84.dp)
-                        .clip(MaterialTheme.shapes.large)
+                        .padding(bottom = 8.dp)
+                        .fillMaxWidth()
+                        .align(Alignment.Start),
                 )
-                AnimatedVisibility(
-                    visible = itemState == ListItemState.Expanded,
-                    enter = fadeIn(animationSpec = testSpec()) +
-                        expandVertically(animationSpec = testSpec()),
-                    exit = fadeOut(animationSpec = testSpec()) +
-                        shrinkVertically(animationSpec = testSpec())
-                ) {
-                    Text(
-                        text = news.symbols.joinToString(),
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.caption.copy(fontSize = 13.sp)
+            }
+            Row(modifier = Modifier.height(IntrinsicSize.Max)) {
+                Column {
+                    // https://github.com/chrisbanes/accompanist/pull/220 will solve the crash
+                    // CoilImage(
+                    //     data = news.imageUrl,
+                    //     contentDescription = null,
+                    //     fadeIn = true,
+                    //     contentScale = ContentScale.Crop,
+                    //     modifier = Modifier
+                    //         .size(imageSize)
+                    //         .clip(MaterialTheme.shapes.large)
+                    // )
+                    Box(
+                        modifier = Modifier
+                            .size(imageSize)
+                            .background(color = Color.Red, shape = MaterialTheme.shapes.large)
                     )
-                    Button(onClick = { onReadMoreClicked() }) {
+                    Button(
+                        onClick = onReadMoreClicked,
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 3.dp),
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .height(readMoreSize)
+                            .padding(vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.read_more_button),
+                            modifier = Modifier.padding(end = 4.dp)
+                        )
                         Icon(
                             painter = painterResource(R.drawable.ic_launch),
-                            contentDescription = stringResource(id = R.string.read_more_button)
+                            contentDescription = null
                         )
                     }
                 }
-            }
-            Column(
-                modifier = Modifier
-                    .weight(1f, true)
-                    .padding(start = 16.dp)
-            ) {
-                AnimatedVisibility(
-                    visible = itemState == ListItemState.Collapsed,
-                    enter = expandIn(animationSpec = testSpec()) + fadeIn(animationSpec = testSpec()),
-                    exit = shrinkOut(animationSpec = testSpec()) + fadeOut(animationSpec = testSpec())
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 16.dp)
                 ) {
-                    Text(
-                        text = news.headline,
-                        style = MaterialTheme.typography.h6.copy(fontSize = 18.sp)
-                    )
-                }
-                AnimatedVisibility(
-                    visible = itemState == ListItemState.Expanded,
-                    enter = fadeIn(animationSpec = testSpec()) +
-                        expandVertically(animationSpec = testSpec()),
-                    exit = fadeOut(animationSpec = testSpec()) +
-                        shrinkVertically(animationSpec = testSpec())
-                ) {
-                    Text(
-                        text = news.summary,
-                        maxLines = 8,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.body2
-                    )
-                }
-                CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                    Text(
-                        text = "${news.source} - $newsDate",
-                        style = MaterialTheme.typography.caption.copy(fontSize = 13.sp),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp)
-                    )
+                    AnimatedVisibility(
+                        visible = itemState == ListItemState.Collapsed,
+                        enter = expandVertically(animationSpec = testSpec()) + fadeIn(animationSpec = testSpec()),
+                        exit = shrinkVertically(animationSpec = testSpec()) + fadeOut(animationSpec = testSpec())
+                    ) {
+                        Text(
+                            text = news.headline,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.h6.copy(fontSize = 16.sp)
+                        )
+                    }
+                    AnimatedVisibility(
+                        visible = itemState == ListItemState.Expanded,
+                        enter = fadeIn(animationSpec = testSpec()) +
+                            expandVertically(animationSpec = testSpec()),
+                        exit = fadeOut(animationSpec = testSpec()) +
+                            shrinkVertically(animationSpec = testSpec())
+                    ) {
+                        Text(
+                            text = news.summary,
+                            maxLines = 8,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.body2
+                        )
+                    }
+                    Spacer(Modifier.weight(1f))
+                    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+                        Text(
+                            text = "${news.source} - $newsDate",
+                            style = MaterialTheme.typography.caption.copy(fontSize = 13.sp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.End,
+                            modifier = Modifier
+                                .align(Alignment.End)
+                                .padding(top = 8.dp)
+                        )
+                    }
                 }
             }
         }
