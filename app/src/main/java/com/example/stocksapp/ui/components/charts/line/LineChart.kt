@@ -1,17 +1,14 @@
 package com.example.stocksapp.ui.components.charts.line
 
-import androidx.compose.animation.animateColor
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.Animatable
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,6 +18,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import com.example.stocksapp.ui.components.charts.line.LineChartUtils.interpolateLineChartData
 import com.example.stocksapp.ui.components.charts.line.renderer.line.LineDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.line.SolidLineDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.path.LinePathCalculator
@@ -31,7 +29,8 @@ import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.SimpleYAxi
 import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.YAxisDrawer
 import com.example.stocksapp.ui.theme.loss
 import com.example.stocksapp.ui.theme.profit
-import timber.log.Timber
+
+private fun <T> spec() = spring<T>(stiffness = Spring.StiffnessVeryLow)
 
 @Composable
 fun LineChart(
@@ -46,60 +45,69 @@ fun LineChart(
     neutralColor: Color = MaterialTheme.colors.onPrimary,
     animate: Boolean = true
 ) {
-    var previousData by remember { mutableStateOf(lineChartData) }
-    val transitionState = remember { MutableTransitionState(ChartState.Collapsed) }
+    // Used to represent the data to transition from while animating between different data
+    var oldData by remember { mutableStateOf(lineChartData) }
+    // Used to represent the data to transition towards while animating between different data
+    var targetData by remember { mutableStateOf(lineChartData) }
+    // Used to represent the data currently being charted
+    var visibleData by remember { mutableStateOf(lineChartData) }
 
-    if (transitionState.currentState == ChartState.Collapsed &&
-        transitionState.targetState == ChartState.Collapsed
-    ) {
-        Timber.d("Setting target: EXPANDED")
-        transitionState.targetState = ChartState.Expanded
-        previousData = lineChartData
+    val lineLength = remember { Animatable(0f) }
+    val interpolationProgress = remember { Animatable(1f) }
+    val lineColor = remember { Animatable(neutralColor) }
+
+    // Controls the color
+    LaunchedEffect(lineChartData.points) {
+        lineColor.animateTo(
+            when {
+                lineChartData.points.last().value > lineChartData.points.first().value -> profitColor
+                lineChartData.points.last().value < lineChartData.points.first().value -> lossColor
+                else -> neutralColor
+            },
+            animationSpec = spec()
+        )
     }
 
-    if (previousData != lineChartData && transitionState.targetState != ChartState.Collapsed) {
-        Timber.d("Setting target: COLLAPSED")
-        transitionState.targetState = ChartState.Collapsed
+    LaunchedEffect(lineLength) {
+        lineLength.animateTo(1f, animationSpec = spec())
     }
 
-    val transition = updateTransition(transitionState)
-
-    val transitionProgress by transition.animateFloat(
-        transitionSpec = {
-            if (ChartState.Collapsed isTransitioningTo ChartState.Expanded) {
-                if (animate) tween(1000, easing = LinearOutSlowInEasing) else snap()
-            } else {
-                if (animate) tween(1000, easing = FastOutLinearInEasing) else snap()
-            }
+    // Controls the length
+    LaunchedEffect(lineChartData.points) {
+        if (visibleData.points.size != lineChartData.points.size) {
+            // Different amount of points, animate length to 0
+            lineLength.animateTo(0f, animationSpec = spec())
+        } else if (lineLength.value != lineLength.targetValue) {
+            // Animation was interrupted, continue it
+            lineLength.animateTo(lineLength.targetValue, animationSpec = spec())
         }
-    ) { state ->
-        when (state) {
-            ChartState.Collapsed -> 0f
-            ChartState.Expanded -> 1f
+
+        if (lineLength.value == 0f && lineLength.targetValue == 0f) {
+            // Bounce back to 1
+            visibleData = lineChartData
+            lineLength.animateTo(1f, animationSpec = spec())
         }
     }
 
-    val color by transition.animateColor(
-        transitionSpec = {
-            if (ChartState.Collapsed isTransitioningTo ChartState.Expanded) {
-                if (animate) tween(1000, easing = LinearOutSlowInEasing) else snap()
-            } else {
-                if (animate) tween(1000, easing = FastOutLinearInEasing) else snap()
-            }
+    // Controls the interpolation
+    LaunchedEffect(lineChartData.points) {
+        if (visibleData.points.size == lineChartData.points.size) {
+            // Same amount of points, animate between them
+            oldData = visibleData
+            targetData = lineChartData
+            interpolationProgress.snapTo(0f)
+            interpolationProgress.animateTo(1f, animationSpec = spec())
+        } else if (interpolationProgress.value != interpolationProgress.targetValue) {
+            // Animation was interrupted, continue it
+            interpolationProgress.animateTo(
+                interpolationProgress.targetValue,
+                animationSpec = spec()
+            )
         }
-    ) { state ->
-        when (state) {
-            ChartState.Collapsed -> neutralColor
-            ChartState.Expanded -> {
-                val first = lineChartData.points.firstOrNull()?.value ?: 0f
-                val last = lineChartData.points.lastOrNull()?.value ?: 0f
-                when {
-                    last > first -> profitColor
-                    last < first -> lossColor
-                    else -> neutralColor
-                }
-            }
-        }
+    }
+
+    if (interpolationProgress.value != 1f) {
+        visibleData = interpolateLineChartData(oldData, targetData, interpolationProgress.value)
     }
 
     Canvas(modifier = modifier.fillMaxSize()) {
@@ -131,27 +139,23 @@ fun LineChart(
                 drawScope = this,
                 linePath = linePathCalculator.calculateLinePath(
                     drawableArea = chartDrawableArea,
-                    data = if (transitionState.targetState == ChartState.Collapsed) {
-                        previousData
-                    } else {
-                        lineChartData
-                    },
-                    transitionProgress = transitionProgress
+                    data = visibleData,
+                    lineLength = lineLength.value
                 ),
-                color = color
+                color = lineColor.value
             )
             xAxisDrawer.draw(
                 drawScope = this,
                 canvas = canvas,
                 drawableArea = xAxisDrawableArea,
-                labels = lineChartData.points.map { it.label }
+                labels = visibleData.points.map { it.label }
             )
             yAxisDrawer.draw(
                 drawScope = this,
                 canvas = canvas,
                 drawableArea = yAxisDrawableArea,
-                minValue = lineChartData.minYValue,
-                maxValue = lineChartData.maxYValue
+                minValue = visibleData.minYValue,
+                maxValue = visibleData.maxYValue
             )
         }
     }
@@ -174,9 +178,18 @@ object LineChartUtils {
             y = drawableArea.height - y * drawableArea.height,
         )
     }
-}
 
-private enum class ChartState {
-    Collapsed,
-    Expanded
+    fun interpolateLineChartData(
+        oldData: LineChartData,
+        newData: LineChartData,
+        transitionProgress: Float
+    ) = LineChartData(
+        newData.points.mapIndexed { index, newPoint ->
+            val oldPoint = oldData.points[index]
+            LineChartData.Point(
+                value = oldPoint.value + (newPoint.value - oldPoint.value) * transitionProgress,
+                label = newPoint.label
+            )
+        }
+    )
 }

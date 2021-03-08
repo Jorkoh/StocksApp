@@ -1,25 +1,27 @@
 package com.example.stocksapp.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateSize
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
@@ -32,12 +34,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.stocksapp.R
@@ -45,8 +49,8 @@ import com.example.stocksapp.data.model.News
 import java.text.DateFormat
 import java.util.Date
 
-fun <T> testSpec() = tween<T>(durationMillis = 270)
-fun <T> testSpecDelayed() = tween<T>(durationMillis = 125, delayMillis = 300)
+fun <T> testSpec() = tween<T>(durationMillis = 260)
+fun <T> testSpecDelayed() = tween<T>(durationMillis = 140, delayMillis = 300)
 
 @Composable
 fun NewsListItem(
@@ -56,29 +60,26 @@ fun NewsListItem(
     onClick: () -> Unit,
     onReadMoreClicked: () -> Unit
 ) {
-    val imageSize: Dp by animateDpAsState(
-        targetValue = when (itemState) {
-            ListItemState.Collapsed -> 84.dp
-            ListItemState.Expanded -> 120.dp
-        },
-        animationSpec = testSpecDelayed()
-    )
+    val transition = updateTransition(itemState)
 
-    val readMoreSize: Dp by animateDpAsState(
-        targetValue = when (itemState) {
-            ListItemState.Collapsed -> 0.dp
-            ListItemState.Expanded -> 36.dp
-        },
-        animationSpec = testSpecDelayed()
-    )
-
-    val cardElevation: Dp by animateDpAsState(
-        targetValue = when (itemState) {
+    val imageSize by transition.animateSize(transitionSpec = { testSpecDelayed() }) { state ->
+        when (state) {
+            ListItemState.Collapsed -> Size(84.dp.value, 84.dp.value)
+            ListItemState.Expanded -> Size(120.dp.value, 156.dp.value)
+        }
+    }
+    val readMoreAlpha by transition.animateFloat(transitionSpec = { testSpecDelayed() }) { state ->
+        when (state) {
+            ListItemState.Collapsed -> 0f
+            ListItemState.Expanded -> 0.85f
+        }
+    }
+    val cardElevation by transition.animateDp(transitionSpec = { testSpecDelayed() }) { state ->
+        when (state) {
             ListItemState.Collapsed -> 0.dp
             ListItemState.Expanded -> 8.dp
-        },
-        animationSpec = testSpecDelayed()
-    )
+        }
+    }
 
     Card(
         elevation = cardElevation,
@@ -126,25 +127,32 @@ fun NewsListItem(
                     // )
                     Box(
                         modifier = Modifier
-                            .size(imageSize)
+                            .size(imageSize.width.dp, imageSize.height.dp)
                             .background(color = Color.Red, shape = MaterialTheme.shapes.large)
-                    )
-                    Button(
-                        onClick = onReadMoreClicked,
-                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 3.dp),
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .height(readMoreSize)
-                            .padding(vertical = 4.dp)
                     ) {
-                        Text(
-                            text = stringResource(R.string.read_more_button),
-                            modifier = Modifier.padding(end = 4.dp)
-                        )
-                        Icon(
-                            painter = painterResource(R.drawable.ic_launch),
-                            contentDescription = null
-                        )
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .alpha(readMoreAlpha)
+                                .background(color = MaterialTheme.colors.surface)
+                                .clickable(
+                                    enabled = itemState == ListItemState.Expanded,
+                                    onClick = onReadMoreClicked
+                                )
+                                .padding(vertical = 3.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.read_more_button),
+                                textDecoration = TextDecoration.Underline,
+                                modifier = Modifier.padding(end = 4.dp)
+                            )
+                            Icon(
+                                painter = painterResource(R.drawable.ic_launch),
+                                contentDescription = null
+                            )
+                        }
                     }
                 }
                 Column(

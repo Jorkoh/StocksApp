@@ -8,6 +8,6 @@ interface LinePathCalculator {
     fun calculateLinePath(
         drawableArea: Rect,
         data: LineChartData,
-        transitionProgress: Float,
+        lineLength: Float,
     ): Path
 }

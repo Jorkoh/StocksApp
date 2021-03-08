@@ -10,13 +10,13 @@ class StraightLinePathCalculator : LinePathCalculator {
     private var previousDrawableArea: Rect? = null
     private var previousLineChartData: LineChartData? = null
 
-    private var path: Path = Path()
+    private var path = Path()
     private val pathMeasure = PathMeasure()
 
     override fun calculateLinePath(
         drawableArea: Rect,
         data: LineChartData,
-        transitionProgress: Float
+        lineLength: Float
     ): Path {
         if (data != previousLineChartData || drawableArea != previousDrawableArea) {
             // Only recalculate the path it it has actually changed
@@ -40,12 +40,12 @@ class StraightLinePathCalculator : LinePathCalculator {
             previousDrawableArea = drawableArea
         }
 
-        return if (transitionProgress < 1f) {
+        return if (lineLength < 1f) {
             // Animation in progress, calculate the sub section
             Path().apply {
                 pathMeasure.getSegment(
                     0f,
-                    pathMeasure.length * transitionProgress,
+                    pathMeasure.length * lineLength,
                     this
                 )
             }
