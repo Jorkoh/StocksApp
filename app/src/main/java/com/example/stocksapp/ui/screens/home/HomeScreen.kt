@@ -14,10 +14,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
@@ -31,8 +31,6 @@ import com.example.stocksapp.ui.components.SectionTitle
 import com.example.stocksapp.ui.components.TickerCardPreview
 import com.example.stocksapp.ui.screens.NavigableScreens
 import dev.chrisbanes.accompanist.insets.statusBarsPadding
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
@@ -55,12 +53,10 @@ fun HomeContent(
     modifier: Modifier = Modifier,
     onSymbolSelected: (String) -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-
     LazyColumn(modifier.fillMaxSize()) {
         item { Spacer(modifier = Modifier.statusBarsPadding()) }
         // userSymbolsSection(activeSymbolsUIState, onSymbolSelected)
-        activeSymbolsSection(activeSymbolsUIState, scope, onSymbolSelected)
+        activeSymbolsSection(activeSymbolsUIState, onSymbolSelected)
     }
 }
 
@@ -91,7 +87,6 @@ private fun LazyListScope.userSymbolsSection(
 
 private fun LazyListScope.activeSymbolsSection(
     activeSymbolsUIState: State<ActiveSymbolsUIState>,
-    scope: CoroutineScope,
     onSymbolSelected: (String) -> Unit,
 ) {
     item { SectionTitle(stringResource(R.string.active_symbols_section_title)) }
@@ -104,7 +99,7 @@ private fun LazyListScope.activeSymbolsSection(
                 key = { it.symbol }
             ) { quote ->
                 val alpha = remember { Animatable(0f) }
-                scope.launch {
+                LaunchedEffect(alpha) {
                     alpha.animateTo(
                         targetValue = 1f,
                         animationSpec = tween(durationMillis = 350, easing = LinearOutSlowInEasing)
