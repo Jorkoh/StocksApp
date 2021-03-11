@@ -77,7 +77,7 @@ dependencies {
 
     // DI
     implementation "com.google.dagger:hilt-android:$versions.hilt"
-    implementation "androidx.hilt:hilt-navigation-fragment:$versions.hilt_navigation"
+    implementation "androidx.hilt:hilt-navigation-compose:$versions.hilt_navigation"
     kapt "com.google.dagger:hilt-compiler:$versions.hilt"
 
     // Network stuff
