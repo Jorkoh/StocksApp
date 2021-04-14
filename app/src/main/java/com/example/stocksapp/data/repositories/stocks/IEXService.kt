@@ -3,6 +3,7 @@ package com.example.stocksapp.data.repositories.stocks
 import com.example.stocksapp.BuildConfig
 import com.example.stocksapp.data.model.network.CompanyInfoResponse
 import com.example.stocksapp.data.model.network.NewsResponse
+import com.example.stocksapp.data.model.network.PriceResponse
 import com.example.stocksapp.data.model.network.QuoteResponse
 import com.example.stocksapp.data.repositories.utils.BatchedNews
 import com.example.stocksapp.data.repositories.utils.BatchedNewsAdapter
@@ -35,9 +36,11 @@ interface IEXService {
 
     @GET("stock/{symbol}/chart/{range}")
     suspend fun fetchChart(
-        @Query("symbol") symbol: String,
-        @Query("range") range: ChartRanges
-    )
+        @Path("symbol") symbol: String,
+        @Path("range") range: ChartRanges,
+        @Query("includeToday") includeToday : Boolean = true,
+        @Query("chartCloseOnly") closeOnly: Boolean = true
+    ): ApiResponse<List<PriceResponse>>
 
     @GET("stock/market/batch?types=news")
     @BatchedNews
@@ -86,6 +89,18 @@ interface IEXService {
                 .addCallAdapterFactory(CoroutinesResponseCallAdapterFactory())
                 .build()
                 .create(IEXService::class.java)
+        }
+    }
+
+    enum class ChartRanges(private val urlString: String) {
+        FiveDays("5d"),
+        OneMonth("1m"),
+        ThreeMonths("3m"),
+        OneYear("1y"),
+        All("max");
+
+        override fun toString(): String {
+            return urlString
         }
     }
 }

@@ -37,7 +37,7 @@ import com.example.stocksapp.ui.components.charts.line.renderer.path.BezierLineP
 import com.example.stocksapp.ui.components.charts.line.renderer.xaxis.NoXAxisDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.NoYAxisDrawer
 import dagger.hilt.android.EntryPointAccessors
-import dev.chrisbanes.accompanist.insets.statusBarsPadding
+import com.google.accompanist.insets.statusBarsPadding
 
 @Composable
 fun StockDetailScreen(

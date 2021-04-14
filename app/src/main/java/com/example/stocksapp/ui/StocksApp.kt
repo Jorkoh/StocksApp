@@ -16,13 +16,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirstOrNull
-import androidx.hilt.navigation.HiltViewModelFactory
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavBackStackEntry
+import androidx.hilt.navigation.compose.hiltNavGraphViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.KEY_ROUTE
@@ -43,7 +38,7 @@ import com.example.stocksapp.ui.screens.stockdetail.StockDetailScreen
 import com.example.stocksapp.ui.screens.stockdetail.stockDetailViewModel
 import com.example.stocksapp.ui.theme.StocksAppTheme
 import com.example.stocksapp.ui.utils.LocalSysUiController
-import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
+import com.google.accompanist.insets.ProvideWindowInsets
 
 @Composable
 fun StocksApp() {
@@ -68,21 +63,22 @@ private fun NavigableContent(
     innerPadding: PaddingValues,
     navController: NavHostController
 ) {
-    // Can't use Modifier.padding(innerPadding) because value doesn't update inside NavHost (bug)
-    val padding = Modifier.padding(bottom = 64.dp)
-
-    NavHost(navController, NavigableDestinations.StartDestination.route) {
+    NavHost(
+        navController = navController,
+        startDestination = NavigableDestinations.StartDestination.route,
+        modifier = Modifier.padding(innerPadding)
+    ) {
         // Base destinations
         composable(NavigableDestinations.Home.route) {
-            HomeScreen(it.hiltNavGraphViewModel(), navController, padding)
+            HomeScreen(hiltNavGraphViewModel(it), navController)
         }
-        composable(NavigableDestinations.Search.route) { SearchScreen(padding) }
+        composable(NavigableDestinations.Search.route) { SearchScreen() }
         composable(NavigableDestinations.News.route) {
-            NewsScreen(it.hiltNavGraphViewModel(), navController, padding)
+            NewsScreen(hiltNavGraphViewModel(it), navController)
         }
-        composable(NavigableDestinations.Profile.route) { ProfileScreen(padding) }
+        composable(NavigableDestinations.Profile.route) { ProfileScreen() }
 
-        // Deeper screens, don't use padding because the bottom bar won't be present
+        // Deeper screens
         composable(
             route = NavigableScreens.StockDetail.routeWithArgument,
             arguments = listOf(
@@ -140,11 +136,4 @@ private fun NavigableBottomBar(navController: NavHostController) {
             destinations = NavigableDestinations.toList().map { it.destination },
         )
     }
-}
-
-// https://kotlinlang.slack.com/archives/CJLTWPH7S/p1604071670473700?thread_ts=1604043017.440100&cid=CJLTWPH7S
-@Composable
-inline fun <reified VM : ViewModel> NavBackStackEntry.hiltNavGraphViewModel(): VM {
-    val viewModelFactory = HiltViewModelFactory(LocalContext.current, this)
-    return ViewModelProvider(this, viewModelFactory).get(VM::class.java)
 }

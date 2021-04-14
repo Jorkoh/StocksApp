@@ -1,3 +1,4 @@
+<!-- Icon from official Google's set (navigate_before_rounded) -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
@@ -5,10 +6,7 @@
     android:viewportWidth="24"
     android:viewportHeight="24">
     <path
-        android:fillColor="@android:color/transparent"
-        android:pathData="M15,6L9,12L15,18"
-        android:strokeWidth="1.5"
-        android:strokeColor="@android:color/white"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round" />
+        android:fillColor="@android:color/white"
+        android:pathData="M14.91,6.71c-0.39,-0.39 -1.02,-0.39 -1.41,0L8.91,11.3c-0.39,0.39 -0.39,1.02 0,1.41l4.59,4.59c0.39,0.39 1.02,0.39 1.41,0 0.39,-0.39 0.39,-1.02 0,-1.41L11.03,12l3.88,-3.88c0.38,-0.39 0.38,-1.03 0,-1.41z"/>
 </vector>
+

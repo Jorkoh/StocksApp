@@ -23,7 +23,7 @@ import com.example.stocksapp.data.model.News
 import com.example.stocksapp.ui.components.ListItemState
 import com.example.stocksapp.ui.components.NewsListItem
 import com.example.stocksapp.ui.components.SectionTitle
-import dev.chrisbanes.accompanist.insets.statusBarsPadding
+import com.google.accompanist.insets.statusBarsPadding
 
 @Composable
 fun NewsScreen(

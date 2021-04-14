@@ -46,8 +46,8 @@ import androidx.compose.ui.util.lerp
 import com.example.stocksapp.ui.screens.Destination
 import com.example.stocksapp.ui.screens.NavigableDestinations
 import com.example.stocksapp.ui.theme.StocksAppTheme
-import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
-import dev.chrisbanes.accompanist.insets.navigationBarsPadding
+import com.google.accompanist.insets.ProvideWindowInsets
+import com.google.accompanist.insets.navigationBarsPadding
 import kotlinx.coroutines.launch
 
 @Composable

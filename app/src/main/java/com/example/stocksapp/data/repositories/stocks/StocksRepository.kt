@@ -40,8 +40,9 @@ class StocksRepository @Inject constructor(
                     Timber.d("No cached top active quotes, fetching them from service")
                     IEXService.fetchMostActiveSymbols().suspendOnSuccess {
                         data?.let { quotesResponse ->
+                            val timestamp = Date().time
                             val updatedQuotes = quotesResponse.map {
-                                it.mapToQuote(Date().time, true)
+                                it.mapToQuote(timestamp, true)
                             }
                             Timber.d("Storing new top active quotes in DB")
                             stocksDao.refreshTopActiveQuotes(updatedQuotes)
@@ -72,8 +73,9 @@ class StocksRepository @Inject constructor(
                     // TODO: use symbols from watchlist or top quotes
                     IEXService.fetchNews("GME").suspendOnSuccess {
                         data?.let { newsResponse ->
+                            val timestamp = Date().time
                             val updatedNews = newsResponse.map {
-                                it.mapToNews(Date().time)
+                                it.mapToNews(timestamp)
                             }
                             Timber.d("Storing new news in DB")
                             stocksDao.refreshNews(updatedNews)
@@ -140,15 +142,3 @@ class StocksRepository @Inject constructor(
 private fun Int.daysToTimestampCutoff() = (this * 24).hoursToTimestampCutoff()
 private fun Int.hoursToTimestampCutoff() = (this * 60).minutesToTimestampCutoff()
 private fun Int.minutesToTimestampCutoff() = Date().time - (this * 60000)
-
-enum class ChartRanges(private val urlString: String) {
-    FiveDays("5d"),
-    OneMonth("1m"),
-    ThreeMonths("3m"),
-    OneYear("1y"),
-    All("max");
-
-    override fun toString(): String {
-        return urlString
-    }
-}

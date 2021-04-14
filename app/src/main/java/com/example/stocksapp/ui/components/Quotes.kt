@@ -39,7 +39,7 @@ import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.NoYAxisDra
 import com.example.stocksapp.ui.theme.StocksAppTheme
 import com.example.stocksapp.ui.theme.loss
 import com.example.stocksapp.ui.theme.profit
-import dev.chrisbanes.accompanist.coil.CoilImage
+import com.google.accompanist.coil.CoilImage
 import java.util.Date
 import kotlin.math.sign
 import kotlin.random.Random

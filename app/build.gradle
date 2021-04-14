@@ -64,8 +64,8 @@ dependencies {
     implementation "androidx.navigation:navigation-compose:$versions.compose_navigation"
 
     // Accompanist utilities
-    implementation "dev.chrisbanes.accompanist:accompanist-insets:$versions.accompanist"
-    implementation "dev.chrisbanes.accompanist:accompanist-coil:$versions.accompanist"
+    implementation "com.google.accompanist:accompanist-insets:$versions.accompanist"
+    implementation "com.google.accompanist:accompanist-coil:$versions.accompanist"
 
     // Logging
     implementation "com.jakewharton.timber:timber:$versions.timber"

@@ -30,13 +30,13 @@ import com.example.stocksapp.ui.components.QuoteListItem
 import com.example.stocksapp.ui.components.SectionTitle
 import com.example.stocksapp.ui.components.TickerCardPreview
 import com.example.stocksapp.ui.screens.NavigableScreens
-import dev.chrisbanes.accompanist.insets.statusBarsPadding
+import com.google.accompanist.insets.statusBarsPadding
 
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
     navController: NavController,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
 ) {
     HomeContent(
         activeSymbolsUIState = viewModel.activeSymbolsUIState.collectAsState(),
