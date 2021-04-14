@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,16 +38,21 @@ import com.example.stocksapp.ui.screens.search.SearchScreen
 import com.example.stocksapp.ui.screens.stockdetail.StockDetailScreen
 import com.example.stocksapp.ui.screens.stockdetail.stockDetailViewModel
 import com.example.stocksapp.ui.theme.StocksAppTheme
-import com.example.stocksapp.ui.utils.LocalSysUiController
 import com.google.accompanist.insets.ProvideWindowInsets
+import com.google.accompanist.systemuicontroller.LocalSystemUiController
 
 @Composable
 fun StocksApp() {
     val navController = rememberNavController()
+    val systemUiController = LocalSystemUiController.current
+    val colors = MaterialTheme.colors
 
-    LocalSysUiController.current.setSystemBarsColor(
-        color = MaterialTheme.colors.surface.copy(alpha = 0.85f)
-    )
+    SideEffect {
+        systemUiController.setSystemBarsColor(
+            color = colors.surface.copy(alpha = 0.85f),
+            darkIcons = colors.isLight
+        )
+    }
 
     ProvideWindowInsets {
         StocksAppTheme {

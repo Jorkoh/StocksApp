@@ -65,6 +65,7 @@ dependencies {
 
     // Accompanist utilities
     implementation "com.google.accompanist:accompanist-insets:$versions.accompanist"
+    implementation "com.google.accompanist:accompanist-systemuicontroller:$versions.accompanist"
     implementation "com.google.accompanist:accompanist-coil:$versions.accompanist"
 
     // Logging
