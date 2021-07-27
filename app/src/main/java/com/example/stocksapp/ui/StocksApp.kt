@@ -18,19 +18,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.util.fastFirstOrNull
-import androidx.hilt.navigation.compose.hiltNavGraphViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
-import androidx.navigation.compose.KEY_ROUTE
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.navArgument
-import androidx.navigation.compose.navigate
 import androidx.navigation.compose.rememberNavController
 import com.example.stocksapp.ui.components.CustomBottomBar
-import com.example.stocksapp.ui.screens.NavigableDestinations
-import com.example.stocksapp.ui.screens.NavigableScreens
+import com.example.stocksapp.ui.screens.NavigableDestination
+import com.example.stocksapp.ui.screens.NavigableScreen
 import com.example.stocksapp.ui.screens.home.HomeScreen
 import com.example.stocksapp.ui.screens.news.NewsScreen
 import com.example.stocksapp.ui.screens.profile.ProfileScreen
@@ -39,12 +35,12 @@ import com.example.stocksapp.ui.screens.stockdetail.StockDetailScreen
 import com.example.stocksapp.ui.screens.stockdetail.stockDetailViewModel
 import com.example.stocksapp.ui.theme.StocksAppTheme
 import com.google.accompanist.insets.ProvideWindowInsets
-import com.google.accompanist.systemuicontroller.LocalSystemUiController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
 fun StocksApp() {
     val navController = rememberNavController()
-    val systemUiController = LocalSystemUiController.current
+    val systemUiController = rememberSystemUiController()
     val colors = MaterialTheme.colors
 
     SideEffect {
@@ -71,30 +67,23 @@ private fun NavigableContent(
 ) {
     NavHost(
         navController = navController,
-        startDestination = NavigableDestinations.StartDestination.route,
+        startDestination = NavigableDestination.StartDestination.route,
         modifier = Modifier.padding(innerPadding)
     ) {
         // Base destinations
-        composable(NavigableDestinations.Home.route) {
-            HomeScreen(hiltNavGraphViewModel(it), navController)
+        composable(NavigableDestination.Home.route) {
+            HomeScreen(hiltViewModel(it), navController)
         }
-        composable(NavigableDestinations.Search.route) { SearchScreen() }
-        composable(NavigableDestinations.News.route) {
-            NewsScreen(hiltNavGraphViewModel(it), navController)
+        composable(NavigableDestination.Search.route) { SearchScreen() }
+        composable(NavigableDestination.News.route) {
+            NewsScreen(hiltViewModel(it), navController)
         }
-        composable(NavigableDestinations.Profile.route) { ProfileScreen() }
+        composable(NavigableDestination.Profile.route) { ProfileScreen() }
 
         // Deeper screens
-        composable(
-            route = NavigableScreens.StockDetail.routeWithArgument,
-            arguments = listOf(
-                navArgument(NavigableScreens.StockDetail.argument) {
-                    type = NavType.StringType
-                }
-            )
-        ) { backStackEntry ->
+        composable(NavigableScreen.StockDetail.routeWithArgument) { backStackEntry ->
             val symbol = requireNotNull(
-                backStackEntry.arguments?.getString(NavigableScreens.StockDetail.argument)
+                backStackEntry.arguments?.getString(NavigableScreen.StockDetail.argument)
             )
             StockDetailScreen(stockDetailViewModel(symbol), navController)
         }
@@ -105,13 +94,14 @@ private fun NavigableContent(
 private fun NavigableBottomBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     var lastNavigableDestination by remember {
-        mutableStateOf<NavigableDestinations>(NavigableDestinations.StartDestination)
+        mutableStateOf<NavigableDestination>(NavigableDestination.StartDestination)
     }
 
-    val currentRoute = navBackStackEntry?.arguments?.getString(KEY_ROUTE) ?: return
-    val currentNavigableDestination = NavigableDestinations.toList().fastFirstOrNull {
+    val currentRoute = navBackStackEntry?.destination?.route ?: return
+    val currentNavigableDestination = NavigableDestination.listAll().fastFirstOrNull {
         it.route == currentRoute
     }?.let { currentNavigableDestination ->
+        // TODO: document why is this needed
         lastNavigableDestination = currentNavigableDestination
     }
 
@@ -127,19 +117,19 @@ private fun NavigableBottomBar(navController: NavHostController) {
         )
     ) {
         CustomBottomBar(
-            currentDestination = lastNavigableDestination.destination,
+            currentDestination = lastNavigableDestination,
             onDestinationSelected = { newDestination ->
-                if (lastNavigableDestination.destination != newDestination) {
-                    val newRoute = NavigableDestinations.toList().first {
-                        it.destination == newDestination
-                    }.route
-                    navController.navigate(newRoute) {
-                        popUpTo = navController.graph.startDestination
+                if (lastNavigableDestination != newDestination) {
+                    navController.navigate(newDestination.route) {
+                        popUpTo(navController.graph.startDestinationId){
+                            saveState = true
+                        }
                         launchSingleTop = true
+                        restoreState = true
                     }
                 }
             },
-            destinations = NavigableDestinations.toList().map { it.destination },
+            destinations = NavigableDestination.listAll(),
         )
     }
 }

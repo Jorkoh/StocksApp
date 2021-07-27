@@ -1,5 +1,6 @@
 package com.example.stocksapp.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -29,6 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberImagePainter
 import com.example.stocksapp.data.model.Quote
 import com.example.stocksapp.ui.components.charts.line.LineChart
 import com.example.stocksapp.ui.components.charts.line.LineChartData
@@ -39,7 +41,6 @@ import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.NoYAxisDra
 import com.example.stocksapp.ui.theme.StocksAppTheme
 import com.example.stocksapp.ui.theme.loss
 import com.example.stocksapp.ui.theme.profit
-import com.google.accompanist.coil.CoilImage
 import java.util.Date
 import kotlin.math.sign
 import kotlin.random.Random
@@ -57,10 +58,14 @@ fun QuoteListItem(
             .padding(horizontal = 24.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        CoilImage(
-            data = "https://storage.googleapis.com/iexcloud-hl37opg/api/logos/${quote.symbol}.png",
+        Image(
+            painter = rememberImagePainter(
+                data = "https://storage.googleapis.com/iexcloud-hl37opg/api/logos/${quote.symbol}.png",
+                builder = {
+                    crossfade(true)
+                }
+            ),
             contentDescription = "${quote.symbol} logo",
-            fadeIn = true,
             modifier = Modifier
                 .size(48.dp)
                 .clip(MaterialTheme.shapes.medium)

@@ -23,13 +23,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.navigate
 import com.example.stocksapp.R
 import com.example.stocksapp.ui.components.LoadingIndicator
 import com.example.stocksapp.ui.components.QuoteListItem
 import com.example.stocksapp.ui.components.SectionTitle
 import com.example.stocksapp.ui.components.TickerCardPreview
-import com.example.stocksapp.ui.screens.NavigableScreens
+import com.example.stocksapp.ui.screens.NavigableScreen
 import com.google.accompanist.insets.statusBarsPadding
 
 @Composable
@@ -42,7 +41,7 @@ fun HomeScreen(
         activeSymbolsUIState = viewModel.activeSymbolsUIState.collectAsState(),
         modifier = modifier,
         onSymbolSelected = { symbol ->
-            navController.navigate(NavigableScreens.StockDetail.buildRoute(symbol))
+            navController.navigate(NavigableScreen.StockDetail.buildRoute(symbol))
         }
     )
 }

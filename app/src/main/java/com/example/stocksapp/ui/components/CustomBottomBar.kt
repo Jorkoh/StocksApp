@@ -43,8 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
-import com.example.stocksapp.ui.screens.Destination
-import com.example.stocksapp.ui.screens.NavigableDestinations
+import com.example.stocksapp.ui.screens.NavigableDestination
 import com.example.stocksapp.ui.theme.StocksAppTheme
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.navigationBarsPadding
@@ -52,9 +51,9 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun CustomBottomBar(
-    currentDestination: Destination,
-    onDestinationSelected: (Destination) -> Unit,
-    destinations: List<Destination>,
+    currentDestination: NavigableDestination,
+    onDestinationSelected: (NavigableDestination) -> Unit,
+    destinations: List<NavigableDestination>,
     backgroundColor: Color = MaterialTheme.colors.primary,
     indicatorColor: Color = MaterialTheme.colors.secondary,
     unselectedColor: Color = contentColorFor(backgroundColor),
@@ -73,8 +72,8 @@ fun CustomBottomBar(
                 animSpec = springSpec,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .navigationBarsPadding(left = false, right = false)
-                    .fillMaxWidth(0.85f)
+                    .navigationBarsPadding(start = false, end = false)
+                    .fillMaxWidth(0.88f)
             ) {
                 val colorSpec = with(springSpec) { SpringSpec<Color>(dampingRatio, stiffness) }
 
@@ -87,14 +86,14 @@ fun CustomBottomBar(
                     CustomBottomBarItem(
                         icon = {
                             Icon(
-                                painter = painterResource(section.icon),
+                                painter = painterResource(section.destination.icon),
                                 tint = tint,
                                 contentDescription = null
                             )
                         },
                         text = {
                             Text(
-                                text = stringResource(section.title),
+                                text = stringResource(section.destination.title),
                                 color = tint,
                                 style = MaterialTheme.typography.button,
                                 maxLines = 1
@@ -301,4 +300,4 @@ private fun CustomBottomBarPreviewDark() {
     }
 }
 
-val previewDestinations = NavigableDestinations.toList().map { it.destination }
+val previewDestinations = NavigableDestination.listAll()

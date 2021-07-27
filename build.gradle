@@ -1,13 +1,16 @@
 buildscript {
+    ext.kotlin_version = '1.5.10'
     apply from: "$rootDir/versions.gradle"
     repositories {
+        gradlePluginPortal()
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$versions.build_tools"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
         classpath "com.google.dagger:hilt-android-gradle-plugin:$versions.hilt"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
@@ -18,7 +21,6 @@ plugins{
 allprojects {
     repositories {
         google()
-        jcenter()
     }
 
     apply plugin: 'com.diffplug.spotless'
