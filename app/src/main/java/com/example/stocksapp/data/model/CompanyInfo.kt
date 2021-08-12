@@ -2,6 +2,8 @@ package com.example.stocksapp.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.time.Instant
+import java.util.Date
 
 @Entity(tableName = "company_infos")
 data class CompanyInfo(
@@ -15,11 +17,12 @@ data class CompanyInfo(
     val CEO: String,
     val securityName: String,
     val sector: String,
-    val employees: Int,
-    val address: String,
-    val state: String,
-    val city: String,
+    val employees: Int?,
+    val address: String?,
+    val state: String?,
+    val city: String?,
     val zip: String,
     val country: String,
-    val timestamp: Long
+
+    val fetchTimestamp: Instant
 )

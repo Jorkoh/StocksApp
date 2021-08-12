@@ -15,9 +15,10 @@ annotation class BatchedNews
 // TODO: this adapter is similar to [BatchedQuotesAdapter], can they be made generic?
 class BatchedNewsAdapter {
     companion object {
-        val adapter: JsonAdapter<NewsResponse> = Moshi.Builder().build().adapter(
-            NewsResponse::class.java
-        )
+        val adapter: JsonAdapter<NewsResponse> = Moshi.Builder()
+            .add(InstantAdapter())
+            .build()
+            .adapter(NewsResponse::class.java)
     }
 
     @BatchedNews

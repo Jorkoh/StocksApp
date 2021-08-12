@@ -36,8 +36,8 @@ import com.example.stocksapp.ui.components.charts.line.renderer.line.SolidLineDr
 import com.example.stocksapp.ui.components.charts.line.renderer.path.BezierLinePathCalculator
 import com.example.stocksapp.ui.components.charts.line.renderer.xaxis.NoXAxisDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.NoYAxisDrawer
-import dagger.hilt.android.EntryPointAccessors
 import com.google.accompanist.insets.statusBarsPadding
+import dagger.hilt.android.EntryPointAccessors
 
 @Composable
 fun StockDetailScreen(
@@ -46,10 +46,10 @@ fun StockDetailScreen(
     modifier: Modifier = Modifier
 ) {
     StockDetailContent(
-        companyInfoUIState = viewModel.companyInfoUIState.collectAsState(),
-        chartUIState = viewModel.chartUIState.collectAsState(),
+        stockDetailUIState = viewModel.stockDetailUIState.collectAsState(),
         modifier = modifier,
         onUpButtonPressed = { navController.navigateUp() },
+        onWatchButtonPressed = { viewModel.toggleIsTracked() },
         // TODO: temp for testing
         onChartRangeChange = { viewModel.refreshChartData() }
     )
@@ -57,15 +57,15 @@ fun StockDetailScreen(
 
 @Composable
 fun StockDetailContent(
-    companyInfoUIState: State<CompanyInfoUIState>,
-    chartUIState: State<ChartUIState>,
+    stockDetailUIState: State<StockDetailUIState>,
     modifier: Modifier = Modifier,
     onUpButtonPressed: () -> Unit,
+    onWatchButtonPressed: () -> Unit,
     onChartRangeChange: () -> Unit
 ) {
     Scaffold(
         modifier = modifier,
-        topBar = { StockDetailTopBar(companyInfoUIState, onUpButtonPressed) }
+        topBar = { StockDetailTopBar(stockDetailUIState, onUpButtonPressed, onWatchButtonPressed) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -73,17 +73,18 @@ fun StockDetailContent(
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ChartSection(chartUIState, onChartRangeChange)
+            ChartSection(stockDetailUIState.value.chartUIState, onChartRangeChange)
             Spacer(modifier = Modifier.height(20.dp))
-            CompanyInfoSection(companyInfoUIState)
+            CompanyInfoSection(stockDetailUIState.value.companyInfoUIState)
         }
     }
 }
 
 @Composable
 fun StockDetailTopBar(
-    companyInfoUIState: State<CompanyInfoUIState>,
-    onUpButtonPressed: () -> Unit
+    stockDetailUIState: State<StockDetailUIState>,
+    onUpButtonPressed: () -> Unit,
+    onWatchButtonPressed: () -> Unit
 ) {
     TopAppBar(modifier = Modifier.statusBarsPadding()) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -97,27 +98,42 @@ fun StockDetailTopBar(
                 )
             }
             Text(
-                text = companyInfoUIState.value.symbol,
+                text = stockDetailUIState.value.symbol,
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.h6,
                 modifier = Modifier.align(Alignment.Center)
             )
+            IconButton(
+                modifier = Modifier.align(Alignment.CenterEnd),
+                onClick = { onWatchButtonPressed() }
+            ) {
+                Icon(
+                    painter = painterResource(
+                        if (stockDetailUIState.value.isTracked) {
+                            R.drawable.ic_track_on
+                        } else {
+                            R.drawable.ic_track_off
+                        }
+                    ),
+                    contentDescription = stringResource(R.string.label_back)
+                )
+            }
         }
     }
 }
 
 @Composable
 fun ChartSection(
-    chartUIState: State<ChartUIState>,
+    chartUIState: StockDetailUIState.ChartUIState,
     onChartRangeChange: () -> Unit
 ) {
-    when (val state = chartUIState.value) {
-        is ChartUIState.Loading -> {
+    when (chartUIState) {
+        is StockDetailUIState.ChartUIState.Loading -> {
             LoadingIndicator(Modifier.padding(vertical = 24.dp))
         }
-        is ChartUIState.Success -> {
+        is StockDetailUIState.ChartUIState.Success -> {
             LineChart(
-                lineChartData = state.chartData,
+                lineChartData = chartUIState.chartData,
                 linePathCalculator = BezierLinePathCalculator(),
                 lineDrawer = SolidLineDrawer(),
                 xAxisDrawer = NoXAxisDrawer,
@@ -129,19 +145,21 @@ fun ChartSection(
                     .clickable { onChartRangeChange() }
             )
         }
-        is ChartUIState.Error -> {
-            Text("ERROR: ${state.message}")
+        is StockDetailUIState.ChartUIState.Error -> {
+            Text("ERROR: ${chartUIState.message}")
         }
     }
 }
 
 @Composable
-fun CompanyInfoSection(companyInfoUIState: State<CompanyInfoUIState>) {
+fun CompanyInfoSection(
+    companyInfoUIState: StockDetailUIState.CompanyInfoUIState
+) {
     Text(
-        text = when (val state = companyInfoUIState.value) {
-            is CompanyInfoUIState.Loading -> "LOADING..."
-            is CompanyInfoUIState.Success -> "SUCCESS: ${state.companyInfo.companyName}"
-            is CompanyInfoUIState.Error -> "ERROR: ${state.message}"
+        text = when (companyInfoUIState) {
+            is StockDetailUIState.CompanyInfoUIState.Loading -> "LOADING..."
+            is StockDetailUIState.CompanyInfoUIState.Success -> "SUCCESS: ${companyInfoUIState.companyInfo.companyName}"
+            is StockDetailUIState.CompanyInfoUIState.Error -> "ERROR: ${companyInfoUIState.message}"
         },
         style = MaterialTheme.typography.body1,
         textAlign = TextAlign.Center

@@ -10,6 +10,8 @@ import com.example.stocksapp.data.repositories.utils.BatchedNewsAdapter
 import com.example.stocksapp.data.repositories.utils.BatchedQuotes
 import com.example.stocksapp.data.repositories.utils.BatchedQuotesAdapter
 import com.example.stocksapp.data.repositories.utils.HttpRequestInterceptor
+import com.example.stocksapp.data.repositories.utils.InstantAdapter
+import com.example.stocksapp.data.repositories.utils.LocalDateAdapter
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.coroutines.CoroutinesResponseCallAdapterFactory
 import com.squareup.moshi.Moshi
@@ -35,10 +37,10 @@ interface IEXService {
     ): ApiResponse<List<QuoteResponse>>
 
     @GET("stock/{symbol}/chart/{range}")
-    suspend fun fetchChart(
+    suspend fun fetchChartPrices(
         @Path("symbol") symbol: String,
         @Path("range") range: ChartRanges,
-        @Query("includeToday") includeToday : Boolean = true,
+        @Query("includeToday") includeToday: Boolean = false,
         @Query("chartCloseOnly") closeOnly: Boolean = true
     ): ApiResponse<List<PriceResponse>>
 
@@ -83,21 +85,23 @@ interface IEXService {
                         Moshi.Builder()
                             .add(BatchedQuotesAdapter())
                             .add(BatchedNewsAdapter())
+                            .add(LocalDateAdapter())
+                            .add(InstantAdapter())
                             .build()
                     )
                 )
-                .addCallAdapterFactory(CoroutinesResponseCallAdapterFactory())
+                .addCallAdapterFactory(CoroutinesResponseCallAdapterFactory.create())
                 .build()
                 .create(IEXService::class.java)
         }
     }
 
     enum class ChartRanges(private val urlString: String) {
-        FiveDays("5d"),
+        OneWeek("7d"),
         OneMonth("1m"),
         ThreeMonths("3m"),
-        OneYear("1y"),
-        All("max");
+        OneYear("1y");
+        // All("max"); // TODO: Add "All" range support
 
         override fun toString(): String {
             return urlString

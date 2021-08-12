@@ -7,10 +7,12 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.stocksapp.data.model.CompanyInfo
 import com.example.stocksapp.data.model.News
+import com.example.stocksapp.data.model.Price
 import com.example.stocksapp.data.model.Quote
+import com.example.stocksapp.data.model.TrackedSymbol
 
 @Database(
-    entities = [CompanyInfo::class, Quote::class, News::class],
+    entities = [CompanyInfo::class, Price::class, Quote::class, News::class, TrackedSymbol::class],
     version = 1,
     exportSchema = true
 )

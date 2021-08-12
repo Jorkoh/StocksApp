@@ -26,8 +26,9 @@ import androidx.navigation.NavController
 import com.example.stocksapp.R
 import com.example.stocksapp.ui.components.LoadingIndicator
 import com.example.stocksapp.ui.components.QuoteListItem
+import com.example.stocksapp.ui.components.QuoteWithChartCard
 import com.example.stocksapp.ui.components.SectionTitle
-import com.example.stocksapp.ui.components.TickerCardPreview
+import com.example.stocksapp.ui.components.charts.line.LineChartData
 import com.example.stocksapp.ui.screens.NavigableScreen
 import com.google.accompanist.insets.statusBarsPadding
 
@@ -38,6 +39,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
 ) {
     HomeContent(
+        trackedSymbolsUIState = viewModel.trackedSymbolsUIState.collectAsState(),
         activeSymbolsUIState = viewModel.activeSymbolsUIState.collectAsState(),
         modifier = modifier,
         onSymbolSelected = { symbol ->
@@ -48,36 +50,47 @@ fun HomeScreen(
 
 @Composable
 fun HomeContent(
+    trackedSymbolsUIState: State<TrackedSymbolsUIState>,
     activeSymbolsUIState: State<ActiveSymbolsUIState>,
     modifier: Modifier = Modifier,
     onSymbolSelected: (String) -> Unit
 ) {
     LazyColumn(modifier.fillMaxSize()) {
         item { Spacer(modifier = Modifier.statusBarsPadding()) }
-        // userSymbolsSection(activeSymbolsUIState, onSymbolSelected)
+        userSymbolsSection(trackedSymbolsUIState, onSymbolSelected)
         activeSymbolsSection(activeSymbolsUIState, onSymbolSelected)
     }
 }
 
 // TODO pass actual state and quotes with charts here
 private fun LazyListScope.userSymbolsSection(
-    userSymbolsUIState: State<ActiveSymbolsUIState>,
+    trackedSymbolsUIState: State<TrackedSymbolsUIState>,
     onSymbolSelected: (String) -> Unit,
 ) {
     item { SectionTitle(stringResource(R.string.user_symbols_section_title)) }
-    when (val state = userSymbolsUIState.value) {
-        is ActiveSymbolsUIState.Loading -> item { LoadingIndicator(Modifier.padding(vertical = 24.dp)) }
-        is ActiveSymbolsUIState.Error -> item { Text(state.message) }
-        is ActiveSymbolsUIState.Success -> item {
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(
-                    items = state.quotes,
-                    key = { it.symbol }
-                ) { quote ->
-                    TickerCardPreview()
+    when (val state = trackedSymbolsUIState.value) {
+        is TrackedSymbolsUIState.Loading -> item { LoadingIndicator(Modifier.padding(vertical = 24.dp)) }
+        is TrackedSymbolsUIState.Error -> item { Text(state.message) }
+        is TrackedSymbolsUIState.Success -> item {
+            if (state.chartPrices.isEmpty()) {
+                Text("placeholder: tell the user to add symbols to watchlist")
+            } else {
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // TODO clean this up
+                    items(
+                        items = state.chartPrices,
+                        key = { it.first().symbol }
+                    ) { chartPrices ->
+                        QuoteWithChartCard(
+                            symbol = chartPrices.first().symbol,
+                            chartData = LineChartData(
+                                chartPrices.map { LineChartData.Point(it.closePrice.toFloat(), it.date.toString()) }),
+                            onSymbolSelected = onSymbolSelected
+                        )
+                    }
                 }
             }
         }

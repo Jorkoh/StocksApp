@@ -14,9 +14,10 @@ annotation class BatchedQuotes
 
 class BatchedQuotesAdapter {
     companion object {
-        val adapter: JsonAdapter<QuoteResponse> = Moshi.Builder().build().adapter(
-            QuoteResponse::class.java
-        )
+        val adapter: JsonAdapter<QuoteResponse> = Moshi.Builder()
+            .add(InstantAdapter())
+            .build()
+            .adapter(QuoteResponse::class.java)
     }
 
     @BatchedQuotes

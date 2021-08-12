@@ -46,8 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.stocksapp.R
 import com.example.stocksapp.data.model.News
-import java.text.DateFormat
-import java.util.Date
 
 fun <T> testSpec() = tween<T>(durationMillis = 260)
 fun <T> testSpecDelayed() = tween<T>(durationMillis = 140, delayMillis = 300)
@@ -90,7 +88,7 @@ fun NewsListItem(
     ) {
         Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) {
             val newsDate = remember(news.date) {
-                DateFormat.getDateInstance(DateFormat.SHORT).format(Date(news.date))
+                news.date.toString()
             }
 
             AnimatedVisibility(

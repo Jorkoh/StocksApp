@@ -9,6 +9,7 @@ import com.example.stocksapp.ui.components.charts.line.LineChartData
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -19,55 +20,81 @@ class StockDetailViewModel @AssistedInject constructor(
     @Assisted private val symbol: String
 ) : ViewModel() {
 
-    private val _chartUIState = MutableStateFlow<ChartUIState>(ChartUIState.Loading)
-    val chartUIState: StateFlow<ChartUIState> = _chartUIState
+    private val _stockDetailUIState = MutableStateFlow(StockDetailUIState(symbol))
+    val stockDetailUIState: StateFlow<StockDetailUIState> = _stockDetailUIState
 
-    private val _companyInfoUIState =
-        MutableStateFlow<CompanyInfoUIState>(CompanyInfoUIState.Loading(symbol))
-    val companyInfoUIState: StateFlow<CompanyInfoUIState> = _companyInfoUIState
+    private var getChartJob: Job? = null
+    private var getCompanyInfoJob: Job? = null
 
     init {
+        getIsTracked()
+        getChart()
+        getCompanyInfo()
+    }
+
+    private fun getIsTracked() {
         viewModelScope.launch {
-            getCompanyInfo(symbol)
-        }
-        viewModelScope.launch {
-            getChart(symbol)
+            stocksRepository.fetchIsTracked(symbol).collect { isTracked ->
+                _stockDetailUIState.value = _stockDetailUIState.value.copy(isTracked = isTracked)
+            }
         }
     }
 
-    private suspend fun getCompanyInfo(symbol: String) {
-        stocksRepository.fetchCompanyInfo(
-            symbol = symbol,
-            onStart = {
-                _companyInfoUIState.value = CompanyInfoUIState.Loading(symbol)
-            },
-            onError = { message ->
-                _companyInfoUIState.value = CompanyInfoUIState.Error(symbol, message)
+    private fun getChart() {
+        getChartJob?.cancel()
+        getChartJob = viewModelScope.launch {
+            stocksRepository.fetchChartPrices(
+                symbol = symbol,
+                onStart = {
+                    _stockDetailUIState.value = _stockDetailUIState.value.copy(
+                        chartUIState = StockDetailUIState.ChartUIState.Loading
+                    )
+                },
+                onError = { message ->
+                    _stockDetailUIState.value = _stockDetailUIState.value.copy(
+                        chartUIState = StockDetailUIState.ChartUIState.Error(message)
+                    )
+                }
+            ).collect { chartData ->
+                _stockDetailUIState.value = _stockDetailUIState.value.copy(
+                    chartUIState = StockDetailUIState.ChartUIState.Success(chartData)
+                )
             }
-        ).collect { companyInfo ->
-            _companyInfoUIState.value = CompanyInfoUIState.Success(symbol, companyInfo)
         }
     }
 
-    private suspend fun getChart(symbol: String) {
-        stocksRepository.fetchChart(
-            symbol = symbol,
-            onStart = {
-                _chartUIState.value = ChartUIState.Loading
-            },
-            onError = { message ->
-                _chartUIState.value = ChartUIState.Error(message)
+    private fun getCompanyInfo() {
+        getCompanyInfoJob?.cancel()
+        getCompanyInfoJob = viewModelScope.launch {
+            stocksRepository.fetchCompanyInfo(
+                symbol = symbol,
+                onStart = {
+                    _stockDetailUIState.value = _stockDetailUIState.value.copy(
+                        companyInfoUIState = StockDetailUIState.CompanyInfoUIState.Loading
+                    )
+                },
+                onError = { message ->
+                    _stockDetailUIState.value = _stockDetailUIState.value.copy(
+                        companyInfoUIState = StockDetailUIState.CompanyInfoUIState.Error(message)
+                    )
+                }
+            ).collect { companyInfo ->
+                _stockDetailUIState.value = _stockDetailUIState.value.copy(
+                    companyInfoUIState = StockDetailUIState.CompanyInfoUIState.Success(companyInfo)
+                )
             }
-        ).collect { chartData ->
-            _chartUIState.value = ChartUIState.Success(chartData)
+        }
+    }
+
+    fun toggleIsTracked() {
+        viewModelScope.launch {
+            stocksRepository.toggleIsTracked(symbol, !_stockDetailUIState.value.isTracked)
         }
     }
 
     // TODO: temp for testing
     fun refreshChartData() {
-        viewModelScope.launch {
-            getChart(symbol)
-        }
+        getChart()
     }
 
     companion object {
@@ -83,16 +110,23 @@ class StockDetailViewModel @AssistedInject constructor(
     }
 }
 
-sealed class CompanyInfoUIState(val symbol: String) {
-    class Loading(symbol: String) : CompanyInfoUIState(symbol)
-    class Success(symbol: String, val companyInfo: CompanyInfo) : CompanyInfoUIState(symbol)
-    class Error(symbol: String, val message: String) : CompanyInfoUIState(symbol)
-}
+data class StockDetailUIState(
+    val symbol: String,
+    val isTracked: Boolean = false,
+    val companyInfoUIState: CompanyInfoUIState = CompanyInfoUIState.Loading,
+    val chartUIState: ChartUIState = ChartUIState.Loading,
+) {
+    sealed class CompanyInfoUIState {
+        object Loading : CompanyInfoUIState()
+        class Success(val companyInfo: CompanyInfo) : CompanyInfoUIState()
+        class Error(val message: String) : CompanyInfoUIState()
+    }
 
-sealed class ChartUIState {
-    object Loading : ChartUIState()
-    class Success(val chartData: LineChartData) : ChartUIState()
-    class Error(val message: String) : ChartUIState()
+    sealed class ChartUIState {
+        object Loading : ChartUIState()
+        class Success(val chartData: LineChartData) : ChartUIState()
+        class Error(val message: String) : ChartUIState()
+    }
 }
 
 @AssistedFactory

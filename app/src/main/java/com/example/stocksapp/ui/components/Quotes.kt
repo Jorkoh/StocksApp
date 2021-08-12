@@ -41,7 +41,7 @@ import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.NoYAxisDra
 import com.example.stocksapp.ui.theme.StocksAppTheme
 import com.example.stocksapp.ui.theme.loss
 import com.example.stocksapp.ui.theme.profit
-import java.util.Date
+import java.time.Instant
 import kotlin.math.sign
 import kotlin.random.Random
 
@@ -160,21 +160,21 @@ fun QuoteListItemsPreview() {
             companyName = "Advanced Micro Devices, Inc",
             primaryExchange = "",
             openPrice = 0.0,
-            openTime = 0,
+            openTime = Instant.now(),
             closePrice = 0.0,
-            closeTime = 0,
+            closeTime = Instant.now(),
             highPrice = 0.0,
-            highTime = 0,
+            highTime = Instant.now(),
             lowPrice = 0.0,
-            lowTime = 0,
+            lowTime = Instant.now(),
             latestPrice = 86.77,
             latestSource = "",
-            latestTime = 0,
+            latestTime = Instant.now(),
             latestVolume = 0,
             extendedPrice = 0.0,
             extendedChange = 0.0,
             extendedChangePercent = 0.0,
-            extendedPriceTime = 0,
+            extendedPriceTime = Instant.now(),
             previousClose = 0.0,
             previousVolume = 0,
             change = -2.84,
@@ -186,10 +186,10 @@ fun QuoteListItemsPreview() {
             week52High = 0.0,
             week52Low = 0.0,
             ytdChange = 0.0,
-            lastTradeTime = 0,
+            lastTradeTime = Instant.now(),
             isUSMarketOpen = true,
             isTopActive = false,
-            timestamp = Date().time
+            fetchTimestamp = Instant.now()
         )
     }
     StocksAppTheme {
