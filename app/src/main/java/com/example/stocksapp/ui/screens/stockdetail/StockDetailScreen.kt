@@ -34,8 +34,6 @@ import com.example.stocksapp.ui.components.LoadingIndicator
 import com.example.stocksapp.ui.components.charts.line.LineChart
 import com.example.stocksapp.ui.components.charts.line.renderer.line.SolidLineDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.path.BezierLinePathCalculator
-import com.example.stocksapp.ui.components.charts.line.renderer.xaxis.NoXAxisDrawer
-import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.NoYAxisDrawer
 import com.google.accompanist.insets.statusBarsPadding
 import dagger.hilt.android.EntryPointAccessors
 
@@ -136,8 +134,8 @@ fun ChartSection(
                 lineChartData = chartUIState.chartData,
                 linePathCalculator = BezierLinePathCalculator(),
                 lineDrawer = SolidLineDrawer(),
-                xAxisDrawer = NoXAxisDrawer,
-                yAxisDrawer = NoYAxisDrawer,
+                // xAxisDrawer = NoXAxisDrawer,
+                // yAxisDrawer = NoYAxisDrawer,
                 modifier = Modifier
                     .padding(12.dp)
                     .fillMaxWidth()

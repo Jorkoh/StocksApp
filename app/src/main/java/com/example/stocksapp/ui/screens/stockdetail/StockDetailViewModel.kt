@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.stocksapp.data.model.CompanyInfo
+import com.example.stocksapp.data.repositories.stocks.IEXService
 import com.example.stocksapp.data.repositories.stocks.StocksRepository
 import com.example.stocksapp.ui.components.charts.line.LineChartData
 import dagger.assisted.Assisted
@@ -45,6 +46,7 @@ class StockDetailViewModel @AssistedInject constructor(
         getChartJob = viewModelScope.launch {
             stocksRepository.fetchChartPrices(
                 symbol = symbol,
+                range = IEXService.ChartRanges.OneWeek,
                 onStart = {
                     _stockDetailUIState.value = _stockDetailUIState.value.copy(
                         chartUIState = StockDetailUIState.ChartUIState.Loading
@@ -55,9 +57,13 @@ class StockDetailViewModel @AssistedInject constructor(
                         chartUIState = StockDetailUIState.ChartUIState.Error(message)
                     )
                 }
-            ).collect { chartData ->
+            ).collect { chartPrices ->
                 _stockDetailUIState.value = _stockDetailUIState.value.copy(
-                    chartUIState = StockDetailUIState.ChartUIState.Success(chartData)
+                    chartUIState = StockDetailUIState.ChartUIState.Success(
+                        LineChartData(chartPrices.map {
+                            LineChartData.Point(it.closePrice.toFloat(), it.date.toString())
+                        })
+                    )
                 )
             }
         }

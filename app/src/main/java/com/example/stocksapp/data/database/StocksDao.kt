@@ -36,7 +36,7 @@ interface StocksDao {
 
     // CHARTS
 
-    @Query("SELECT * FROM prices WHERE symbol = :symbol AND date BETWEEN :firstDate AND :lastDate")
+    @Query("SELECT * FROM prices WHERE symbol = :symbol AND date BETWEEN :firstDate AND :lastDate ORDER BY date")
     fun getChartPrices(symbol: String, firstDate: LocalDate, lastDate: LocalDate): Flow<List<Price>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

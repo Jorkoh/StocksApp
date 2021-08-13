@@ -21,7 +21,7 @@ data class CompanyInfo(
     val address: String?,
     val state: String?,
     val city: String?,
-    val zip: String,
+    val zip: String?,
     val country: String,
 
     val fetchTimestamp: Instant

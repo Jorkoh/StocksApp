@@ -23,7 +23,7 @@ data class CompanyInfoResponse(
     @Json(name = "address2") val address2: String?,
     @Json(name = "state") val state: String?,
     @Json(name = "city") val city: String?,
-    @Json(name = "zip") val zip: String,
+    @Json(name = "zip") val zip: String?,
     @Json(name = "country") val country: String,
     @Json(name = "phone") val phone: String
 )

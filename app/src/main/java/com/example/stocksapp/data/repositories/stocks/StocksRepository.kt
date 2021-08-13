@@ -11,7 +11,6 @@ import com.example.stocksapp.data.repositories.stocks.IEXService.ChartRanges.One
 import com.example.stocksapp.data.repositories.stocks.IEXService.ChartRanges.OneWeek
 import com.example.stocksapp.data.repositories.stocks.IEXService.ChartRanges.OneYear
 import com.example.stocksapp.data.repositories.stocks.IEXService.ChartRanges.ThreeMonths
-import com.example.stocksapp.ui.components.charts.line.LineChartData
 import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onException
 import com.skydoves.sandwich.suspendOnSuccess
@@ -24,10 +23,10 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
-import kotlin.random.Random
 
 class StocksRepository @Inject constructor(
     private val IEXService: IEXService,
@@ -52,19 +51,20 @@ class StocksRepository @Inject constructor(
         onStart: () -> Unit,
         onError: (String) -> Unit
     ) = flow<List<List<Price>>> {
-        val trackedSymbols = stocksDao.getTrackedSymbols().first()
-        if (trackedSymbols.isEmpty()) {
-            emit(emptyList())
-        } else {
-            combine(trackedSymbols.map { trackedSymbol ->
-                fetchChartPrices(
-                    symbol = trackedSymbol.symbol,
-                    range = OneWeek,
-                    onStart = {},
-                    onError = { onError(it) }
-                )
-            }) { it.toList() }.collect {
-                emit(it)
+        stocksDao.getTrackedSymbols().collect { trackedSymbols ->
+            if (trackedSymbols.isEmpty()) {
+                emit(emptyList())
+            } else {
+                combine(trackedSymbols.map { trackedSymbol ->
+                    fetchChartPrices(
+                        symbol = trackedSymbol.symbol,
+                        range = OneWeek,
+                        onStart = {},
+                        onError = { onError(it) }
+                    )
+                }) { it.toList() }.collect {
+                    emit(it)
+                }
             }
         }
     }.onStart { onStart() }.flowOn(Dispatchers.IO)
@@ -85,14 +85,13 @@ class StocksRepository @Inject constructor(
                 2
             }
         )
-        val firstDate = lastDate.apply {
+        val firstDate = lastDate.run {
             when (range) {
                 OneWeek -> minus(1, ChronoUnit.WEEKS)
                 OneMonth -> minus(1, ChronoUnit.MONTHS)
                 ThreeMonths -> minus(3, ChronoUnit.MONTHS)
                 OneYear -> minus(1, ChronoUnit.YEARS)
-            }
-            plusDays(1)
+            }.plusDays(1)
         }
         val daysBetween = firstDate.until(lastDate).plusDays(1).days
 
@@ -100,18 +99,73 @@ class StocksRepository @Inject constructor(
             symbol = symbol,
             firstDate = firstDate,
             lastDate = lastDate
-        ).distinctUntilChanged().collect { cachedPrices ->
+        ).first { cachedPrices ->
             if (cachedPrices.size != daysBetween) {
                 // API fetch TODO: if the missing dates are all at the end only fetch that missing range
                 IEXService.fetchChartPrices(symbol, range).suspendOnSuccess {
                     val timestamp = Instant.now()
                     val apiPrices = data.map { it.mapToPrice(symbol, timestamp) }
-                    val dates = List(daysBetween) { offset -> firstDate.plusDays(offset.toLong()) }
-                    val missingPrices = dates.toSet().minus(apiPrices.map { it.date }.toSet()).map { date ->
+                    val missingPrices = generateMissingPrices(
+                        symbol = symbol,
+                        apiPrices = apiPrices,
+                        firstDate = firstDate,
+                        lastDate = lastDate,
+                        timestamp = timestamp
+                    )
+                    stocksDao.insertChartPrices(apiPrices + missingPrices)
+                }.onError {
+                    onError("Request failed with code ${statusCode.code}: $raw")
+                }.onException {
+                    onError("Error while requesting: $message")
+                }
+                false
+            } else {
+                // DB cache
+                emit(cachedPrices)
+                true
+            }
+        }
+    }.onStart { onStart() }.flowOn(Dispatchers.IO)
+
+    private fun generateMissingPrices(
+        symbol: String,
+        apiPrices: List<Price>,
+        firstDate: LocalDate,
+        lastDate: LocalDate,
+        timestamp: Instant
+    ): MutableList<Price> {
+        val missingPrices = mutableListOf<Price>()
+        if (!apiPrices.first().date.isEqual(firstDate)) {
+            // missing days at the start, add them
+            var runningDate = firstDate
+            do {
+                missingPrices.add(
+                    Price(
+                        symbol = symbol,
+                        date = runningDate,
+                        closePrice = apiPrices.first().closePrice,
+                        volume = 0,
+                        change = 0.0,
+                        changePercent = 0.0,
+                        changeOverTime = 0.0,
+                        noDataDay = true,
+                        earliestAvailable = false,
+                        fetchTimestamp = timestamp
+                    )
+                )
+                runningDate = runningDate.plusDays(1)
+            } while (!runningDate.isEqual(apiPrices.first().date))
+        }
+        apiPrices.zipWithNext { firstPrice, secondPrice ->
+            if (!firstPrice.date.plusDays(1).isEqual(secondPrice.date)) {
+                // days are not consecutive, need to fill the days between
+                var runningDate = firstPrice.date.plusDays(1)
+                do {
+                    missingPrices.add(
                         Price(
                             symbol = symbol,
-                            date = date,
-                            closePrice = 0.0,
+                            date = runningDate,
+                            closePrice = firstPrice.closePrice,
                             volume = 0,
                             change = 0.0,
                             changePercent = 0.0,
@@ -120,19 +174,34 @@ class StocksRepository @Inject constructor(
                             earliestAvailable = false,
                             fetchTimestamp = timestamp
                         )
-                    }
-                    stocksDao.insertChartPrices(apiPrices + missingPrices)
-                }.onError {
-                    onError("Request failed with code ${statusCode.code}: $raw")
-                }.onException {
-                    onError("Error while requesting: $message")
-                }
-            } else {
-                // DB cache
-                emit(cachedPrices)
+                    )
+                    runningDate = runningDate.plusDays(1)
+                } while (!runningDate.isEqual(secondPrice.date))
             }
         }
-    }.onStart { onStart() }.flowOn(Dispatchers.IO)
+        if (!apiPrices.last().date.isEqual(lastDate)) {
+            // missing days at the start, add them
+            var runningDate = firstDate
+            do {
+                missingPrices.add(
+                    Price(
+                        symbol = symbol,
+                        date = runningDate,
+                        closePrice = apiPrices.last().closePrice,
+                        volume = 0,
+                        change = 0.0,
+                        changePercent = 0.0,
+                        changeOverTime = 0.0,
+                        noDataDay = true,
+                        earliestAvailable = false,
+                        fetchTimestamp = timestamp
+                    )
+                )
+                runningDate = runningDate.plusDays(1)
+            } while (!runningDate.isEqual(apiPrices.last().date))
+        }
+        return missingPrices
+    }
 
     @WorkerThread
     fun fetchTopActiveQuotes(
@@ -218,19 +287,4 @@ class StocksRepository @Inject constructor(
             }
         }
     }.onStart { onStart() }.flowOn(Dispatchers.IO)
-
-    @WorkerThread
-    fun fetchChartPrices(
-        symbol: String,
-        onStart: () -> Unit,
-        onError: (String) -> Unit
-    ) = flow {
-        emit(
-            LineChartData(
-                (1..10).map {
-                    LineChartData.Point(Random.nextDouble(5.0, 20.0).toFloat(), "#$it")
-                }
-            )
-        )
-    }
 }

@@ -3,21 +3,27 @@ package com.example.stocksapp.ui.screens.home
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Card
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
@@ -26,9 +32,7 @@ import androidx.navigation.NavController
 import com.example.stocksapp.R
 import com.example.stocksapp.ui.components.LoadingIndicator
 import com.example.stocksapp.ui.components.QuoteListItem
-import com.example.stocksapp.ui.components.QuoteWithChartCard
 import com.example.stocksapp.ui.components.SectionTitle
-import com.example.stocksapp.ui.components.charts.line.LineChartData
 import com.example.stocksapp.ui.screens.NavigableScreen
 import com.google.accompanist.insets.statusBarsPadding
 
@@ -84,12 +88,29 @@ private fun LazyListScope.userSymbolsSection(
                         items = state.chartPrices,
                         key = { it.first().symbol }
                     ) { chartPrices ->
-                        QuoteWithChartCard(
-                            symbol = chartPrices.first().symbol,
-                            chartData = LineChartData(
-                                chartPrices.map { LineChartData.Point(it.closePrice.toFloat(), it.date.toString()) }),
-                            onSymbolSelected = onSymbolSelected
-                        )
+                        Card(
+                            modifier = Modifier
+                                .clickable(onClick = { onSymbolSelected(chartPrices.first().symbol) })
+                                .size(164.dp),
+                            elevation = 4.dp
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.padding(8.dp)
+                            ) {
+                                Text(
+                                    text = chartPrices.first().symbol,
+                                    style = MaterialTheme.typography.h6
+                                )
+                            }
+                        }
+                        // QuoteWithChartCard(
+                        //     symbol = chartPrices.first().symbol,
+                        //     chartData = LineChartData(chartPrices.map {
+                        //         LineChartData.Point(it.closePrice.toFloat(), it.date.toString())
+                        //     }),
+                        //     onSymbolSelected = onSymbolSelected
+                        // )
                     }
                 }
             }
