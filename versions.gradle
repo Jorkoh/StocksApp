@@ -1,6 +1,6 @@
 ext.versions = [
         kotlin               : '1.5.21',
-        build_tools          : '7.1.0-alpha06',
+        build_tools          : '7.1.0-alpha09',
         min_sdk              : 26,
         compile_sdk          : 30,
         version_code         : 1,

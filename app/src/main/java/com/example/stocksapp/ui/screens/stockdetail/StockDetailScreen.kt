@@ -71,6 +71,19 @@ fun StockDetailContent(
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // TODO: add the logo somewhere
+            // Image(
+            //     painter = rememberImagePainter(
+            //         data = "https://storage.googleapis.com/iexcloud-hl37opg/api/logos/${quote.symbol}.png",
+            //         builder = {
+            //             crossfade(true)
+            //         }
+            //     ),
+            //     contentDescription = "${quote.symbol} logo",
+            //     modifier = Modifier
+            //         .size(48.dp)
+            //         .clip(MaterialTheme.shapes.medium)
+            // )
             ChartSection(stockDetailUIState.value.chartUIState, onChartRangeChange)
             Spacer(modifier = Modifier.height(20.dp))
             CompanyInfoSection(stockDetailUIState.value.companyInfoUIState)
