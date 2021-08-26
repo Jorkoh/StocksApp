@@ -48,7 +48,7 @@ interface IEXService {
     @BatchedNews
     suspend fun fetchNews(
         @Query("symbols") symbols: String,
-        @Query("last") numberPerSymbol: Int = 5
+        @Query("last") numberPerSymbol: Int = 2
     ): ApiResponse<List<NewsResponse>>
 
     @GET("stock/{symbol}/company")
@@ -57,7 +57,8 @@ interface IEXService {
     ): ApiResponse<CompanyInfoResponse>
 
     companion object {
-        private const val BASE_URL = "https://cloud.iexapis.com/stable/"
+        // private const val BASE_URL = "https://cloud.iexapis.com/stable/"
+        private const val BASE_URL = "https://sandbox.iexapis.com/stable/"
 
         fun create(): IEXService {
             return Retrofit.Builder()

@@ -15,5 +15,4 @@ data class NewsResponse(
     @Json(name = "related") val related: String,
     @Json(name = "image") val image: String,
     @Json(name = "lang") val lang: String,
-    @Json(name = "hasPaywall") val hasPaywall: Boolean
 )

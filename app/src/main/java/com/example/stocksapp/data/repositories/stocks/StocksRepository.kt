@@ -241,14 +241,17 @@ class StocksRepository @Inject constructor(
                 val trackedSymbols = stocksDao.getTrackedSymbols().first()
                 val newsSymbols = if (trackedSymbols.isNotEmpty()) {
                     // If the user has tracked symbols fetch news from those
-                    trackedSymbols.joinToString(separator = ",") { it.symbol }
+                    trackedSymbols.map { it.symbol }
                 } else {
                     // If the user doesn't have tracked symbols fetch news from most active
                     // TODO take care of error fetching top active quotes
-                    val mostActiveSymbols = fetchTopActiveQuotes({}, {}).first()
-                    mostActiveSymbols.joinToString(separator = ",") { it.symbol }
+                    fetchTopActiveQuotes({}, {}).first().map { it.symbol }
                 }
-                IEXService.fetchNews(newsSymbols).suspendOnSuccess(SuccessNewsMapper) {
+                // We want to load a max of ~10 news since its API is expensive
+                IEXService.fetchNews(
+                    symbols = newsSymbols.joinToString(separator = ","),
+                    numberPerSymbol = (10 / newsSymbols.size).coerceAtLeast(1)
+                ).suspendOnSuccess(SuccessNewsMapper) {
                     stocksDao.refreshNews(this)
                 }.onError {
                     onError("Request failed with code ${statusCode.code}: $raw")

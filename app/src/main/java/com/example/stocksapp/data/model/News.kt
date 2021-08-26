@@ -16,7 +16,6 @@ data class News(
     val summary: String,
     val symbols: List<String>,
     val imageUrl: String,
-    val hasPaywall: Boolean,
 
     val fetchTimestamp: Instant
 )

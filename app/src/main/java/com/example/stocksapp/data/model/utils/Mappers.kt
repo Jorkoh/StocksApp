@@ -108,7 +108,6 @@ object SuccessNewsMapper : ApiSuccessModelMapper<List<NewsResponse>, List<News>>
         summary = summary,
         symbols = related.split(','),
         imageUrl = image,
-        hasPaywall = hasPaywall,
         fetchTimestamp = timestamp
     )
 }
