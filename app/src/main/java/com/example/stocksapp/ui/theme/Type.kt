@@ -38,12 +38,22 @@ val typography = Typography(
     ),
     subtitle1 = TextStyle(
         fontFamily = Inter,
-        fontWeight = FontWeight.W300,
+        fontWeight = FontWeight.W500,
         fontSize = 12.sp
     ),
     subtitle2 = TextStyle(
         fontFamily = Inter,
-        fontWeight = FontWeight.W500,
+        fontWeight = FontWeight.W300,
         fontSize = 12.sp
+    ),
+    body1 = TextStyle(
+        fontFamily = Inter,
+        fontWeight = FontWeight.W400,
+        fontSize = 16.sp
+    ),
+    body2 = TextStyle(
+        fontFamily = Inter,
+        fontWeight = FontWeight.W400,
+        fontSize = 14.sp
     )
 )

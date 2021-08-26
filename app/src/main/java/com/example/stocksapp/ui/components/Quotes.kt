@@ -66,7 +66,7 @@ fun QuoteListItem(
             Spacer(Modifier.height(4.dp))
             Text(
                 text = quote.companyName,
-                style = MaterialTheme.typography.subtitle1,
+                style = MaterialTheme.typography.subtitle2,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -105,7 +105,7 @@ fun QuoteChange(
     Box(modifier = backgroundModifier.padding(horizontal = 2.dp)) {
         Text(
             text = "${"%+.2f".format(changePercent * 100)}%",
-            style = MaterialTheme.typography.subtitle2,
+            style = MaterialTheme.typography.subtitle1,
             textAlign = TextAlign.End,
             color = changeColor
         )

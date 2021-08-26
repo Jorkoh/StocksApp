@@ -29,14 +29,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Card
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -45,7 +41,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
@@ -53,7 +48,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
 import com.example.stocksapp.R
 import com.example.stocksapp.data.model.News
@@ -103,7 +97,8 @@ fun NewsListItem(
             )
             Row(modifier = Modifier.height(IntrinsicSize.Max)) {
                 NewsImage(
-                    imageUrl = news.imageUrl,
+                    // imageUrl = news.imageUrl,
+                    imageUrl = "https://s3-symbol-logo.tradingview.com/amc-entertainment-holdings--600.png",
                     transition = transition,
                     readMoreClickable = itemState == ListItemState.Expanded,
                     onReadMoreClicked = onReadMoreClicked
@@ -203,27 +198,23 @@ private fun NewsImage(
             contentDescription = null,
             modifier = Modifier.size(imageSize.width.dp, imageSize.height.dp)
         )
-        Row(
-            horizontalArrangement = Arrangement.Center,
+        Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .alpha(readMoreAlpha)
                 .background(color = MaterialTheme.colors.surface)
-                .clickable(
-                    enabled = readMoreClickable,
-                    onClick = onReadMoreClicked
-                )
-                .padding(vertical = 3.dp)
+                .run {
+                    if (readMoreClickable) clickable(onClick = onReadMoreClicked) else this
+                }
+                .padding(vertical = 6.dp)
         ) {
             Text(
                 text = stringResource(R.string.read_more_button),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.subtitle1,
                 textDecoration = TextDecoration.Underline,
-                modifier = Modifier.padding(end = 4.dp)
-            )
-            Icon(
-                painter = painterResource(R.drawable.ic_launch),
-                contentDescription = null
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
@@ -245,7 +236,7 @@ private fun NewsContent(
                 text = headline,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.h6.copy(fontSize = 16.sp)
+                style = MaterialTheme.typography.body1
             )
             ListItemState.Expanded -> Text(
                 text = summary,
@@ -273,18 +264,16 @@ private fun NewsFoot(
     }
 
     with(columnScope) {
-        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-            Text(
-                text = "$source - $dateString",
-                style = MaterialTheme.typography.caption.copy(fontSize = 13.sp),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(top = 8.dp)
-            )
-        }
+        Text(
+            text = "$source - $dateString",
+            style = MaterialTheme.typography.subtitle2,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(top = 8.dp)
+        )
     }
 }
 
