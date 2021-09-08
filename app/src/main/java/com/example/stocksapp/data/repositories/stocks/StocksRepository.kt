@@ -78,8 +78,9 @@ class StocksRepository @Inject constructor(
                             second = chartPrices.first { it.first().symbol == symbol.symbol }
                         )
                     }
-                }.collect {
+                }.first {
                     emit(it)
+                    true
                 }
             }
         }
@@ -210,9 +211,7 @@ class StocksRepository @Inject constructor(
         ).distinctUntilChanged().collect { cachedQuotes -> // TODO why is distinctUntilChanged needed?
             if (cachedQuotes.isEmpty()) {
                 // API fetch
-                Timber.d("FETCHING")
                 IEXService.fetchQuotes(symbols.joinToString(",")).suspendOnSuccess(SuccessQuotesMapper) {
-                    Timber.d("INSERTING")
                     stocksDao.insertQuotes(this)
                 }.onError {
                     onError("Request failed with code ${statusCode.code}: $raw")
@@ -221,7 +220,6 @@ class StocksRepository @Inject constructor(
                 }
             } else {
                 // DB cache
-                Timber.d("EMITTING")
                 emit(cachedQuotes)
             }
         }
@@ -232,7 +230,6 @@ class StocksRepository @Inject constructor(
         onStart: () -> Unit,
         onError: (String) -> Unit
     ) = flow {
-        Timber.d("TOP ACTIVE")
         stocksDao.getQuotesByActivity(
             isTopActive = true,
             timestampCutoff = Instant.now().minus(1, ChronoUnit.HOURS)

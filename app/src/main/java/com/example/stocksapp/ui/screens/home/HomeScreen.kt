@@ -84,7 +84,7 @@ private fun LazyListScope.userSymbolsSection(
                         key = { it.first.symbol }
                     ) { quoteAndChartPrices ->
                         QuoteWithChartCard(
-                            quote = quoteAndChartPrices.first, // TODO
+                            quote = quoteAndChartPrices.first,
                             chartData = LineChartData(quoteAndChartPrices.second.map {
                                 LineChartData.Point(it.closePrice.toFloat(), it.date.toString())
                             }),

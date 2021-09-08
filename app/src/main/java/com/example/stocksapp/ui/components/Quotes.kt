@@ -24,13 +24,17 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.stocksapp.data.model.Quote
+import com.example.stocksapp.ui.components.charts.line.LineChart
 import com.example.stocksapp.ui.components.charts.line.LineChartData
+import com.example.stocksapp.ui.components.charts.line.renderer.line.SolidLineDrawer
+import com.example.stocksapp.ui.components.charts.line.renderer.path.BezierLinePathCalculator
+import com.example.stocksapp.ui.components.charts.line.renderer.xaxis.NoXAxisDrawer
+import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.NoYAxisDrawer
 import com.example.stocksapp.ui.theme.StocksAppTheme
 import com.example.stocksapp.ui.theme.loss
 import com.example.stocksapp.ui.theme.profit
@@ -79,7 +83,10 @@ fun QuoteListItem(
                 style = MaterialTheme.typography.h6,
                 textAlign = TextAlign.End
             )
-            QuoteChange(quote.change.sign, quote.changePercent)
+            QuoteChange(
+                sign = quote.change.sign,
+                changePercent = quote.changePercent
+            )
         }
     }
 }
@@ -87,14 +94,15 @@ fun QuoteListItem(
 @Composable
 fun QuoteChange(
     sign: Double,
-    changePercent: Double
+    changePercent: Double,
+    modifier: Modifier = Modifier
 ) {
     val changeColor = when (sign) {
         -1.0 -> MaterialTheme.colors.loss
         1.0 -> MaterialTheme.colors.profit
         else -> LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
     }
-    val backgroundModifier = Modifier.background(
+    val backgroundModifier = modifier.background(
         shape = MaterialTheme.shapes.small,
         color = changeColor.copy(alpha = 0.1f)
     )
@@ -118,29 +126,27 @@ fun QuoteWithChartCard(
     Card(
         modifier = modifier
             .clickable(onClick = { onSymbolSelected(quote.symbol) })
-            .size(164.dp),
+            .size(144.dp),
         elevation = 4.dp
     ) {
-        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+        Column(modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 4.dp)) {
             Text(
                 text = quote.symbol,
                 style = MaterialTheme.typography.h5
             )
-            // LineChart(
-            //     lineChartData = chartData,
-            //     linePathCalculator = BezierLinePathCalculator(),
-            //     lineDrawer = SolidLineDrawer(),
-            //     xAxisDrawer = NoXAxisDrawer,
-            //     yAxisDrawer = NoYAxisDrawer
-            // )
-            Box(
+            LineChart(
+                lineChartData = chartData,
+                linePathCalculator = BezierLinePathCalculator(),
+                lineDrawer = SolidLineDrawer(),
+                xAxisDrawer = NoXAxisDrawer,
+                yAxisDrawer = NoYAxisDrawer,
                 modifier = Modifier
-                    .padding(vertical = 4.dp)
                     .weight(1f)
-                    .background(color = Color.Red)
-            ) // TODO replace with the actual chart
+                    .fillMaxWidth()
+            )
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
@@ -148,7 +154,12 @@ fun QuoteWithChartCard(
                     style = MaterialTheme.typography.h6,
                     textAlign = TextAlign.End
                 )
-                QuoteChange(quote.change.sign, quote.changePercent)
+                val change = with(chartData.points) { (last().value - first().value) / first().value }.toDouble()
+                QuoteChange(
+                    sign = change.sign,
+                    changePercent = change,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
             }
         }
     }

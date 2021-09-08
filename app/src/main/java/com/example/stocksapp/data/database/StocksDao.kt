@@ -61,9 +61,9 @@ interface StocksDao {
 
     @Transaction
     suspend fun updateIsTracked(symbol: String, isTracked: Boolean) {
-        if(isTracked && !symbolIsTracked(symbol).first()){
+        if (isTracked && !symbolIsTracked(symbol).first()) {
             insertTrackedSymbol(TrackedSymbol(symbol))
-        }else if(!isTracked && symbolIsTracked(symbol).first()){
+        } else if (!isTracked && symbolIsTracked(symbol).first()) {
             deleteTrackedSymbol(TrackedSymbol(symbol))
         }
     }
