@@ -57,8 +57,8 @@ interface IEXService {
     ): ApiResponse<CompanyInfoResponse>
 
     companion object {
-        // private const val BASE_URL = "https://cloud.iexapis.com/stable/"
-        private const val BASE_URL = "https://sandbox.iexapis.com/stable/"
+        private const val BASE_URL = "https://cloud.iexapis.com/stable/"
+        // private const val BASE_URL = "https://sandbox.iexapis.com/stable/"
 
         fun create(): IEXService {
             return Retrofit.Builder()

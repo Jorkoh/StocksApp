@@ -97,8 +97,7 @@ fun NewsListItem(
             )
             Row(modifier = Modifier.height(IntrinsicSize.Max)) {
                 NewsImage(
-                    // imageUrl = news.imageUrl,
-                    imageUrl = "https://s3-symbol-logo.tradingview.com/amc-entertainment-holdings--600.png",
+                    imageUrl = news.imageUrl,
                     transition = transition,
                     readMoreClickable = itemState == ListItemState.Expanded,
                     onReadMoreClicked = onReadMoreClicked

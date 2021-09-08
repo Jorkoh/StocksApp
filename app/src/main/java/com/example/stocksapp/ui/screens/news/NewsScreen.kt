@@ -48,7 +48,7 @@ fun NewsContent(
     modifier: Modifier = Modifier,
     onReadMoreClicked: (News) -> Unit
 ) {
-    var expandedNews by remember { mutableStateOf<Long?>(null) }
+    var expandedNewsId by remember { mutableStateOf<Long?>(null) }
 
     LazyColumn(modifier.fillMaxSize()) {
         item { Spacer(modifier = Modifier.statusBarsPadding()) }
@@ -60,12 +60,12 @@ fun NewsContent(
                 items(state.news) { news ->
                     NewsListItem(
                         news = news,
-                        itemState = if (expandedNews == news.id) {
+                        itemState = if (expandedNewsId == news.id) {
                             ListItemState.Expanded
                         } else {
                             ListItemState.Collapsed
                         },
-                        onClick = { expandedNews = if (expandedNews == news.id) null else news.id },
+                        onClick = { expandedNewsId = if (expandedNewsId == news.id) null else news.id },
                         onReadMoreClicked = { onReadMoreClicked(news) }
                     )
                 }

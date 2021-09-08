@@ -3,6 +3,7 @@ package com.example.stocksapp.data.repositories.stocks
 import androidx.annotation.WorkerThread
 import com.example.stocksapp.data.database.StocksDao
 import com.example.stocksapp.data.model.Price
+import com.example.stocksapp.data.model.Quote
 import com.example.stocksapp.data.model.utils.SuccessCompanyInfoMapper
 import com.example.stocksapp.data.model.utils.SuccessNewsMapper
 import com.example.stocksapp.data.model.utils.SuccessQuotesMapper
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
+import timber.log.Timber
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -50,19 +52,33 @@ class StocksRepository @Inject constructor(
     fun fetchTrackedSymbols(
         onStart: () -> Unit,
         onError: (String) -> Unit
-    ) = flow<List<List<Price>>> {
+    ) = flow<List<Pair<Quote, List<Price>>>> {
         stocksDao.getTrackedSymbols().collect { trackedSymbols ->
             if (trackedSymbols.isEmpty()) {
                 emit(emptyList())
             } else {
-                combine(trackedSymbols.map { trackedSymbol ->
+                val quotesFlow = fetchQuotes(
+                    symbols = trackedSymbols.map { it.symbol },
+                    onStart = {},
+                    onError = { onError(it) }
+                )
+                val chartPricesFlow = combine(trackedSymbols.map { trackedSymbol ->
                     fetchChartPrices(
                         symbol = trackedSymbol.symbol,
                         range = OneWeek,
                         onStart = {},
                         onError = { onError(it) }
                     )
-                }) { it.toList() }.collect {
+                }) { it.toList() }
+
+                combine(quotesFlow, chartPricesFlow) { quotes, chartPrices ->
+                    trackedSymbols.map { symbol ->
+                        Pair(
+                            first = quotes.first { it.symbol == symbol.symbol },
+                            second = chartPrices.first { it.first().symbol == symbol.symbol }
+                        )
+                    }
+                }.collect {
                     emit(it)
                 }
             }
@@ -139,20 +155,7 @@ class StocksRepository @Inject constructor(
             // missing days at the start, add them
             var runningDate = firstDate
             do {
-                missingPrices.add(
-                    Price(
-                        symbol = symbol,
-                        date = runningDate,
-                        closePrice = apiPrices.first().closePrice,
-                        volume = 0,
-                        change = 0.0,
-                        changePercent = 0.0,
-                        changeOverTime = 0.0,
-                        noDataDay = true,
-                        earliestAvailable = false,
-                        fetchTimestamp = timestamp
-                    )
-                )
+                missingPrices.add(generateEmptyPrice(symbol, runningDate, apiPrices.first().closePrice, timestamp))
                 runningDate = runningDate.plusDays(1)
             } while (!runningDate.isEqual(apiPrices.first().date))
         }
@@ -161,20 +164,7 @@ class StocksRepository @Inject constructor(
                 // days are not consecutive, need to fill the days between
                 var runningDate = firstPrice.date.plusDays(1)
                 do {
-                    missingPrices.add(
-                        Price(
-                            symbol = symbol,
-                            date = runningDate,
-                            closePrice = firstPrice.closePrice,
-                            volume = 0,
-                            change = 0.0,
-                            changePercent = 0.0,
-                            changeOverTime = 0.0,
-                            noDataDay = true,
-                            earliestAvailable = false,
-                            fetchTimestamp = timestamp
-                        )
-                    )
+                    missingPrices.add(generateEmptyPrice(symbol, runningDate, firstPrice.closePrice, timestamp))
                     runningDate = runningDate.plusDays(1)
                 } while (!runningDate.isEqual(secondPrice.date))
             }
@@ -183,31 +173,66 @@ class StocksRepository @Inject constructor(
             // missing days at the start, add them
             var runningDate = firstDate
             do {
-                missingPrices.add(
-                    Price(
-                        symbol = symbol,
-                        date = runningDate,
-                        closePrice = apiPrices.last().closePrice,
-                        volume = 0,
-                        change = 0.0,
-                        changePercent = 0.0,
-                        changeOverTime = 0.0,
-                        noDataDay = true,
-                        earliestAvailable = false,
-                        fetchTimestamp = timestamp
-                    )
-                )
+                missingPrices.add(generateEmptyPrice(symbol, runningDate, apiPrices.last().closePrice, timestamp))
                 runningDate = runningDate.plusDays(1)
             } while (!runningDate.isEqual(apiPrices.last().date))
         }
         return missingPrices
     }
 
+    private fun generateEmptyPrice(
+        symbol: String,
+        date: LocalDate,
+        closePrice: Double,
+        timestamp: Instant
+    ) = Price(
+        symbol = symbol,
+        date = date,
+        closePrice = closePrice,
+        volume = 0,
+        change = 0.0,
+        changePercent = 0.0,
+        changeOverTime = 0.0,
+        noDataDay = true,
+        earliestAvailable = false,
+        fetchTimestamp = timestamp
+    )
+
+    @WorkerThread
+    fun fetchQuotes(
+        symbols: List<String>,
+        onStart: () -> Unit,
+        onError: (String) -> Unit
+    ) = flow {
+        stocksDao.getQuotes(
+            symbols = symbols,
+            timestampCutoff = Instant.now().minus(1, ChronoUnit.HOURS)
+        ).distinctUntilChanged().collect { cachedQuotes -> // TODO why is distinctUntilChanged needed?
+            if (cachedQuotes.isEmpty()) {
+                // API fetch
+                Timber.d("FETCHING")
+                IEXService.fetchQuotes(symbols.joinToString(",")).suspendOnSuccess(SuccessQuotesMapper) {
+                    Timber.d("INSERTING")
+                    stocksDao.insertQuotes(this)
+                }.onError {
+                    onError("Request failed with code ${statusCode.code}: $raw")
+                }.onException {
+                    onError("Error while requesting: $message")
+                }
+            } else {
+                // DB cache
+                Timber.d("EMITTING")
+                emit(cachedQuotes)
+            }
+        }
+    }.onStart { onStart() }.flowOn(Dispatchers.IO)
+
     @WorkerThread
     fun fetchTopActiveQuotes(
         onStart: () -> Unit,
         onError: (String) -> Unit
     ) = flow {
+        Timber.d("TOP ACTIVE")
         stocksDao.getQuotesByActivity(
             isTopActive = true,
             timestampCutoff = Instant.now().minus(1, ChronoUnit.HOURS)

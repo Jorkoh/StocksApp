@@ -31,6 +31,9 @@ interface StocksDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertQuotes(quotes: List<Quote>)
 
+    @Query("SELECT * FROM quotes WHERE symbol IN (:symbols) AND fetchTimestamp >= :timestampCutoff")
+    fun getQuotes(symbols: List<String>, timestampCutoff: Instant): Flow<List<Quote>>
+
     @Query("SELECT * FROM quotes WHERE isTopActive = :isTopActive AND fetchTimestamp >= :timestampCutoff")
     fun getQuotesByActivity(isTopActive: Boolean, timestampCutoff: Instant): Flow<List<Quote>>
 

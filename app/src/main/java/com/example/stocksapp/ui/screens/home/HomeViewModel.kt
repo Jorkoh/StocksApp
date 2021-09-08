@@ -33,6 +33,7 @@ class HomeViewModel @Inject constructor(
 
     private fun getUserSymbols() {
         getUserSymbolsJob?.cancel()
+        // TODO also need to get the quotes here, not just the chart prices
         getUserSymbolsJob = viewModelScope.launch {
             stocksRepository.fetchTrackedSymbols(
                 onStart = { _trackedSymbolsUIState.value = TrackedSymbolsUIState.Loading },
@@ -58,7 +59,7 @@ class HomeViewModel @Inject constructor(
 
 sealed class TrackedSymbolsUIState {
     object Loading : TrackedSymbolsUIState()
-    data class Success(val chartPrices: List<List<Price>>) : TrackedSymbolsUIState()
+    data class Success(val chartPrices: List<Pair<Quote, List<Price>>>) : TrackedSymbolsUIState()
     data class Error(val message: String) : TrackedSymbolsUIState()
 }
 

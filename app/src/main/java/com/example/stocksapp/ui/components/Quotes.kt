@@ -24,17 +24,13 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.stocksapp.data.model.Quote
-import com.example.stocksapp.ui.components.charts.line.LineChart
 import com.example.stocksapp.ui.components.charts.line.LineChartData
-import com.example.stocksapp.ui.components.charts.line.renderer.line.SolidLineDrawer
-import com.example.stocksapp.ui.components.charts.line.renderer.path.BezierLinePathCalculator
-import com.example.stocksapp.ui.components.charts.line.renderer.xaxis.NoXAxisDrawer
-import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.NoYAxisDrawer
 import com.example.stocksapp.ui.theme.StocksAppTheme
 import com.example.stocksapp.ui.theme.loss
 import com.example.stocksapp.ui.theme.profit
@@ -114,33 +110,46 @@ fun QuoteChange(
 
 @Composable
 fun QuoteWithChartCard(
-    symbol: String,
+    quote: Quote,
     chartData: LineChartData,
     modifier: Modifier = Modifier,
     onSymbolSelected: (String) -> Unit
 ) {
     Card(
         modifier = modifier
-            .clickable(onClick = { onSymbolSelected(symbol) })
+            .clickable(onClick = { onSymbolSelected(quote.symbol) })
             .size(164.dp),
         elevation = 4.dp
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(8.dp)
-        ) {
+        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
             Text(
-                text = symbol,
-                style = MaterialTheme.typography.h6
+                text = quote.symbol,
+                style = MaterialTheme.typography.h5
             )
-            Spacer(modifier.height(20.dp))
-            LineChart(
-                lineChartData = chartData,
-                linePathCalculator = BezierLinePathCalculator(),
-                lineDrawer = SolidLineDrawer(),
-                xAxisDrawer = NoXAxisDrawer,
-                yAxisDrawer = NoYAxisDrawer
-            )
+            // LineChart(
+            //     lineChartData = chartData,
+            //     linePathCalculator = BezierLinePathCalculator(),
+            //     lineDrawer = SolidLineDrawer(),
+            //     xAxisDrawer = NoXAxisDrawer,
+            //     yAxisDrawer = NoYAxisDrawer
+            // )
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 4.dp)
+                    .weight(1f)
+                    .background(color = Color.Red)
+            ) // TODO replace with the actual chart
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "%.2f".format(quote.latestPrice),
+                    style = MaterialTheme.typography.h6,
+                    textAlign = TextAlign.End
+                )
+                QuoteChange(quote.change.sign, quote.changePercent)
+            }
         }
     }
 }
@@ -149,42 +158,7 @@ fun QuoteWithChartCard(
 @Composable
 fun QuoteListItemsPreview() {
     val quotes = List(5) {
-        Quote(
-            symbol = "AMD",
-            companyName = "Advanced Micro Devices, Inc",
-            primaryExchange = "",
-            openPrice = 0.0,
-            openTime = Instant.now(),
-            closePrice = 0.0,
-            closeTime = Instant.now(),
-            highPrice = 0.0,
-            highTime = Instant.now(),
-            lowPrice = 0.0,
-            lowTime = Instant.now(),
-            latestPrice = 86.77,
-            latestSource = "",
-            latestTime = Instant.now(),
-            latestVolume = 0,
-            extendedPrice = 0.0,
-            extendedChange = 0.0,
-            extendedChangePercent = 0.0,
-            extendedPriceTime = Instant.now(),
-            previousClose = 0.0,
-            previousVolume = 0,
-            change = -2.84,
-            changePercent = -0.0317,
-            volume = 0,
-            avgTotalVolume = 0,
-            marketCap = 0,
-            peRatio = 0.0,
-            week52High = 0.0,
-            week52Low = 0.0,
-            ytdChange = 0.0,
-            lastTradeTime = Instant.now(),
-            isUSMarketOpen = true,
-            isTopActive = false,
-            fetchTimestamp = Instant.now()
-        )
+        generatePreviewQuote()
     }
     StocksAppTheme {
         Surface {
@@ -204,12 +178,49 @@ fun QuoteListItemsPreview() {
 @Composable
 fun TickerCardPreview() {
     QuoteWithChartCard(
-        symbol = "AMD",
+        quote = generatePreviewQuote(),
         chartData = LineChartData(
             points = (1..7).map { LineChartData.Point(randomYValue(), "#$it") }
         ),
         onSymbolSelected = {}
     )
 }
+
+private fun generatePreviewQuote() = Quote(
+    symbol = "AMD",
+    companyName = "Advanced Micro Devices, Inc",
+    primaryExchange = "",
+    openPrice = 0.0,
+    openTime = Instant.now(),
+    closePrice = 0.0,
+    closeTime = Instant.now(),
+    highPrice = 0.0,
+    highTime = Instant.now(),
+    lowPrice = 0.0,
+    lowTime = Instant.now(),
+    latestPrice = 86.77,
+    latestSource = "",
+    latestTime = Instant.now(),
+    latestVolume = 0,
+    extendedPrice = 0.0,
+    extendedChange = 0.0,
+    extendedChangePercent = 0.0,
+    extendedPriceTime = Instant.now(),
+    previousClose = 0.0,
+    previousVolume = 0,
+    change = -2.84,
+    changePercent = -0.0317,
+    volume = 0,
+    avgTotalVolume = 0,
+    marketCap = 0,
+    peRatio = 0.0,
+    week52High = 0.0,
+    week52Low = 0.0,
+    ytdChange = 0.0,
+    lastTradeTime = Instant.now(),
+    isUSMarketOpen = true,
+    isTopActive = false,
+    fetchTimestamp = Instant.now()
+)
 
 private fun randomYValue() = Random.nextDouble(5.0, 20.0).toFloat()
