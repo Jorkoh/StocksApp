@@ -4,13 +4,32 @@ import com.example.stocksapp.data.model.CompanyInfo
 import com.example.stocksapp.data.model.News
 import com.example.stocksapp.data.model.Price
 import com.example.stocksapp.data.model.Quote
+import com.example.stocksapp.data.model.Symbol
 import com.example.stocksapp.data.model.network.CompanyInfoResponse
 import com.example.stocksapp.data.model.network.NewsResponse
 import com.example.stocksapp.data.model.network.PriceResponse
 import com.example.stocksapp.data.model.network.QuoteResponse
+import com.example.stocksapp.data.model.network.SymbolResponse
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.ApiSuccessModelMapper
 import java.time.Instant
+
+object SuccessSymbolsMapper : ApiSuccessModelMapper<List<SymbolResponse>, List<Symbol>> {
+    override fun map(apiErrorResponse: ApiResponse.Success<List<SymbolResponse>>): List<Symbol> {
+        val timestamp = Instant.now()
+        return apiErrorResponse.data.map { it.mapToSymbol(timestamp) }
+    }
+
+    private fun SymbolResponse.mapToSymbol(timestamp: Instant) = Symbol(
+        symbol = symbol,
+        creationDate = creationDate,
+        type = type,
+        region = region,
+        currency = currency,
+        userTracked = false,
+        fetchTimestamp = timestamp
+    )
+}
 
 object SuccessQuotesMapper : ApiSuccessModelMapper<List<QuoteResponse>, List<Quote>> {
     override fun map(apiErrorResponse: ApiResponse.Success<List<QuoteResponse>>): List<Quote> {

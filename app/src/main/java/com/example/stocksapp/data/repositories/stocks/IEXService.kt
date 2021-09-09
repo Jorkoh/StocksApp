@@ -5,6 +5,7 @@ import com.example.stocksapp.data.model.network.CompanyInfoResponse
 import com.example.stocksapp.data.model.network.NewsResponse
 import com.example.stocksapp.data.model.network.PriceResponse
 import com.example.stocksapp.data.model.network.QuoteResponse
+import com.example.stocksapp.data.model.network.SymbolResponse
 import com.example.stocksapp.data.repositories.utils.BatchedNews
 import com.example.stocksapp.data.repositories.utils.BatchedNewsAdapter
 import com.example.stocksapp.data.repositories.utils.BatchedQuotes
@@ -24,6 +25,9 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface IEXService {
+
+    @GET("ref-data/symbols")
+    suspend fun fetchSymbols(): ApiResponse<List<SymbolResponse>>
 
     @GET("stock/market/list/mostactive")
     suspend fun fetchMostActiveSymbols(

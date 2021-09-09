@@ -1,5 +1,6 @@
 package com.example.stocksapp.data.database
 
+import androidx.compose.ui.util.fastFirstOrNull
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -10,7 +11,7 @@ import com.example.stocksapp.data.model.CompanyInfo
 import com.example.stocksapp.data.model.News
 import com.example.stocksapp.data.model.Price
 import com.example.stocksapp.data.model.Quote
-import com.example.stocksapp.data.model.TrackedSymbol
+import com.example.stocksapp.data.model.Symbol
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import java.time.Instant
@@ -18,6 +19,39 @@ import java.time.LocalDate
 
 @Dao
 interface StocksDao {
+
+    // SYMBOLS
+
+    @Query("SELECT * FROM symbols WHERE symbol LIKE '%' ||:query ||'%'")
+    suspend fun getSymbolsByQuery(query: String): List<Symbol>
+
+    @Transaction
+    suspend fun refreshSymbols(newSymbols: List<Symbol>) {
+        val tracked = getTrackedSymbols().first()
+        val newWithTracked = newSymbols.map { newSymbol ->
+            tracked.fastFirstOrNull { it.symbol == newSymbol.symbol } ?: newSymbol
+        }
+
+        deleteSymbols()
+        insertSymbols(newWithTracked)
+    }
+
+    @Query("DELETE FROM symbols")
+    suspend fun deleteSymbols()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSymbols(symbols: List<Symbol>)
+
+    @Query("SELECT * FROM symbols WHERE userTracked = 1")
+    fun getTrackedSymbols(): Flow<List<Symbol>>
+
+    @Query("SELECT EXISTS(SELECT 1 FROM symbols WHERE userTracked = 1 AND symbol = :symbol)")
+    fun symbolIsTracked(symbol: String): Flow<Boolean>
+
+    @Query("UPDATE symbols SET userTracked = :isTracked WHERE symbol = :symbol")
+    suspend fun updateIsTracked(symbol: String, isTracked: Boolean)
+
+    // QUOTES
 
     @Transaction
     suspend fun refreshTopActiveQuotes(topActiveQuotes: List<Quote>) {
@@ -44,29 +78,6 @@ interface StocksDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChartPrices(prices: List<Price>)
-
-    // TRACKED SYMBOLS
-
-    @Query("SELECT * FROM tracked_symbols")
-    fun getTrackedSymbols(): Flow<List<TrackedSymbol>>
-
-    @Query("SELECT EXISTS(SELECT 1 FROM tracked_symbols WHERE symbol = :symbol)")
-    fun symbolIsTracked(symbol: String): Flow<Boolean>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTrackedSymbol(symbol: TrackedSymbol)
-
-    @Delete
-    suspend fun deleteTrackedSymbol(symbol: TrackedSymbol)
-
-    @Transaction
-    suspend fun updateIsTracked(symbol: String, isTracked: Boolean) {
-        if (isTracked && !symbolIsTracked(symbol).first()) {
-            insertTrackedSymbol(TrackedSymbol(symbol))
-        } else if (!isTracked && symbolIsTracked(symbol).first()) {
-            deleteTrackedSymbol(TrackedSymbol(symbol))
-        }
-    }
 
     // NEWS
 

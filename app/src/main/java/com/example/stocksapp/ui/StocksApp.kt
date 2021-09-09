@@ -74,7 +74,9 @@ private fun NavigableContent(
         composable(NavigableDestination.Home.route) {
             HomeScreen(hiltViewModel(it), navController)
         }
-        composable(NavigableDestination.Search.route) { SearchScreen() }
+        composable(NavigableDestination.Search.route) {
+            SearchScreen(hiltViewModel(it), navController)
+        }
         composable(NavigableDestination.News.route) {
             NewsScreen(hiltViewModel(it), navController)
         }

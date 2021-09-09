@@ -9,10 +9,15 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.navigation.NavController
 import com.google.accompanist.insets.statusBarsPadding
 
 @Composable
-fun SearchScreen(modifier: Modifier = Modifier) {
+fun SearchScreen(
+    viewModel: SearchViewModel,
+    navController: NavController,
+    modifier: Modifier = Modifier
+) {
     Surface(modifier.fillMaxSize()) {
         Text(
             "Search destination",

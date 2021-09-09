@@ -4,7 +4,6 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import java.time.Instant
 
-// TODO times/dates as Date?
 @JsonClass(generateAdapter = true)
 data class QuoteResponse(
     // https://iexcloud.io/docs/api/#quote

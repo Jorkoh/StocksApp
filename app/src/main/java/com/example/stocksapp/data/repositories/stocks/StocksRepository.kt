@@ -7,6 +7,7 @@ import com.example.stocksapp.data.model.Quote
 import com.example.stocksapp.data.model.utils.SuccessCompanyInfoMapper
 import com.example.stocksapp.data.model.utils.SuccessNewsMapper
 import com.example.stocksapp.data.model.utils.SuccessQuotesMapper
+import com.example.stocksapp.data.model.utils.SuccessSymbolsMapper
 import com.example.stocksapp.data.model.utils.mapToPrice
 import com.example.stocksapp.data.repositories.stocks.IEXService.ChartRanges.OneMonth
 import com.example.stocksapp.data.repositories.stocks.IEXService.ChartRanges.OneWeek
@@ -312,4 +313,31 @@ class StocksRepository @Inject constructor(
             }
         }
     }.onStart { onStart() }.flowOn(Dispatchers.IO)
+
+    @WorkerThread
+    fun fetchSymbols(
+        query: String,
+        onStart: () -> Unit,
+        onError: (String) -> Unit
+    ) = flow {
+        val symbols = stocksDao.getSymbolsByQuery(query)
+        emit(symbols)
+    }.onStart { onStart() }.flowOn(Dispatchers.IO)
+
+    @WorkerThread
+    suspend fun updateSymbols(
+        onStart: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        onStart()
+        IEXService.fetchSymbols().suspendOnSuccess(SuccessSymbolsMapper) {
+            Timber.d("ABOUT TO REFRESH SYMBOLS")
+            stocksDao.refreshSymbols(this)
+            Timber.d("REFRESHED SYMBOLS")
+        }.onError {
+            onError("Request failed with code ${statusCode.code}: $raw")
+        }.onException {
+            onError("Error while requesting: $message")
+        }
+    }
 }
