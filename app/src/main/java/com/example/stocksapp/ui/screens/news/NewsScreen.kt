@@ -20,8 +20,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.example.stocksapp.R
 import com.example.stocksapp.data.model.News
+import com.example.stocksapp.data.repositories.stocks.StocksRepository.Companion.MAX_NEWS
 import com.example.stocksapp.ui.components.ListItemState
 import com.example.stocksapp.ui.components.NewsListItem
+import com.example.stocksapp.ui.components.NewsListItemPlaceholder
 import com.example.stocksapp.ui.components.SectionTitle
 import com.google.accompanist.insets.statusBarsPadding
 
@@ -54,7 +56,7 @@ fun NewsContent(
         item { Spacer(modifier = Modifier.statusBarsPadding()) }
         item { SectionTitle(stringResource(R.string.news_section_title)) }
         when (val state = newsUIState.value) {
-            is NewsUIState.Loading -> item { Text("LOADING") }
+            is NewsUIState.Loading -> items(MAX_NEWS) { NewsListItemPlaceholder() }
             is NewsUIState.Error -> item { Text("ERROR ${state.message}") }
             is NewsUIState.Success -> {
                 items(state.news) { news ->

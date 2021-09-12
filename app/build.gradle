@@ -69,6 +69,7 @@ dependencies {
     // Accompanist utilities
     implementation "com.google.accompanist:accompanist-insets:$versions.accompanist"
     implementation "com.google.accompanist:accompanist-systemuicontroller:$versions.accompanist"
+    implementation "com.google.accompanist:accompanist-placeholder-material:$versions.accompanist"
 
     // Coil
     implementation "io.coil-kt:coil-compose:$versions.coil"

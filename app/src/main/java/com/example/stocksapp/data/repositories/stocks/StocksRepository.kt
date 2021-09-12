@@ -35,6 +35,10 @@ class StocksRepository @Inject constructor(
     private val stocksDao: StocksDao
 ) {
 
+    companion object {
+        const val MAX_NEWS = 10
+    }
+
     @WorkerThread
     fun fetchIsTracked(
         symbol: String
@@ -273,7 +277,7 @@ class StocksRepository @Inject constructor(
                 // We want to load a max of ~10 news since its API is expensive
                 IEXService.fetchNews(
                     symbols = newsSymbols.joinToString(separator = ","),
-                    numberPerSymbol = (10 / newsSymbols.size).coerceAtLeast(1)
+                    numberPerSymbol = (MAX_NEWS / newsSymbols.size).coerceAtLeast(1)
                 ).suspendOnSuccess(SuccessNewsMapper) {
                     stocksDao.refreshNews(this)
                 }.onError {

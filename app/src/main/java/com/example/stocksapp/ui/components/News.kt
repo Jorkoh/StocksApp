@@ -53,10 +53,23 @@ import coil.compose.rememberImagePainter
 import com.example.stocksapp.R
 import com.example.stocksapp.data.model.News
 import com.example.stocksapp.ui.theme.StocksAppTheme
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.material.shimmer
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+
+enum class ListItemState {
+    Collapsed,
+    Expanded
+}
+
+private val imageWidthCollapsed = 84.dp
+private val imageHeightCollapsed = 84.dp
+private val imageWidthExpanded = 120.dp
+private val imageHeightExpanded = 156.dp
 
 private fun <T> transitionSpec() = spring<T>(
     dampingRatio = Spring.DampingRatioLowBouncy,
@@ -169,8 +182,8 @@ private fun NewsImage(
         label = "imageSizeTransition"
     ) { state ->
         when (state) {
-            ListItemState.Collapsed -> Size(84.dp.value, 84.dp.value)
-            ListItemState.Expanded -> Size(120.dp.value, 156.dp.value)
+            ListItemState.Collapsed -> Size(imageWidthCollapsed.value, imageHeightCollapsed.value)
+            ListItemState.Expanded -> Size(imageWidthExpanded.value, imageHeightExpanded.value)
         }
     }
 
@@ -277,9 +290,29 @@ private fun NewsFoot(
     }
 }
 
-enum class ListItemState {
-    Collapsed,
-    Expanded
+@Composable
+fun NewsListItemPlaceholder() {
+    Row(Modifier.padding(horizontal = 24.dp, vertical = 14.dp)) {
+        Box(
+            modifier = Modifier
+                .size(imageWidthCollapsed, imageHeightCollapsed)
+                .clip(MaterialTheme.shapes.large)
+                .placeholder(
+                    visible = true,
+                    highlight = PlaceholderHighlight.shimmer(),
+                )
+        )
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(40.dp)
+                .padding(start = 16.dp)
+                .placeholder(
+                    visible = true,
+                    highlight = PlaceholderHighlight.shimmer(),
+                )
+        )
+    }
 }
 
 @Preview
