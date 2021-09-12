@@ -33,7 +33,7 @@ interface IEXService {
 
     @GET("stock/market/list/mostactive")
     suspend fun fetchMostActiveSymbols(
-        @Query("listLimit") numberReturned: Int = 20
+        @Query("listLimit") numberReturned: Int
     ): ApiResponse<List<QuoteResponse>>
 
     @GET("stock/market/batch?types=quote")

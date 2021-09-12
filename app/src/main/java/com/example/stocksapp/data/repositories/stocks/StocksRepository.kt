@@ -37,6 +37,7 @@ class StocksRepository @Inject constructor(
 
     companion object {
         const val MAX_NEWS = 10
+        const val MOST_ACTIVE_COUNT = 20
     }
 
     @WorkerThread
@@ -241,7 +242,7 @@ class StocksRepository @Inject constructor(
         ).distinctUntilChanged().collect { cachedQuotes -> // TODO why is distinctUntilChanged needed?
             if (cachedQuotes.isEmpty()) { // TODO can there be cases where this check is not enough?
                 // API fetch
-                IEXService.fetchMostActiveSymbols().suspendOnSuccess(SuccessQuotesMapper) {
+                IEXService.fetchMostActiveSymbols(MOST_ACTIVE_COUNT).suspendOnSuccess(SuccessQuotesMapper) {
                     stocksDao.refreshTopActiveQuotes(this)
                 }.onError {
                     onError("Request failed with code ${statusCode.code}: $raw")

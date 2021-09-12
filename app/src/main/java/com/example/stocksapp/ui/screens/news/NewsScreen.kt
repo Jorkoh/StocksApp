@@ -2,12 +2,16 @@ package com.example.stocksapp.ui.screens.news
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -60,6 +64,14 @@ fun NewsContent(
             is NewsUIState.Error -> item { Text("ERROR ${state.message}") }
             is NewsUIState.Success -> {
                 items(state.news) { news ->
+                    val alpha = remember { Animatable(0f) }
+                    LaunchedEffect(alpha) {
+                        alpha.animateTo(
+                            targetValue = 1f,
+                            animationSpec = tween(durationMillis = 350, easing = LinearOutSlowInEasing)
+                        )
+                    }
+
                     NewsListItem(
                         news = news,
                         itemState = if (expandedNewsId == news.id) {

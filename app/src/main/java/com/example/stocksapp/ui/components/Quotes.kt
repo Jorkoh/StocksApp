@@ -96,6 +96,27 @@ fun QuoteListItem(
     }
 }
 
+@Composable
+fun QuoteListItemPlaceholder() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 12.dp)
+            .height(IntrinsicSize.Max),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+                .placeholder(
+                    visible = true,
+                    highlight = PlaceholderHighlight.shimmer(),
+                )
+        )
+    }
+}
+
 private val CARD_SIZE = 144.dp
 
 @Composable

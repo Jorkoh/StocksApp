@@ -42,20 +42,20 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 fun StocksApp() {
     val navController = rememberNavController()
     val systemUiController = rememberSystemUiController()
-    val colors = MaterialTheme.colors
-
-    SideEffect {
-        systemUiController.setSystemBarsColor(
-            color = colors.surface.copy(alpha = 0.85f),
-            darkIcons = colors.isLight
-        )
-    }
 
     ProvideWindowInsets(windowInsetsAnimationsEnabled = true) {
         StocksAppTheme {
+            val colors = MaterialTheme.colors
+            SideEffect {
+                systemUiController.setSystemBarsColor(
+                    color = colors.background.copy(alpha = 0.85f),
+                    darkIcons = colors.isLight
+                )
+            }
+
             Scaffold(
                 bottomBar = { NavigableBottomBar(navController) },
-                content = { innerPadding -> NavigableContent(innerPadding, navController) }
+                content = { innerPadding -> NavigableContent(innerPadding, navController) },
             )
         }
     }
@@ -124,7 +124,7 @@ private fun NavigableBottomBar(navController: NavHostController) {
             onDestinationSelected = { newDestination ->
                 if (lastNavigableDestination != newDestination) {
                     navController.navigate(newDestination.route) {
-                        popUpTo(navController.graph.startDestinationId){
+                        popUpTo(navController.graph.startDestinationId) {
                             saveState = true
                         }
                         launchSingleTop = true

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -32,8 +33,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.stocksapp.R
-import com.example.stocksapp.ui.components.LoadingIndicator
+import com.example.stocksapp.data.repositories.stocks.StocksRepository.Companion.MOST_ACTIVE_COUNT
 import com.example.stocksapp.ui.components.QuoteListItem
+import com.example.stocksapp.ui.components.QuoteListItemPlaceholder
 import com.example.stocksapp.ui.components.QuoteWithChartCard
 import com.example.stocksapp.ui.components.QuoteWithChartCardPlaceholder
 import com.example.stocksapp.ui.components.SectionTitle
@@ -110,9 +112,10 @@ private fun EmptyUserTrackedSymbols() {
     ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_tracked),
-            contentDescription = stringResource(id = R.string.track)
+            contentDescription = stringResource(id = R.string.track),
+            modifier = Modifier.size(32.dp)
         )
-        Spacer(modifier = Modifier.width(4.dp))
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = stringResource(id = R.string.user_symbols_section_suggestion),
             style = MaterialTheme.typography.h6.copy(fontSize = 18.sp)
@@ -150,27 +153,40 @@ private fun LazyListScope.activeQuotesSection(
 ) {
     item { SectionTitle(stringResource(R.string.active_symbols_section_title)) }
     when (val state = activeSymbolsUIState.value) {
-        is ActiveSymbolsUIState.Loading -> item { LoadingIndicator(Modifier.padding(top = 24.dp)) }
+        is ActiveSymbolsUIState.Loading -> {
+            placeholderActiveQuotes()
+        }
         is ActiveSymbolsUIState.Error -> item { Text(state.message) }
         is ActiveSymbolsUIState.Success -> {
-            items(
-                items = state.quotes,
-                key = { it.symbol }
-            ) { quote ->
-                val alpha = remember { Animatable(0f) }
-                LaunchedEffect(alpha) {
-                    alpha.animateTo(
-                        targetValue = 1f,
-                        animationSpec = tween(durationMillis = 350, easing = LinearOutSlowInEasing)
-                    )
-                }
-
-                QuoteListItem(
-                    quote = quote,
-                    onClick = { onSymbolSelected(quote.symbol) },
-                    modifier = Modifier.alpha(alpha.value)
-                )
-            }
+            activeQuotes(state, onSymbolSelected)
         }
+    }
+}
+
+private fun LazyListScope.placeholderActiveQuotes() {
+    items(MOST_ACTIVE_COUNT) { QuoteListItemPlaceholder() }
+}
+
+private fun LazyListScope.activeQuotes(
+    state: ActiveSymbolsUIState.Success,
+    onSymbolSelected: (String) -> Unit
+) {
+    items(
+        items = state.quotes,
+        key = { it.symbol }
+    ) { quote ->
+        val alpha = remember { Animatable(0f) }
+        LaunchedEffect(alpha) {
+            alpha.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 350, easing = LinearOutSlowInEasing)
+            )
+        }
+
+        QuoteListItem(
+            quote = quote,
+            onClick = { onSymbolSelected(quote.symbol) },
+            modifier = Modifier.alpha(alpha.value)
+        )
     }
 }
