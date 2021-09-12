@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.stocksapp.data.model.Quote
 import com.example.stocksapp.ui.components.charts.line.LineChart
 import com.example.stocksapp.ui.components.charts.line.LineChartData
@@ -109,7 +110,7 @@ fun QuoteChange(
     Box(modifier = backgroundModifier.padding(horizontal = 2.dp)) {
         Text(
             text = "${"%+.2f".format(changePercent * 100)}%",
-            style = MaterialTheme.typography.subtitle1,
+            style = MaterialTheme.typography.subtitle1.copy(fontSize = 12.sp),
             textAlign = TextAlign.End,
             color = changeColor
         )

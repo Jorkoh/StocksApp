@@ -39,7 +39,7 @@ val typography = Typography(
     subtitle1 = TextStyle(
         fontFamily = Inter,
         fontWeight = FontWeight.W500,
-        fontSize = 12.sp
+        fontSize = 14.sp
     ),
     subtitle2 = TextStyle(
         fontFamily = Inter,
@@ -55,5 +55,10 @@ val typography = Typography(
         fontFamily = Inter,
         fontWeight = FontWeight.W400,
         fontSize = 14.sp
+    ),
+    caption = TextStyle(
+        fontFamily = Inter,
+        fontWeight = FontWeight.W400,
+        fontSize = 12.sp
     )
 )

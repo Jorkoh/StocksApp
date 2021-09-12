@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
 import com.example.stocksapp.R
 import com.example.stocksapp.data.model.News
@@ -211,7 +212,7 @@ private fun NewsImage(
             Text(
                 text = stringResource(R.string.read_more_button),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.subtitle1,
+                style = MaterialTheme.typography.subtitle1.copy(fontSize = 12.sp),
                 textDecoration = TextDecoration.Underline,
                 modifier = Modifier.fillMaxWidth()
             )

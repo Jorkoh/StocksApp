@@ -83,6 +83,7 @@ private fun SearchField(
     ) {
         OutlinedTextField(
             value = query,
+            singleLine = true,
             label = { Text(stringResource(id = R.string.search_field_label)) },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 cursorColor = MaterialTheme.colors.onBackground,
