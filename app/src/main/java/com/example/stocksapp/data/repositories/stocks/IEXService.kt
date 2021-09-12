@@ -6,6 +6,7 @@ import com.example.stocksapp.data.model.network.NewsResponse
 import com.example.stocksapp.data.model.network.PriceResponse
 import com.example.stocksapp.data.model.network.QuoteResponse
 import com.example.stocksapp.data.model.network.SymbolResponse
+import com.example.stocksapp.data.model.network.SymbolType
 import com.example.stocksapp.data.repositories.utils.BatchedNews
 import com.example.stocksapp.data.repositories.utils.BatchedNewsAdapter
 import com.example.stocksapp.data.repositories.utils.BatchedQuotes
@@ -16,6 +17,7 @@ import com.example.stocksapp.data.repositories.utils.LocalDateAdapter
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.coroutines.CoroutinesResponseCallAdapterFactory
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.adapters.EnumJsonAdapter
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -88,6 +90,10 @@ interface IEXService {
                 .addConverterFactory(
                     MoshiConverterFactory.create(
                         Moshi.Builder()
+                            .add(
+                                SymbolType::class.java,
+                                EnumJsonAdapter.create(SymbolType::class.java).withUnknownFallback(SymbolType.Unknown)
+                            )
                             .add(BatchedQuotesAdapter())
                             .add(BatchedNewsAdapter())
                             .add(LocalDateAdapter())

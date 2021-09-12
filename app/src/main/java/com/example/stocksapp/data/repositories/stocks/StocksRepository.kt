@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
-import timber.log.Timber
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -210,9 +209,10 @@ class StocksRepository @Inject constructor(
             symbols = symbols,
             timestampCutoff = Instant.now().minus(1, ChronoUnit.HOURS)
         ).distinctUntilChanged().collect { cachedQuotes -> // TODO why is distinctUntilChanged needed?
-            if (cachedQuotes.isEmpty()) {
+            if (cachedQuotes.size != symbols.size) {
+                val missingSymbols = symbols.minus(cachedQuotes.map { it.symbol })
                 // API fetch
-                IEXService.fetchQuotes(symbols.joinToString(",")).suspendOnSuccess(SuccessQuotesMapper) {
+                IEXService.fetchQuotes(missingSymbols.joinToString(",")).suspendOnSuccess(SuccessQuotesMapper) {
                     stocksDao.insertQuotes(this)
                 }.onError {
                     onError("Request failed with code ${statusCode.code}: $raw")
@@ -235,7 +235,7 @@ class StocksRepository @Inject constructor(
             isTopActive = true,
             timestampCutoff = Instant.now().minus(1, ChronoUnit.HOURS)
         ).distinctUntilChanged().collect { cachedQuotes -> // TODO why is distinctUntilChanged needed?
-            if (cachedQuotes.isEmpty()) {
+            if (cachedQuotes.isEmpty()) { // TODO can there be cases where this check is not enough?
                 // API fetch
                 IEXService.fetchMostActiveSymbols().suspendOnSuccess(SuccessQuotesMapper) {
                     stocksDao.refreshTopActiveQuotes(this)
@@ -317,10 +317,11 @@ class StocksRepository @Inject constructor(
     @WorkerThread
     fun fetchSymbols(
         query: String,
+        limit: Int = Int.MAX_VALUE,
         onStart: () -> Unit,
         onError: (String) -> Unit
     ) = flow {
-        val symbols = stocksDao.getSymbolsByQuery(query)
+        val symbols = stocksDao.getSymbolsByQuery(query, limit)
         emit(symbols)
     }.onStart { onStart() }.flowOn(Dispatchers.IO)
 
@@ -331,9 +332,7 @@ class StocksRepository @Inject constructor(
     ) {
         onStart()
         IEXService.fetchSymbols().suspendOnSuccess(SuccessSymbolsMapper) {
-            Timber.d("ABOUT TO REFRESH SYMBOLS")
             stocksDao.refreshSymbols(this)
-            Timber.d("REFRESHED SYMBOLS")
         }.onError {
             onError("Request failed with code ${statusCode.code}: $raw")
         }.onException {

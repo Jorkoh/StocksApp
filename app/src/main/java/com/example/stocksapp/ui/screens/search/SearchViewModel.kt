@@ -17,27 +17,45 @@ class SearchViewModel @Inject constructor(
     private val stocksRepository: StocksRepository
 ) : ViewModel() {
 
-    private val _searchUIState = MutableStateFlow<SearchUIState>(SearchUIState.Loading)
+    private val _searchUIState = MutableStateFlow<SearchUIState>(SearchUIState.Empty)
     val searchUIState: StateFlow<SearchUIState> = _searchUIState
 
     private var getQueriedSymbolsJob: Job? = null
 
     fun onQueryChanged(newQuery: String) {
         getQueriedSymbolsJob?.cancel()
-        getQueriedSymbolsJob = viewModelScope.launch {
-            stocksRepository.fetchSymbols(
-                query = newQuery,
-                onStart = { _searchUIState.value = SearchUIState.Loading },
-                onError = { _searchUIState.value = SearchUIState.Error(it) }
-            ).collect { results ->
-                _searchUIState.value = SearchUIState.Success(results)
+        if (newQuery.isBlank()) {
+            _searchUIState.value = SearchUIState.Empty
+        } else {
+            getQueriedSymbolsJob = viewModelScope.launch {
+                stocksRepository.fetchSymbols(
+                    query = newQuery,
+                    limit = 15,
+                    onStart = {
+                        _searchUIState.value = SearchUIState.InUse(
+                            results = when (val state = _searchUIState.value){
+                                is SearchUIState.InUse -> state.results
+                                else -> emptyList()
+                            },
+                            loading = true,
+                            query = newQuery
+                        )
+                    },
+                    onError = { _searchUIState.value = SearchUIState.Error(it, _searchUIState.value.query) }
+                ).collect { results ->
+                    _searchUIState.value = SearchUIState.InUse(
+                        results = results,
+                        loading = false,
+                        query = _searchUIState.value.query
+                    )
+                }
             }
         }
     }
 }
 
-sealed class SearchUIState {
-    object Loading : SearchUIState()
-    data class Success(val results: List<Symbol>) : SearchUIState()
-    data class Error(val message: String) : SearchUIState()
+sealed class SearchUIState(val query: String) {
+    object Empty : SearchUIState("")
+    class InUse(val results: List<Symbol>, loading: Boolean, query: String) : SearchUIState(query)
+    class Error(val message: String, query: String) : SearchUIState(query)
 }

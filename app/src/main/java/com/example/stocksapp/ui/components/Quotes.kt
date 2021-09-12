@@ -46,12 +46,12 @@ import kotlin.random.Random
 fun QuoteListItem(
     quote: Quote,
     modifier: Modifier = Modifier,
-    onSymbolSelected: (String) -> Unit
+    onClick: () -> Unit
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = { onSymbolSelected(quote.symbol) })
+            .clickable(onClick =  onClick)
             .padding(horizontal = 24.dp, vertical = 12.dp)
             .height(IntrinsicSize.Max),
         verticalAlignment = Alignment.CenterVertically
@@ -177,7 +177,7 @@ fun QuoteListItemsPreview() {
                 items(items = quotes) {
                     QuoteListItem(
                         quote = it,
-                        onSymbolSelected = {}
+                        onClick = {}
                     )
                 }
             }

@@ -35,6 +35,7 @@ import com.example.stocksapp.ui.screens.stockdetail.StockDetailScreen
 import com.example.stocksapp.ui.screens.stockdetail.stockDetailViewModel
 import com.example.stocksapp.ui.theme.StocksAppTheme
 import com.google.accompanist.insets.ProvideWindowInsets
+import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
@@ -50,7 +51,7 @@ fun StocksApp() {
         )
     }
 
-    ProvideWindowInsets {
+    ProvideWindowInsets(windowInsetsAnimationsEnabled = true) {
         StocksAppTheme {
             Scaffold(
                 bottomBar = { NavigableBottomBar(navController) },
@@ -132,6 +133,7 @@ private fun NavigableBottomBar(navController: NavHostController) {
                 }
             },
             destinations = NavigableDestination.listAll(),
+            modifier = Modifier.navigationBarsWithImePadding()
         )
     }
 }

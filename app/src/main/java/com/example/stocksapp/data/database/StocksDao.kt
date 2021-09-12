@@ -2,7 +2,6 @@ package com.example.stocksapp.data.database
 
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -22,8 +21,8 @@ interface StocksDao {
 
     // SYMBOLS
 
-    @Query("SELECT * FROM symbols WHERE symbol LIKE '%' ||:query ||'%'")
-    suspend fun getSymbolsByQuery(query: String): List<Symbol>
+    @Query("SELECT * FROM symbols WHERE symbol LIKE '%' ||:query ||'%' ORDER BY LENGTH(symbol) ASC LIMIT :limit")
+    suspend fun getSymbolsByQuery(query: String, limit: Int): List<Symbol>
 
     @Transaction
     suspend fun refreshSymbols(newSymbols: List<Symbol>) {

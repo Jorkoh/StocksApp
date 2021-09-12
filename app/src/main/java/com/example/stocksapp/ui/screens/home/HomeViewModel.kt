@@ -18,7 +18,7 @@ class HomeViewModel @Inject constructor(
     private val stocksRepository: StocksRepository
 ) : ViewModel() {
 
-    private var getUserSymbolsJob: Job? = null
+    private var getUserTrackedSymbolsJob: Job? = null
     private val _trackedSymbolsUIState = MutableStateFlow<TrackedSymbolsUIState>(TrackedSymbolsUIState.Loading)
     val trackedSymbolsUIState: StateFlow<TrackedSymbolsUIState> = _trackedSymbolsUIState
 
@@ -27,14 +27,14 @@ class HomeViewModel @Inject constructor(
     val activeSymbolsUIState: StateFlow<ActiveSymbolsUIState> = _activeSymbolsUIState
 
     init {
-        getUserSymbols()
+        getUserTrackedSymbols()
         getTopActiveQuotes()
     }
 
-    private fun getUserSymbols() {
-        getUserSymbolsJob?.cancel()
+    private fun getUserTrackedSymbols() {
+        getUserTrackedSymbolsJob?.cancel()
         // TODO also need to get the quotes here, not just the chart prices
-        getUserSymbolsJob = viewModelScope.launch {
+        getUserTrackedSymbolsJob = viewModelScope.launch {
             stocksRepository.fetchTrackedSymbols(
                 onStart = { _trackedSymbolsUIState.value = TrackedSymbolsUIState.Loading },
                 onError = { _trackedSymbolsUIState.value = TrackedSymbolsUIState.Error(it) }

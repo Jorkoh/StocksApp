@@ -12,5 +12,23 @@
     <string name="news_section_title">The news</string>
     <string name="read_more_button">READ MORE</string>
 
+    <string name="search_section_title">Search</string>
+    <string name="search_field_label">Find symbols</string>
+    <string name="search">Search</string>
+    <string name="clear">Clear</string>
+
+    <string name="ad_symbol_type_name">ADR</string>
+    <string name="cs_symbol_type_name">Common Stock</string>
+    <string name="cef_symbol_type_name">Closed End Fund</string>
+    <string name="et_symbol_type_name">ETF</string>
+    <string name="oef_symbol_type_name">Open Ended Fund</string>
+    <string name="ps_symbol_type_name">Preferred Stock</string>
+    <string name="rt_symbol_type_name">Right</string>
+    <string name="struct_symbol_type_name">Structured Product</string>
+    <string name="ut_symbol_type_name">Unit</string>
+    <string name="wi_symbol_type_name">When Issued</string>
+    <string name="wt_symbol_type_name">Warrant</string>
+    <string name="unknown_symbol_type_name">Unknown</string>
+
     <string name="label_back">Back</string>
 </resources>

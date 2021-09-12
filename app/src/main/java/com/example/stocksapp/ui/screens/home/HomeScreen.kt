@@ -57,13 +57,13 @@ fun HomeContent(
 ) {
     LazyColumn(modifier.fillMaxSize()) {
         item { Spacer(modifier = Modifier.statusBarsPadding()) }
-        userSymbolsSection(trackedSymbolsUIState, onSymbolSelected)
-        activeSymbolsSection(activeSymbolsUIState, onSymbolSelected)
+        userTrackedSymbolsSection(trackedSymbolsUIState, onSymbolSelected)
+        activeQuotesSection(activeSymbolsUIState, onSymbolSelected)
     }
 }
 
 // TODO pass actual state and quotes with charts here
-private fun LazyListScope.userSymbolsSection(
+private fun LazyListScope.userTrackedSymbolsSection(
     trackedSymbolsUIState: State<TrackedSymbolsUIState>,
     onSymbolSelected: (String) -> Unit,
 ) {
@@ -97,7 +97,7 @@ private fun LazyListScope.userSymbolsSection(
     }
 }
 
-private fun LazyListScope.activeSymbolsSection(
+private fun LazyListScope.activeQuotesSection(
     activeSymbolsUIState: State<ActiveSymbolsUIState>,
     onSymbolSelected: (String) -> Unit,
 ) {
@@ -120,7 +120,7 @@ private fun LazyListScope.activeSymbolsSection(
 
                 QuoteListItem(
                     quote = quote,
-                    onSymbolSelected = onSymbolSelected,
+                    onClick = { onSymbolSelected(quote.symbol) },
                     modifier = Modifier.alpha(alpha.value)
                 )
             }

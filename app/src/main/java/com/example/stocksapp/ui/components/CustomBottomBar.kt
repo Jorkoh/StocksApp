@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import com.example.stocksapp.ui.screens.NavigableDestination
 import com.example.stocksapp.ui.theme.StocksAppTheme
-import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.navigationBarsPadding
 import kotlinx.coroutines.launch
 
@@ -54,6 +53,7 @@ fun CustomBottomBar(
     currentDestination: NavigableDestination,
     onDestinationSelected: (NavigableDestination) -> Unit,
     destinations: List<NavigableDestination>,
+    modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colors.primary,
     indicatorColor: Color = MaterialTheme.colors.secondary,
     unselectedColor: Color = contentColorFor(backgroundColor),
@@ -62,7 +62,7 @@ fun CustomBottomBar(
     Surface(
         color = backgroundColor,
         elevation = 8.dp,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         val springSpec = remember { SpringSpec<Float>(stiffness = 300f) }
         Column {
@@ -275,28 +275,24 @@ private val CustomBottomBarItemPadding = Modifier.padding(horizontal = 16.dp, ve
 @Preview
 @Composable
 private fun CustomBottomBarPreview() {
-    ProvideWindowInsets {
-        StocksAppTheme {
-            CustomBottomBar(
-                currentDestination = previewDestinations.first(),
-                onDestinationSelected = { },
-                destinations = previewDestinations
-            )
-        }
+    StocksAppTheme {
+        CustomBottomBar(
+            currentDestination = previewDestinations.first(),
+            onDestinationSelected = { },
+            destinations = previewDestinations
+        )
     }
 }
 
 @Preview
 @Composable
 private fun CustomBottomBarPreviewDark() {
-    ProvideWindowInsets {
-        StocksAppTheme(darkTheme = true) {
-            CustomBottomBar(
-                currentDestination = previewDestinations.first(),
-                onDestinationSelected = { },
-                destinations = previewDestinations
-            )
-        }
+    StocksAppTheme(darkTheme = true) {
+        CustomBottomBar(
+            currentDestination = previewDestinations.first(),
+            onDestinationSelected = { },
+            destinations = previewDestinations
+        )
     }
 }
 
