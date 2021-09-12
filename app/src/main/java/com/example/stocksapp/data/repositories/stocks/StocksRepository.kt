@@ -176,12 +176,12 @@ class StocksRepository @Inject constructor(
             }
         }
         if (!apiPrices.last().date.isEqual(lastDate)) {
-            // missing days at the start, add them
-            var runningDate = firstDate
+            // missing days at the end, add them
+            var runningDate = apiPrices.last().date
             do {
-                missingPrices.add(generateEmptyPrice(symbol, runningDate, apiPrices.last().closePrice, timestamp))
                 runningDate = runningDate.plusDays(1)
-            } while (!runningDate.isEqual(apiPrices.last().date))
+                missingPrices.add(generateEmptyPrice(symbol, runningDate, apiPrices.last().closePrice, timestamp))
+            } while (!runningDate.isEqual(lastDate))
         }
         return missingPrices
     }
