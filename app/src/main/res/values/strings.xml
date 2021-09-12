@@ -7,6 +7,7 @@
     <string name="destination_profile">Profile</string>
 
     <string name="user_symbols_section_title">Your picks</string>
+    <string name="user_symbols_section_suggestion">symbols to see them here!</string>
     <string name="active_symbols_section_title">The market</string>
 
     <string name="news_section_title">The news</string>
@@ -30,5 +31,8 @@
     <string name="wt_symbol_type_name">Warrant</string>
     <string name="unknown_symbol_type_name">Unknown</string>
 
-    <string name="label_back">Back</string>
+    <string name="track">Track</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not tracked</string>
+    <string name="back">Back</string>
 </resources>

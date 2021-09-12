@@ -24,6 +24,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,6 +40,9 @@ import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.NoYAxisDra
 import com.example.stocksapp.ui.theme.StocksAppTheme
 import com.example.stocksapp.ui.theme.loss
 import com.example.stocksapp.ui.theme.profit
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.material.shimmer
 import java.time.Instant
 import kotlin.math.sign
 import kotlin.random.Random
@@ -52,7 +56,7 @@ fun QuoteListItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick =  onClick)
+            .clickable(onClick = onClick)
             .padding(horizontal = 24.dp, vertical = 12.dp)
             .height(IntrinsicSize.Max),
         verticalAlignment = Alignment.CenterVertically
@@ -92,30 +96,7 @@ fun QuoteListItem(
     }
 }
 
-@Composable
-fun QuoteChange(
-    sign: Double,
-    changePercent: Double,
-    modifier: Modifier = Modifier
-) {
-    val changeColor = when (sign) {
-        -1.0 -> MaterialTheme.colors.loss
-        1.0 -> MaterialTheme.colors.profit
-        else -> LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
-    }
-    val backgroundModifier = modifier.background(
-        shape = MaterialTheme.shapes.small,
-        color = changeColor.copy(alpha = 0.1f)
-    )
-    Box(modifier = backgroundModifier.padding(horizontal = 2.dp)) {
-        Text(
-            text = "${"%+.2f".format(changePercent * 100)}%",
-            style = MaterialTheme.typography.subtitle1.copy(fontSize = 12.sp),
-            textAlign = TextAlign.End,
-            color = changeColor
-        )
-    }
-}
+private val CARD_SIZE = 144.dp
 
 @Composable
 fun QuoteWithChartCard(
@@ -127,7 +108,7 @@ fun QuoteWithChartCard(
     Card(
         modifier = modifier
             .clickable(onClick = { onSymbolSelected(quote.symbol) })
-            .size(144.dp),
+            .size(CARD_SIZE),
         elevation = 4.dp
     ) {
         Column(modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 4.dp)) {
@@ -164,6 +145,44 @@ fun QuoteWithChartCard(
             }
         }
     }
+}
+
+@Composable
+private fun QuoteChange(
+    sign: Double,
+    changePercent: Double,
+    modifier: Modifier = Modifier
+) {
+    val changeColor = when (sign) {
+        -1.0 -> MaterialTheme.colors.loss
+        1.0 -> MaterialTheme.colors.profit
+        else -> LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+    }
+    val backgroundModifier = modifier.background(
+        shape = MaterialTheme.shapes.small,
+        color = changeColor.copy(alpha = 0.1f)
+    )
+    Box(modifier = backgroundModifier.padding(horizontal = 2.dp)) {
+        Text(
+            text = "${"%+.2f".format(changePercent * 100)}%",
+            style = MaterialTheme.typography.subtitle1.copy(fontSize = 12.sp),
+            textAlign = TextAlign.End,
+            color = changeColor
+        )
+    }
+}
+
+@Composable
+fun QuoteWithChartCardPlaceholder() {
+    Box(
+        modifier = Modifier
+            .size(CARD_SIZE)
+            .clip(MaterialTheme.shapes.medium)
+            .placeholder(
+                visible = true,
+                highlight = PlaceholderHighlight.shimmer(),
+            )
+    )
 }
 
 @Preview

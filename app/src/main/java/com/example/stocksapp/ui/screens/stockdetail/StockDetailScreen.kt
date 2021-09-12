@@ -105,7 +105,7 @@ fun StockDetailTopBar(
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_back),
-                    contentDescription = stringResource(R.string.label_back)
+                    contentDescription = stringResource(R.string.back)
                 )
             }
             Text(
@@ -121,12 +121,18 @@ fun StockDetailTopBar(
                 Icon(
                     painter = painterResource(
                         if (stockDetailUIState.value.isTracked) {
-                            R.drawable.ic_track_on
+                            R.drawable.ic_not_tracked
                         } else {
-                            R.drawable.ic_track_off
+                            R.drawable.ic_not_tracked
                         }
                     ),
-                    contentDescription = stringResource(R.string.label_back)
+                    contentDescription = stringResource(
+                        if (stockDetailUIState.value.isTracked) {
+                            R.string.tracked
+                        } else {
+                            R.string.not_tracked
+                        }
+                    )
                 )
             }
         }
