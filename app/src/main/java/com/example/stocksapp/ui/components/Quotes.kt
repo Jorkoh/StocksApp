@@ -97,9 +97,9 @@ fun QuoteListItem(
 }
 
 @Composable
-fun QuoteListItemPlaceholder() {
+fun QuoteListItemPlaceholder(modifier: Modifier = Modifier) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 12.dp)
             .height(IntrinsicSize.Max),
@@ -194,9 +194,9 @@ private fun QuoteChange(
 }
 
 @Composable
-fun QuoteWithChartCardPlaceholder() {
+fun QuoteWithChartCardPlaceholder(modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .size(CARD_SIZE)
             .clip(MaterialTheme.shapes.medium)
             .placeholder(

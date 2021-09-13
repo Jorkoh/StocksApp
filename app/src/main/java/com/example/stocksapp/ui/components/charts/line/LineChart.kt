@@ -42,7 +42,6 @@ fun LineChart(
     profitColor: Color = MaterialTheme.colors.profit,
     lossColor: Color = MaterialTheme.colors.loss,
     neutralColor: Color = MaterialTheme.colors.onPrimary,
-    animate: Boolean = true
 ) {
     // Used to represent the data to transition from while animating between different data
     var oldData by remember { mutableStateOf(lineChartData) }
@@ -51,24 +50,19 @@ fun LineChart(
     // Used to represent the data currently being charted
     var visibleData by remember { mutableStateOf(lineChartData) }
 
+    val lineColor = remember { Animatable(neutralColor) }
     val lineLength = remember { Animatable(0f) }
     val interpolationProgress = remember { Animatable(1f) }
-    val lineColor = remember { Animatable(neutralColor) }
 
     // Controls the color
     LaunchedEffect(lineChartData.points) {
         lineColor.animateTo(
-            when {
+            targetValue = when {
                 lineChartData.points.last().value > lineChartData.points.first().value -> profitColor
                 lineChartData.points.last().value < lineChartData.points.first().value -> lossColor
                 else -> neutralColor
-            },
-            animationSpec = spec()
+            }, animationSpec = spec()
         )
-    }
-
-    LaunchedEffect(lineLength) {
-        lineLength.animateTo(1f, animationSpec = spec())
     }
 
     // Controls the length

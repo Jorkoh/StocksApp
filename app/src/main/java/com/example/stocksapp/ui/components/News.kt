@@ -291,8 +291,8 @@ private fun NewsFoot(
 }
 
 @Composable
-fun NewsListItemPlaceholder() {
-    Row(Modifier.padding(horizontal = 24.dp, vertical = 14.dp)) {
+fun NewsListItemPlaceholder(modifier: Modifier = Modifier) {
+    Row(modifier.padding(horizontal = 24.dp, vertical = 14.dp)) {
         Box(
             modifier = Modifier
                 .size(imageWidthCollapsed, imageHeightCollapsed)

@@ -33,7 +33,6 @@ class HomeViewModel @Inject constructor(
 
     private fun getUserTrackedSymbols() {
         getUserTrackedSymbolsJob?.cancel()
-        // TODO also need to get the quotes here, not just the chart prices
         getUserTrackedSymbolsJob = viewModelScope.launch {
             stocksRepository.fetchTrackedSymbols(
                 onStart = { _trackedSymbolsUIState.value = TrackedSymbolsUIState.Loading },

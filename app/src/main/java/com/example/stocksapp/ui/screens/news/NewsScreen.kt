@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
@@ -60,7 +61,17 @@ fun NewsContent(
         item { Spacer(modifier = Modifier.statusBarsPadding()) }
         item { SectionTitle(stringResource(R.string.news_section_title)) }
         when (val state = newsUIState.value) {
-            is NewsUIState.Loading -> items(MAX_NEWS) { NewsListItemPlaceholder() }
+            is NewsUIState.Loading -> items(MAX_NEWS) {
+                val alpha = remember { Animatable(0f) }
+                LaunchedEffect(alpha) {
+                    alpha.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(durationMillis = 350, easing = LinearOutSlowInEasing)
+                    )
+                }
+
+                NewsListItemPlaceholder(Modifier.alpha(alpha.value))
+            }
             is NewsUIState.Error -> item { Text("ERROR ${state.message}") }
             is NewsUIState.Success -> {
                 items(state.news) { news ->
@@ -79,6 +90,7 @@ fun NewsContent(
                         } else {
                             ListItemState.Collapsed
                         },
+                        modifier = Modifier.alpha(alpha.value),
                         onClick = { expandedNewsId = if (expandedNewsId == news.id) null else news.id },
                         onReadMoreClicked = { onReadMoreClicked(news) }
                     )

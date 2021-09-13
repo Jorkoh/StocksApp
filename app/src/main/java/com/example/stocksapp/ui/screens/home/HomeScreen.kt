@@ -97,7 +97,17 @@ private fun PlaceholderUserTrackedSymbols() {
         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(5) { QuoteWithChartCardPlaceholder() }
+        items(5) {
+            val alpha = remember { Animatable(0f) }
+            LaunchedEffect(alpha) {
+                alpha.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(durationMillis = 350, easing = LinearOutSlowInEasing)
+                )
+            }
+
+            QuoteWithChartCardPlaceholder(modifier = Modifier.alpha(alpha.value))
+        }
     }
 }
 
@@ -164,7 +174,17 @@ private fun LazyListScope.activeQuotesSection(
 }
 
 private fun LazyListScope.placeholderActiveQuotes() {
-    items(MOST_ACTIVE_COUNT) { QuoteListItemPlaceholder() }
+    items(MOST_ACTIVE_COUNT) {
+        val alpha = remember { Animatable(0f) }
+        LaunchedEffect(alpha) {
+            alpha.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 350, easing = LinearOutSlowInEasing)
+            )
+        }
+
+        QuoteListItemPlaceholder(modifier = Modifier.alpha(alpha.value))
+    }
 }
 
 private fun LazyListScope.activeQuotes(
