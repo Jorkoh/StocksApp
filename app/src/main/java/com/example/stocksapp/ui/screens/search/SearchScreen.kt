@@ -28,7 +28,7 @@ import androidx.navigation.NavController
 import com.example.stocksapp.R
 import com.example.stocksapp.ui.components.SectionTitle
 import com.example.stocksapp.ui.components.SymbolListItem
-import com.example.stocksapp.ui.screens.NavigableScreen
+import com.example.stocksapp.ui.screens.Screen
 import com.google.accompanist.insets.statusBarsPadding
 
 @Composable
@@ -42,7 +42,7 @@ fun SearchScreen(
         modifier = modifier,
         onQueryChanged = viewModel::onQueryChanged,
         onSymbolCLicked = { symbol ->
-            navController.navigate(NavigableScreen.StockDetail.buildRoute(symbol))
+            navController.navigate(Screen.StockDetail.buildRoute(symbol))
         }
     )
 }

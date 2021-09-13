@@ -25,8 +25,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.stocksapp.ui.components.CustomBottomBar
-import com.example.stocksapp.ui.screens.NavigableDestination
-import com.example.stocksapp.ui.screens.NavigableScreen
+import com.example.stocksapp.ui.screens.RootDestination
+import com.example.stocksapp.ui.screens.Screen
 import com.example.stocksapp.ui.screens.home.HomeScreen
 import com.example.stocksapp.ui.screens.news.NewsScreen
 import com.example.stocksapp.ui.screens.profile.ProfileScreen
@@ -41,16 +41,27 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 @Composable
 fun StocksApp() {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
     val systemUiController = rememberSystemUiController()
 
     ProvideWindowInsets(windowInsetsAnimationsEnabled = true) {
         StocksAppTheme {
             val colors = MaterialTheme.colors
+            val currentScreen = Screen.listScreens().fastFirstOrNull {
+                it.route == navBackStackEntry?.destination?.route
+            }
+
             SideEffect {
-                systemUiController.setSystemBarsColor(
-                    color = colors.background.copy(alpha = 0.85f),
-                    darkIcons = colors.isLight
-                )
+                if (currentScreen != null) {
+                    systemUiController.setSystemBarsColor(
+                        color = if (currentScreen is RootDestination) {
+                            colors.background.copy(alpha = 0.85f)
+                        } else {
+                            colors.primary
+                        },
+                        darkIcons = colors.isLight
+                    )
+                }
             }
 
             Scaffold(
@@ -68,25 +79,25 @@ private fun NavigableContent(
 ) {
     NavHost(
         navController = navController,
-        startDestination = NavigableDestination.StartDestination.route,
+        startDestination = Screen.StartDestination.route,
         modifier = Modifier.padding(innerPadding)
     ) {
         // Base destinations
-        composable(NavigableDestination.Home.route) {
+        composable(Screen.Home.route) {
             HomeScreen(hiltViewModel(it), navController)
         }
-        composable(NavigableDestination.Search.route) {
+        composable(Screen.Search.route) {
             SearchScreen(hiltViewModel(it), navController)
         }
-        composable(NavigableDestination.News.route) {
+        composable(Screen.News.route) {
             NewsScreen(hiltViewModel(it), navController)
         }
-        composable(NavigableDestination.Profile.route) { ProfileScreen() }
+        composable(Screen.Profile.route) { ProfileScreen() }
 
         // Deeper screens
-        composable(NavigableScreen.StockDetail.routeWithArgument) { backStackEntry ->
+        composable(Screen.StockDetail.route) { backStackEntry ->
             val symbol = requireNotNull(
-                backStackEntry.arguments?.getString(NavigableScreen.StockDetail.argument)
+                backStackEntry.arguments?.getString(Screen.StockDetail.argument)
             )
             StockDetailScreen(stockDetailViewModel(symbol), navController)
         }
@@ -96,15 +107,12 @@ private fun NavigableContent(
 @Composable
 private fun NavigableBottomBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    var lastNavigableDestination by remember {
-        mutableStateOf<NavigableDestination>(NavigableDestination.StartDestination)
-    }
+    var lastNavigableDestination by remember { mutableStateOf(Screen.StartDestination) }
 
     val currentRoute = navBackStackEntry?.destination?.route ?: return
-    val currentNavigableDestination = NavigableDestination.listAll().fastFirstOrNull {
+    val currentNavigableDestination = Screen.listRootDestinations().fastFirstOrNull {
         it.route == currentRoute
     }?.let { currentNavigableDestination ->
-        // TODO: document why is this needed
         lastNavigableDestination = currentNavigableDestination
     }
 
@@ -132,7 +140,7 @@ private fun NavigableBottomBar(navController: NavHostController) {
                     }
                 }
             },
-            destinations = NavigableDestination.listAll(),
+            destinations = Screen.listRootDestinations(),
             modifier = Modifier.navigationBarsWithImePadding()
         )
     }

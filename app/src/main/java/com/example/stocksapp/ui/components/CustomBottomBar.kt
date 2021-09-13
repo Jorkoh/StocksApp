@@ -43,16 +43,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
-import com.example.stocksapp.ui.screens.NavigableDestination
+import com.example.stocksapp.ui.screens.RootDestination
+import com.example.stocksapp.ui.screens.Screen
 import com.example.stocksapp.ui.theme.StocksAppTheme
 import com.google.accompanist.insets.navigationBarsPadding
 import kotlinx.coroutines.launch
 
 @Composable
 fun CustomBottomBar(
-    currentDestination: NavigableDestination,
-    onDestinationSelected: (NavigableDestination) -> Unit,
-    destinations: List<NavigableDestination>,
+    currentDestination: RootDestination,
+    onDestinationSelected: (RootDestination) -> Unit,
+    destinations: List<RootDestination>,
     modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colors.primary,
     indicatorColor: Color = MaterialTheme.colors.secondary,
@@ -86,14 +87,14 @@ fun CustomBottomBar(
                     CustomBottomBarItem(
                         icon = {
                             Icon(
-                                painter = painterResource(section.destination.icon),
+                                painter = painterResource(section.icon),
                                 tint = tint,
                                 contentDescription = null
                             )
                         },
                         text = {
                             Text(
-                                text = stringResource(section.destination.title),
+                                text = stringResource(section.title),
                                 color = tint,
                                 style = MaterialTheme.typography.button,
                                 maxLines = 1
@@ -296,4 +297,4 @@ private fun CustomBottomBarPreviewDark() {
     }
 }
 
-val previewDestinations = NavigableDestination.listAll()
+val previewDestinations = Screen.listRootDestinations()

@@ -10,12 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -61,9 +62,16 @@ fun StockDetailContent(
     onTrackButtonPressed: () -> Unit,
     onChartRangeChange: () -> Unit
 ) {
+
     Scaffold(
         modifier = modifier,
-        topBar = { StockDetailTopBar(stockDetailUIState, onUpButtonPressed, onTrackButtonPressed) }
+        topBar = {
+            StockDetailTopBar(
+                stockDetailUIState = stockDetailUIState,
+                onUpButtonPressed = onUpButtonPressed,
+                onTrackButtonPressed = onTrackButtonPressed
+            )
+        }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -71,19 +79,6 @@ fun StockDetailContent(
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // TODO: add the logo somewhere
-            // Image(
-            //     painter = rememberImagePainter(
-            //         data = "https://storage.googleapis.com/iexcloud-hl37opg/api/logos/${quote.symbol}.png",
-            //         builder = {
-            //             crossfade(true)
-            //         }
-            //     ),
-            //     contentDescription = "${quote.symbol} logo",
-            //     modifier = Modifier
-            //         .size(48.dp)
-            //         .clip(MaterialTheme.shapes.medium)
-            // )
             ChartSection(stockDetailUIState.value.chartUIState, onChartRangeChange)
             Spacer(modifier = Modifier.height(20.dp))
             CompanyInfoSection(stockDetailUIState.value.companyInfoUIState)
@@ -97,7 +92,14 @@ fun StockDetailTopBar(
     onUpButtonPressed: () -> Unit,
     onTrackButtonPressed: () -> Unit
 ) {
-    TopAppBar(modifier = Modifier.statusBarsPadding()) {
+    Surface(
+        elevation = AppBarDefaults.TopAppBarElevation,
+        color = MaterialTheme.colors.primary,
+        modifier = Modifier
+            .statusBarsPadding()
+            .fillMaxWidth()
+            .height(56.dp)
+    ) {
         Box(modifier = Modifier.fillMaxSize()) {
             IconButton(
                 modifier = Modifier.align(Alignment.CenterStart),
@@ -111,7 +113,7 @@ fun StockDetailTopBar(
             Text(
                 text = stockDetailUIState.value.symbol,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.h6,
+                style = MaterialTheme.typography.h4,
                 modifier = Modifier.align(Alignment.Center)
             )
             IconButton(
@@ -153,8 +155,6 @@ fun ChartSection(
                 lineChartData = chartUIState.chartData,
                 linePathCalculator = BezierLinePathCalculator(),
                 lineDrawer = SolidLineDrawer(),
-                // xAxisDrawer = NoXAxisDrawer,
-                // yAxisDrawer = NoYAxisDrawer,
                 modifier = Modifier
                     .padding(12.dp)
                     .fillMaxWidth()
@@ -172,6 +172,18 @@ fun ChartSection(
 fun CompanyInfoSection(
     companyInfoUIState: StockDetailUIState.CompanyInfoUIState
 ) {
+    // Image(
+    //     painter = rememberImagePainter(
+    //         data = "https://storage.googleapis.com/iexcloud-hl37opg/api/logos/${quote.symbol}.png",
+    //         builder = {
+    //             crossfade(true)
+    //         }
+    //     ),
+    //     contentDescription = "${quote.symbol} logo",
+    //     modifier = Modifier
+    //         .size(48.dp)
+    //         .clip(MaterialTheme.shapes.medium)
+    // )
     Text(
         text = when (companyInfoUIState) {
             is StockDetailUIState.CompanyInfoUIState.Loading -> "LOADING..."
