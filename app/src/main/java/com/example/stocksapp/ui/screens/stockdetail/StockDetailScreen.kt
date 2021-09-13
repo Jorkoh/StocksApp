@@ -47,7 +47,7 @@ fun StockDetailScreen(
         stockDetailUIState = viewModel.stockDetailUIState.collectAsState(),
         modifier = modifier,
         onUpButtonPressed = { navController.navigateUp() },
-        onWatchButtonPressed = { viewModel.toggleIsTracked() },
+        onTrackButtonPressed = { viewModel.toggleIsTracked() },
         // TODO: temp for testing
         onChartRangeChange = { viewModel.refreshChartData() }
     )
@@ -58,12 +58,12 @@ fun StockDetailContent(
     stockDetailUIState: State<StockDetailUIState>,
     modifier: Modifier = Modifier,
     onUpButtonPressed: () -> Unit,
-    onWatchButtonPressed: () -> Unit,
+    onTrackButtonPressed: () -> Unit,
     onChartRangeChange: () -> Unit
 ) {
     Scaffold(
         modifier = modifier,
-        topBar = { StockDetailTopBar(stockDetailUIState, onUpButtonPressed, onWatchButtonPressed) }
+        topBar = { StockDetailTopBar(stockDetailUIState, onUpButtonPressed, onTrackButtonPressed) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -95,7 +95,7 @@ fun StockDetailContent(
 fun StockDetailTopBar(
     stockDetailUIState: State<StockDetailUIState>,
     onUpButtonPressed: () -> Unit,
-    onWatchButtonPressed: () -> Unit
+    onTrackButtonPressed: () -> Unit
 ) {
     TopAppBar(modifier = Modifier.statusBarsPadding()) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -116,12 +116,12 @@ fun StockDetailTopBar(
             )
             IconButton(
                 modifier = Modifier.align(Alignment.CenterEnd),
-                onClick = { onWatchButtonPressed() }
+                onClick = { onTrackButtonPressed() }
             ) {
                 Icon(
                     painter = painterResource(
                         if (stockDetailUIState.value.isTracked) {
-                            R.drawable.ic_not_tracked
+                            R.drawable.ic_tracked
                         } else {
                             R.drawable.ic_not_tracked
                         }

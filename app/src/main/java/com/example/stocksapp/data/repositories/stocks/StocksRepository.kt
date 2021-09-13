@@ -50,7 +50,7 @@ class StocksRepository @Inject constructor(
         symbol: String,
         isTracked: Boolean
     ) {
-        stocksDao.updateIsTracked(symbol, isTracked)
+        stocksDao.safeUpdateIsTracked(symbol, isTracked)
     }
 
     @WorkerThread

@@ -11,6 +11,7 @@ import com.example.stocksapp.data.model.News
 import com.example.stocksapp.data.model.Price
 import com.example.stocksapp.data.model.Quote
 import com.example.stocksapp.data.model.Symbol
+import com.example.stocksapp.data.model.network.SymbolType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import java.time.Instant
@@ -44,11 +45,36 @@ interface StocksDao {
     @Query("SELECT * FROM symbols WHERE userTracked = 1")
     fun getTrackedSymbols(): Flow<List<Symbol>>
 
-    @Query("SELECT EXISTS(SELECT 1 FROM symbols WHERE userTracked = 1 AND symbol = :symbol)")
+    @Query("SELECT IFNULL(MIN(userTracked), 0) FROM symbols WHERE symbol = :symbol")
     fun symbolIsTracked(symbol: String): Flow<Boolean>
+
+    @Transaction
+    suspend fun safeUpdateIsTracked(symbol: String, isTracked: Boolean) {
+        if (!symbolExists(symbol)) {
+            // safeguard in case the symbols table hasn't been populated
+            insertSymbols(
+                listOf(
+                    Symbol(
+                        symbol = symbol,
+                        creationDate = LocalDate.now(),
+                        type = SymbolType.Unknown,
+                        region = "US",
+                        currency = "USD",
+                        userTracked = isTracked,
+                        fetchTimestamp = Instant.now()
+                    )
+                )
+            )
+        } else {
+            updateIsTracked(symbol, isTracked)
+        }
+    }
 
     @Query("UPDATE symbols SET userTracked = :isTracked WHERE symbol = :symbol")
     suspend fun updateIsTracked(symbol: String, isTracked: Boolean)
+
+    @Query("SELECT EXISTS(SELECT 1 FROM symbols WHERE symbol = :symbol LIMIT 1)")
+    fun symbolExists(symbol: String): Boolean
 
     // QUOTES
 
