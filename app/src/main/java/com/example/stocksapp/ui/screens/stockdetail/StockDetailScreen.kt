@@ -154,7 +154,7 @@ fun StockDetailTopBar(
 @Composable
 fun ChartSection(
     chartUIState: StockDetailUIState.ChartUIState,
-    chartRange: ChartRange,
+    chartRange: ChartRange?,
     onChartRangeSelected: (ChartRange) -> Unit
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -178,11 +178,13 @@ fun ChartSection(
                 Text("ERROR: ${chartUIState.message}")
             }
         }
-        CustomChartRangeSelector(
-            currentRange = chartRange,
-            onRangeSelected = onChartRangeSelected,
-            ranges = ChartRange.values().toList(),
-        )
+        chartRange?.let {
+            CustomChartRangeSelector(
+                currentRange = it,
+                onRangeSelected = onChartRangeSelected,
+                ranges = ChartRange.values().toList(),
+            )
+        }
     }
 }
 

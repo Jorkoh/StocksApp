@@ -137,7 +137,7 @@ class StockDetailViewModel @AssistedInject constructor(
 data class StockDetailUIState(
     val symbol: String,
     val isTracked: Boolean = false,
-    val chartRange: ChartRange = ChartRange.DefaultRange,
+    val chartRange: ChartRange? = null,
     val companyInfoUIState: CompanyInfoUIState = CompanyInfoUIState.Loading,
     val chartUIState: ChartUIState = ChartUIState.Working(),
 ) {
