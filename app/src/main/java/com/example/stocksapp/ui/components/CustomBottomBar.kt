@@ -178,7 +178,7 @@ private fun CustomBottomBarItem(
     text: @Composable BoxScope.() -> Unit,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colors.secondary,
-    shape: Shape = CustomBottomBarIndicatorShape,
+    shape: Shape = IndicatorShape,
     selected: Boolean,
     onSelected: () -> Unit,
     animSpec: AnimationSpec<Float>
@@ -194,7 +194,7 @@ private fun CustomBottomBarItem(
                 indication = null
             )
             .fillMaxSize()
-            .then(CustomBottomBarItemPadding)
+            .then(ItemPadding)
             .clip(shape)
             .background(color.copy(alpha = animationProgress)),
         contentAlignment = Alignment.Center
@@ -269,8 +269,8 @@ private fun MeasureScope.placeTextAndIcon(
 private val TextIconSpacing = 4.dp
 private val BottomNavHeight = 64.dp
 private val BottomNavLabelTransformOrigin = TransformOrigin(0f, 0.5f)
-private val CustomBottomBarIndicatorShape = RoundedCornerShape(percent = 50)
-private val CustomBottomBarItemPadding = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+private val IndicatorShape = RoundedCornerShape(percent = 50)
+private val ItemPadding = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
 
 @Preview
 @Composable
@@ -296,4 +296,4 @@ private fun CustomBottomBarPreviewDark() {
     }
 }
 
-val previewDestinations = Screen.listRootDestinations()
+private val previewDestinations = Screen.listRootDestinations()
