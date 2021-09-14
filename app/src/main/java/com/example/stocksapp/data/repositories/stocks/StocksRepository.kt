@@ -1,6 +1,8 @@
 package com.example.stocksapp.data.repositories.stocks
 
+import androidx.annotation.StringRes
 import androidx.annotation.WorkerThread
+import com.example.stocksapp.R
 import com.example.stocksapp.data.database.StocksDao
 import com.example.stocksapp.data.model.Price
 import com.example.stocksapp.data.model.Quote
@@ -9,10 +11,7 @@ import com.example.stocksapp.data.model.utils.SuccessNewsMapper
 import com.example.stocksapp.data.model.utils.SuccessQuotesMapper
 import com.example.stocksapp.data.model.utils.SuccessSymbolsMapper
 import com.example.stocksapp.data.model.utils.mapToPrice
-import com.example.stocksapp.data.repositories.stocks.IEXService.ChartRanges.OneMonth
-import com.example.stocksapp.data.repositories.stocks.IEXService.ChartRanges.OneWeek
-import com.example.stocksapp.data.repositories.stocks.IEXService.ChartRanges.OneYear
-import com.example.stocksapp.data.repositories.stocks.IEXService.ChartRanges.ThreeMonths
+import com.example.stocksapp.data.repositories.stocks.ChartRange.*
 import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onException
 import com.skydoves.sandwich.suspendOnSuccess
@@ -94,7 +93,7 @@ class StocksRepository @Inject constructor(
     @WorkerThread
     fun fetchChartPrices(
         symbol: String,
-        range: IEXService.ChartRanges,
+        range: ChartRange,
         onStart: () -> Unit,
         onError: (String) -> Unit
     ) = flow {
@@ -115,7 +114,7 @@ class StocksRepository @Inject constructor(
                 OneYear -> minus(1, ChronoUnit.YEARS)
             }.plusDays(1)
         }
-        val daysBetween = firstDate.until(lastDate).plusDays(1).days
+        val daysBetween = (firstDate.until(lastDate, ChronoUnit.DAYS) + 1).toInt()
 
         stocksDao.getChartPrices(
             symbol = symbol,
@@ -343,5 +342,22 @@ class StocksRepository @Inject constructor(
         }.onException {
             onError("Error while requesting: $message")
         }
+    }
+}
+
+enum class ChartRange(private val urlString: String, @StringRes val uiStringResource: Int) {
+    OneWeek("7d", R.string.chart_range_one_week),
+    OneMonth("1m", R.string.chart_range_one_month),
+    ThreeMonths("3m", R.string.chart_range_three_months),
+    OneYear("1y", R.string.chart_range_one_year);
+    // All("max"); // TODO: Add "All" range support
+
+    companion object {
+        val DefaultRange = OneWeek
+    }
+
+    override fun toString(): String {
+        // To embed into retrofit path directly, not the proper way to do this
+        return urlString
     }
 }

@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option java_package = "com.example.stocksapp";
+option java_multiple_files = true;
+
+message Settings {
+  ChartRangeProto chart_range = 1;
+  enum ChartRangeProto {
+    ONE_WEEK = 0;
+    ONE_MONTH = 1;
+    THREE_MONTHS = 2;
+    ONE_YEAR = 3;
+  }
+}

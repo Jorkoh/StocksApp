@@ -3,8 +3,9 @@ package com.example.stocksapp.ui.screens.stockdetail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.stocksapp.data.datastore.SettingsDataStore
 import com.example.stocksapp.data.model.CompanyInfo
-import com.example.stocksapp.data.repositories.stocks.IEXService
+import com.example.stocksapp.data.repositories.stocks.ChartRange
 import com.example.stocksapp.data.repositories.stocks.StocksRepository
 import com.example.stocksapp.ui.components.charts.line.LineChartData
 import dagger.assisted.Assisted
@@ -18,6 +19,7 @@ import kotlinx.coroutines.launch
 
 class StockDetailViewModel @AssistedInject constructor(
     private val stocksRepository: StocksRepository,
+    private val settings: SettingsDataStore,
     @Assisted private val symbol: String
 ) : ViewModel() {
 
@@ -29,7 +31,7 @@ class StockDetailViewModel @AssistedInject constructor(
 
     init {
         getIsTracked()
-        getChart()
+        getChartRange()
         getCompanyInfo()
     }
 
@@ -41,15 +43,29 @@ class StockDetailViewModel @AssistedInject constructor(
         }
     }
 
-    private fun getChart() {
+    private fun getChartRange() {
+        viewModelScope.launch {
+            settings.chartRange.collect { chartRange ->
+                _stockDetailUIState.value = _stockDetailUIState.value.copy(chartRange = chartRange)
+                getChart(chartRange)
+            }
+        }
+    }
+
+    private fun getChart(chartRange: ChartRange) {
         getChartJob?.cancel()
         getChartJob = viewModelScope.launch {
             stocksRepository.fetchChartPrices(
                 symbol = symbol,
-                range = IEXService.ChartRanges.OneWeek,
+                range = chartRange,
                 onStart = {
                     _stockDetailUIState.value = _stockDetailUIState.value.copy(
-                        chartUIState = StockDetailUIState.ChartUIState.Loading
+                        chartUIState = when (val previousChartState = _stockDetailUIState.value.chartUIState) {
+                            is StockDetailUIState.ChartUIState.Error -> StockDetailUIState.ChartUIState.Working()
+                            is StockDetailUIState.ChartUIState.Working -> StockDetailUIState.ChartUIState.Working(
+                                chartData = previousChartState.chartData
+                            )
+                        }
                     )
                 },
                 onError = { message ->
@@ -59,10 +75,11 @@ class StockDetailViewModel @AssistedInject constructor(
                 }
             ).collect { chartPrices ->
                 _stockDetailUIState.value = _stockDetailUIState.value.copy(
-                    chartUIState = StockDetailUIState.ChartUIState.Success(
-                        LineChartData(chartPrices.map {
+                    chartUIState = StockDetailUIState.ChartUIState.Working(
+                        chartData = LineChartData(chartPrices.map {
                             LineChartData.Point(it.closePrice.toFloat(), it.date.toString())
-                        })
+                        }),
+                        loading = false
                     )
                 )
             }
@@ -98,9 +115,10 @@ class StockDetailViewModel @AssistedInject constructor(
         }
     }
 
-    // TODO: temp for testing
-    fun refreshChartData() {
-        getChart()
+    fun changeChartRange(newRange: ChartRange) {
+        viewModelScope.launch {
+            settings.setChartRange(newRange)
+        }
     }
 
     companion object {
@@ -119,8 +137,9 @@ class StockDetailViewModel @AssistedInject constructor(
 data class StockDetailUIState(
     val symbol: String,
     val isTracked: Boolean = false,
+    val chartRange: ChartRange = ChartRange.DefaultRange,
     val companyInfoUIState: CompanyInfoUIState = CompanyInfoUIState.Loading,
-    val chartUIState: ChartUIState = ChartUIState.Loading,
+    val chartUIState: ChartUIState = ChartUIState.Working(),
 ) {
     sealed class CompanyInfoUIState {
         object Loading : CompanyInfoUIState()
@@ -129,8 +148,7 @@ data class StockDetailUIState(
     }
 
     sealed class ChartUIState {
-        object Loading : ChartUIState()
-        class Success(val chartData: LineChartData) : ChartUIState()
+        class Working(val chartData: LineChartData = LineChartData(), val loading: Boolean = true) : ChartUIState()
         class Error(val message: String) : ChartUIState()
     }
 }

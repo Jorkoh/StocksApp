@@ -10,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -66,13 +65,13 @@ fun CustomBottomBar(
         modifier = modifier.fillMaxWidth()
     ) {
         val springSpec = remember { SpringSpec<Float>(stiffness = 300f) }
-        Column {
+        Box {
             CustomBottomBarLayout(
                 selectedIndex = destinations.indexOf(currentDestination),
                 itemCount = destinations.size,
                 animSpec = springSpec,
                 modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
+                    .align(Alignment.Center)
                     .navigationBarsPadding(start = false, end = false)
                     .fillMaxWidth(0.88f)
             ) {

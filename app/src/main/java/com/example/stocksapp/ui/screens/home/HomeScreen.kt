@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -87,16 +88,15 @@ private fun LazyListScope.userTrackedSymbolsSection(
                     if (state.chartPrices.isEmpty()) {
                         fadingItem { alphaModifier -> EmptyUserTrackedSymbols(alphaModifier) }
                     } else {
-                        fadingItems(
+                        items(
                             items = state.chartPrices,
                             key = { it.first.symbol }
-                        ) { quoteAndChartPrices, alphaModifier ->
+                        ) { quoteAndChartPrices ->
                             QuoteWithChartCard(
                                 quote = quoteAndChartPrices.first,
                                 chartData = LineChartData(quoteAndChartPrices.second.map {
                                     LineChartData.Point(it.closePrice.toFloat(), it.date.toString())
                                 }),
-                                modifier = alphaModifier,
                                 onSymbolSelected = onSymbolSelected
                             )
                         }

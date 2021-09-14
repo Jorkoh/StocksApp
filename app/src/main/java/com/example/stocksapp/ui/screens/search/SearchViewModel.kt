@@ -32,9 +32,9 @@ class SearchViewModel @Inject constructor(
                     query = newQuery,
                     limit = 15,
                     onStart = {
-                        _searchUIState.value = SearchUIState.InUse(
+                        _searchUIState.value = SearchUIState.Working(
                             results = when (val state = _searchUIState.value){
-                                is SearchUIState.InUse -> state.results
+                                is SearchUIState.Working -> state.results
                                 else -> emptyList()
                             },
                             loading = true,
@@ -43,7 +43,7 @@ class SearchViewModel @Inject constructor(
                     },
                     onError = { _searchUIState.value = SearchUIState.Error(it, _searchUIState.value.query) }
                 ).collect { results ->
-                    _searchUIState.value = SearchUIState.InUse(
+                    _searchUIState.value = SearchUIState.Working(
                         results = results,
                         loading = false,
                         query = _searchUIState.value.query
@@ -56,6 +56,6 @@ class SearchViewModel @Inject constructor(
 
 sealed class SearchUIState(val query: String) {
     object Empty : SearchUIState("")
-    class InUse(val results: List<Symbol>, loading: Boolean, query: String) : SearchUIState(query)
+    class Working(val results: List<Symbol>, loading: Boolean, query: String) : SearchUIState(query)
     class Error(val message: String, query: String) : SearchUIState(query)
 }

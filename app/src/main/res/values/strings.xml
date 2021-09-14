@@ -34,5 +34,9 @@
     <string name="track">Track</string>
     <string name="tracked">Tracked</string>
     <string name="not_tracked">Not tracked</string>
+    <string name="chart_range_one_week">1W</string>
+    <string name="chart_range_one_month">1M</string>
+    <string name="chart_range_three_months">3M</string>
+    <string name="chart_range_one_year">1Y</string>
     <string name="back">Back</string>
 </resources>

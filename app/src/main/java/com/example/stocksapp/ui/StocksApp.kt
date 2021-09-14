@@ -1,8 +1,11 @@
 package com.example.stocksapp.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -11,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,17 +54,17 @@ fun StocksApp() {
                 it.route == navBackStackEntry?.destination?.route
             }
 
-            SideEffect {
-                if (currentScreen != null) {
-                    systemUiController.setSystemBarsColor(
-                        color = if (currentScreen is RootDestination) {
-                            colors.background.copy(alpha = 0.85f)
-                        } else {
-                            colors.primary
-                        },
-                        darkIcons = colors.isLight
-                    )
-                }
+            val color by animateColorAsState(
+                targetValue = when (currentScreen) {
+                    is RootDestination -> colors.background.copy(alpha = 0.85f)
+                    !is RootDestination -> colors.primary
+                    else -> colors.background.copy(alpha = 0.85f)
+                },
+                animationSpec = spring(Spring.DampingRatioNoBouncy, 800F)
+            )
+
+            LaunchedEffect(color) {
+                systemUiController.setSystemBarsColor(color = color, darkIcons = colors.isLight)
             }
 
             Scaffold(

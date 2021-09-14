@@ -1,7 +1,7 @@
 package com.example.stocksapp.ui.components.charts.line
 
 data class LineChartData(
-    val points: List<Point> = emptyList(),
+    val points: List<Point> = listOf(Point(0f, ""), Point(0f, "")),
     val bottomPaddingRatio: Float = 0.2f,
     val topPaddingRatio: Float = 0.2f,
 ) {

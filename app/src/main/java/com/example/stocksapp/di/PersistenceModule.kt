@@ -3,6 +3,7 @@ package com.example.stocksapp.di
 import android.content.Context
 import com.example.stocksapp.data.database.AppDatabase
 import com.example.stocksapp.data.database.StocksDao
+import com.example.stocksapp.data.datastore.SettingsDataStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,4 +22,8 @@ object PersistenceModule {
     @Provides
     @Singleton
     fun provideStocksDao(appDatabase: AppDatabase): StocksDao = appDatabase.stocksDao()
+
+    @Provides
+    @Singleton
+    fun provideSettingsDataStore(@ApplicationContext context: Context): SettingsDataStore = SettingsDataStore(context)
 }

@@ -60,7 +60,7 @@ fun SearchContent(
         item { SearchField(query = searchUIState.value.query, onQueryChanged = onQueryChanged) }
         when (val state = searchUIState.value) {
             is SearchUIState.Error -> item { Text("ERROR") }
-            is SearchUIState.InUse -> items(state.results) { symbol ->
+            is SearchUIState.Working -> items(state.results) { symbol ->
                 SymbolListItem(
                     symbol = symbol,
                     onClick = { onSymbolCLicked(symbol.symbol) }

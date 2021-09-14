@@ -45,7 +45,7 @@ interface IEXService {
     @GET("stock/{symbol}/chart/{range}")
     suspend fun fetchChartPrices(
         @Path("symbol") symbol: String,
-        @Path("range") range: ChartRanges,
+        @Path("range") range: ChartRange,
         @Query("includeToday") includeToday: Boolean = false,
         @Query("chartCloseOnly") closeOnly: Boolean = true
     ): ApiResponse<List<PriceResponse>>
@@ -104,18 +104,6 @@ interface IEXService {
                 .addCallAdapterFactory(CoroutinesResponseCallAdapterFactory.create())
                 .build()
                 .create(IEXService::class.java)
-        }
-    }
-
-    enum class ChartRanges(private val urlString: String) {
-        OneWeek("7d"),
-        OneMonth("1m"),
-        ThreeMonths("3m"),
-        OneYear("1y");
-        // All("max"); // TODO: Add "All" range support
-
-        override fun toString(): String {
-            return urlString
         }
     }
 }

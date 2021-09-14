@@ -1,9 +1,12 @@
 package com.example.stocksapp.ui.screens.stockdetail
 
 import android.app.Activity
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,8 +23,10 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -31,10 +36,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.stocksapp.MainActivity
 import com.example.stocksapp.R
+import com.example.stocksapp.data.repositories.stocks.ChartRange
 import com.example.stocksapp.ui.components.LoadingIndicator
 import com.example.stocksapp.ui.components.charts.line.LineChart
 import com.example.stocksapp.ui.components.charts.line.renderer.line.SolidLineDrawer
 import com.example.stocksapp.ui.components.charts.line.renderer.path.BezierLinePathCalculator
+import com.example.stocksapp.ui.components.charts.line.renderer.xaxis.NoXAxisDrawer
+import com.example.stocksapp.ui.components.charts.line.renderer.yaxis.NoYAxisDrawer
 import com.google.accompanist.insets.statusBarsPadding
 import dagger.hilt.android.EntryPointAccessors
 
@@ -49,8 +57,7 @@ fun StockDetailScreen(
         modifier = modifier,
         onUpButtonPressed = { navController.navigateUp() },
         onTrackButtonPressed = { viewModel.toggleIsTracked() },
-        // TODO: temp for testing
-        onChartRangeChange = { viewModel.refreshChartData() }
+        onChartRangeSelected = { viewModel.changeChartRange(it) }
     )
 }
 
@@ -60,7 +67,7 @@ fun StockDetailContent(
     modifier: Modifier = Modifier,
     onUpButtonPressed: () -> Unit,
     onTrackButtonPressed: () -> Unit,
-    onChartRangeChange: () -> Unit
+    onChartRangeSelected: (ChartRange) -> Unit
 ) {
 
     Scaffold(
@@ -76,10 +83,15 @@ fun StockDetailContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .padding(innerPadding)
+                .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ChartSection(stockDetailUIState.value.chartUIState, onChartRangeChange)
+            ChartSection(
+                chartUIState = stockDetailUIState.value.chartUIState,
+                chartRange = stockDetailUIState.value.chartRange,
+                onChartRangeSelected = onChartRangeSelected
+            )
             Spacer(modifier = Modifier.height(20.dp))
             CompanyInfoSection(stockDetailUIState.value.companyInfoUIState)
         }
@@ -100,7 +112,11 @@ fun StockDetailTopBar(
             .fillMaxWidth()
             .height(56.dp)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(AppBarDefaults.ContentPadding)
+        ) {
             IconButton(
                 modifier = Modifier.align(Alignment.CenterStart),
                 onClick = { onUpButtonPressed() }
@@ -113,7 +129,7 @@ fun StockDetailTopBar(
             Text(
                 text = stockDetailUIState.value.symbol,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.h4,
+                style = MaterialTheme.typography.h5,
                 modifier = Modifier.align(Alignment.Center)
             )
             IconButton(
@@ -144,26 +160,45 @@ fun StockDetailTopBar(
 @Composable
 fun ChartSection(
     chartUIState: StockDetailUIState.ChartUIState,
-    onChartRangeChange: () -> Unit
+    chartRange: ChartRange,
+    onChartRangeSelected: (ChartRange) -> Unit
 ) {
-    when (chartUIState) {
-        is StockDetailUIState.ChartUIState.Loading -> {
-            LoadingIndicator(Modifier.padding(vertical = 24.dp))
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        when (chartUIState) {
+            is StockDetailUIState.ChartUIState.Working -> Box(contentAlignment = Alignment.Center) {
+                if (chartUIState.loading) {
+                    LoadingIndicator(Modifier.padding(vertical = 24.dp))
+                }
+                LineChart(
+                    lineChartData = chartUIState.chartData,
+                    linePathCalculator = BezierLinePathCalculator(),
+                    lineDrawer = SolidLineDrawer(),
+                    xAxisDrawer = NoXAxisDrawer,
+                    yAxisDrawer = NoYAxisDrawer,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f, matchHeightConstraintsFirst = true)
+                )
+            }
+            is StockDetailUIState.ChartUIState.Error -> {
+                Text("ERROR: ${chartUIState.message}")
+            }
         }
-        is StockDetailUIState.ChartUIState.Success -> {
-            LineChart(
-                lineChartData = chartUIState.chartData,
-                linePathCalculator = BezierLinePathCalculator(),
-                lineDrawer = SolidLineDrawer(),
-                modifier = Modifier
-                    .padding(12.dp)
-                    .fillMaxWidth()
-                    .aspectRatio(1f)
-                    .clickable { onChartRangeChange() }
-            )
-        }
-        is StockDetailUIState.ChartUIState.Error -> {
-            Text("ERROR: ${chartUIState.message}")
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            ChartRange.values().forEach { range ->
+                val selected = chartRange == range
+                val alpha by animateFloatAsState(targetValue = if (selected) 1f else 0.6f)
+                Text(
+                    text = stringResource(id = range.uiStringResource),
+                    style = MaterialTheme.typography.h6,
+                    modifier = Modifier
+                        .alpha(alpha)
+                        .clickable { onChartRangeSelected(range) }
+                )
+            }
         }
     }
 }
