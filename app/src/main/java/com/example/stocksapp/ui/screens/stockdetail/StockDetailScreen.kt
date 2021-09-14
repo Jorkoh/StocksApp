@@ -83,8 +83,7 @@ fun StockDetailContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 24.dp),
+                .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ChartSection(
@@ -167,7 +166,7 @@ fun ChartSection(
         when (chartUIState) {
             is StockDetailUIState.ChartUIState.Working -> Box(contentAlignment = Alignment.Center) {
                 if (chartUIState.loading) {
-                    LoadingIndicator(Modifier.padding(vertical = 24.dp))
+                    LoadingIndicator()
                 }
                 LineChart(
                     lineChartData = chartUIState.chartData,
