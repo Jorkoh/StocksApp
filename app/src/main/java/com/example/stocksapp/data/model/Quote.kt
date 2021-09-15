@@ -38,7 +38,7 @@ data class Quote(
     val volume: Long?,
 
     val avgTotalVolume: Long,
-    val marketCap: Long,
+    val marketCap: Long?,
     val peRatio: Double?,
     val week52High: Double,
     val week52Low: Double,

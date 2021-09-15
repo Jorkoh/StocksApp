@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.stocksapp.data.datastore.SettingsDataStore
 import com.example.stocksapp.data.model.CompanyInfo
+import com.example.stocksapp.data.model.Quote
 import com.example.stocksapp.data.repositories.stocks.ChartRange
 import com.example.stocksapp.data.repositories.stocks.StocksRepository
 import com.example.stocksapp.ui.components.charts.line.LineChartData
@@ -15,6 +16,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class StockDetailViewModel @AssistedInject constructor(
@@ -27,12 +29,12 @@ class StockDetailViewModel @AssistedInject constructor(
     val stockDetailUIState: StateFlow<StockDetailUIState> = _stockDetailUIState
 
     private var getChartJob: Job? = null
-    private var getCompanyInfoJob: Job? = null
+    private var getNonChartInfoJob: Job? = null
 
     init {
         getIsTracked()
-        getChartRange()
-        getCompanyInfo()
+        getChart()
+        getNonChartInfo()
     }
 
     private fun getIsTracked() {
@@ -43,67 +45,84 @@ class StockDetailViewModel @AssistedInject constructor(
         }
     }
 
-    private fun getChartRange() {
+    private fun getChart() {
         viewModelScope.launch {
             settings.chartRange.collect { chartRange ->
-                _stockDetailUIState.value = _stockDetailUIState.value.copy(chartRange = chartRange)
-                getChart(chartRange)
-            }
-        }
-    }
-
-    private fun getChart(chartRange: ChartRange) {
-        getChartJob?.cancel()
-        getChartJob = viewModelScope.launch {
-            stocksRepository.fetchChartPrices(
-                symbol = symbol,
-                range = chartRange,
-                onStart = {
-                    _stockDetailUIState.value = _stockDetailUIState.value.copy(
-                        chartUIState = when (val previousChartState = _stockDetailUIState.value.chartUIState) {
-                            is StockDetailUIState.ChartUIState.Error -> StockDetailUIState.ChartUIState.Working()
-                            is StockDetailUIState.ChartUIState.Working -> StockDetailUIState.ChartUIState.Working(
-                                chartData = previousChartState.chartData
+                getChartJob?.cancel()
+                getChartJob = viewModelScope.launch {
+                    stocksRepository.fetchChartPrices(
+                        symbol = symbol,
+                        range = chartRange,
+                        onStart = {
+                            _stockDetailUIState.value = _stockDetailUIState.value.copy(
+                                chartUIState = when (val previousChartState = _stockDetailUIState.value.chartUIState) {
+                                    is StockDetailUIState.ChartUIState.Error -> StockDetailUIState.ChartUIState.Working(
+                                        chartRange = chartRange
+                                    )
+                                    is StockDetailUIState.ChartUIState.Working -> StockDetailUIState.ChartUIState.Working(
+                                        chartRange = chartRange,
+                                        chartData = previousChartState.chartData
+                                    )
+                                }
+                            )
+                        },
+                        onError = { message ->
+                            _stockDetailUIState.value = _stockDetailUIState.value.copy(
+                                chartUIState = StockDetailUIState.ChartUIState.Error(message)
                             )
                         }
-                    )
-                },
-                onError = { message ->
-                    _stockDetailUIState.value = _stockDetailUIState.value.copy(
-                        chartUIState = StockDetailUIState.ChartUIState.Error(message)
-                    )
+                    ).collect { chartPrices ->
+                        _stockDetailUIState.value = _stockDetailUIState.value.copy(
+                            chartUIState = StockDetailUIState.ChartUIState.Working(
+                                chartRange = chartRange,
+                                chartData = LineChartData(
+                                    chartPrices.map {
+                                        LineChartData.Point(it.closePrice.toFloat(), it.date.toString())
+                                    },
+                                    bottomPaddingRatio = 0.1f,
+                                    topPaddingRatio = 0.1f
+                                ),
+                                loading = false
+                            )
+                        )
+                    }
                 }
-            ).collect { chartPrices ->
-                _stockDetailUIState.value = _stockDetailUIState.value.copy(
-                    chartUIState = StockDetailUIState.ChartUIState.Working(
-                        chartData = LineChartData(chartPrices.map {
-                            LineChartData.Point(it.closePrice.toFloat(), it.date.toString())
-                        }),
-                        loading = false
-                    )
-                )
             }
         }
     }
 
-    private fun getCompanyInfo() {
-        getCompanyInfoJob?.cancel()
-        getCompanyInfoJob = viewModelScope.launch {
-            stocksRepository.fetchCompanyInfo(
+    private fun getNonChartInfo() {
+        getNonChartInfoJob?.cancel()
+        getNonChartInfoJob = viewModelScope.launch {
+            _stockDetailUIState.value = _stockDetailUIState.value.copy(
+                nonChartUIState = StockDetailUIState.NonChartUIState.Loading
+            )
+            val companyInfoFlow = stocksRepository.fetchCompanyInfo(
                 symbol = symbol,
-                onStart = {
-                    _stockDetailUIState.value = _stockDetailUIState.value.copy(
-                        companyInfoUIState = StockDetailUIState.CompanyInfoUIState.Loading
-                    )
-                },
+                onStart = { },
                 onError = { message ->
                     _stockDetailUIState.value = _stockDetailUIState.value.copy(
-                        companyInfoUIState = StockDetailUIState.CompanyInfoUIState.Error(message)
+                        nonChartUIState = StockDetailUIState.NonChartUIState.Error(message)
                     )
                 }
-            ).collect { companyInfo ->
+            )
+
+            val quoteFlow = stocksRepository.fetchQuotes(
+                symbols = listOf(symbol),
+                onStart = { },
+                onError = { message ->
+                    _stockDetailUIState.value = _stockDetailUIState.value.copy(
+                        nonChartUIState = StockDetailUIState.NonChartUIState.Error(message)
+                    )
+                }
+            )
+
+            combine(companyInfoFlow, quoteFlow) { companyInfo: CompanyInfo, quotes: List<Quote> ->
+                Pair(companyInfo, quotes.first())
+            }.collect { companyInfoAndQuote ->
+                val (companyInfo, quote) = companyInfoAndQuote
                 _stockDetailUIState.value = _stockDetailUIState.value.copy(
-                    companyInfoUIState = StockDetailUIState.CompanyInfoUIState.Success(companyInfo)
+                    nonChartUIState = StockDetailUIState.NonChartUIState.Success(companyInfo, quote)
                 )
             }
         }
@@ -134,22 +153,30 @@ class StockDetailViewModel @AssistedInject constructor(
     }
 }
 
+// TODO figure out a way to organize this state better
 data class StockDetailUIState(
     val symbol: String,
     val isTracked: Boolean = false,
-    val chartRange: ChartRange? = null,
-    val companyInfoUIState: CompanyInfoUIState = CompanyInfoUIState.Loading,
     val chartUIState: ChartUIState = ChartUIState.Working(),
+    val nonChartUIState: NonChartUIState = NonChartUIState.Loading,
 ) {
-    sealed class CompanyInfoUIState {
-        object Loading : CompanyInfoUIState()
-        class Success(val companyInfo: CompanyInfo) : CompanyInfoUIState()
-        class Error(val message: String) : CompanyInfoUIState()
+    sealed class ChartUIState(val chartRange: ChartRange?) {
+        class Working(
+            val chartData: LineChartData = LineChartData(),
+            val loading: Boolean = true,
+            chartRange: ChartRange? = null
+        ) : ChartUIState(chartRange)
+
+        class Error(
+            val message: String,
+            chartRange: ChartRange? = null
+        ) : ChartUIState(chartRange)
     }
 
-    sealed class ChartUIState {
-        class Working(val chartData: LineChartData = LineChartData(), val loading: Boolean = true) : ChartUIState()
-        class Error(val message: String) : ChartUIState()
+    sealed class NonChartUIState {
+        object Loading : NonChartUIState()
+        class Success(val companyInfo: CompanyInfo, val quote: Quote) : NonChartUIState()
+        class Error(val message: String) : NonChartUIState()
     }
 }
 

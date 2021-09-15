@@ -62,9 +62,9 @@ fun CustomChartRangeSelector(
                     Text(
                         text = stringResource(range.uiStringResource),
                         color = tint,
-                        style = MaterialTheme.typography.h5.copy(fontSize = 16.sp),
+                        style = MaterialTheme.typography.button.copy(fontSize = 16.sp),
                         maxLines = 1,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                     )
                 },
                 selected = selected,
@@ -105,7 +105,7 @@ private fun CustomChartRangeItem(
 }
 
 private val IndicatorShape = RoundedCornerShape(percent = 50)
-private val ItemPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+private val ItemPadding = PaddingValues(horizontal = 16.dp)
 
 @Preview
 @Composable

@@ -11,7 +11,10 @@ import com.example.stocksapp.data.model.utils.SuccessNewsMapper
 import com.example.stocksapp.data.model.utils.SuccessQuotesMapper
 import com.example.stocksapp.data.model.utils.SuccessSymbolsMapper
 import com.example.stocksapp.data.model.utils.mapToPrice
-import com.example.stocksapp.data.repositories.stocks.ChartRange.*
+import com.example.stocksapp.data.repositories.stocks.ChartRange.OneMonth
+import com.example.stocksapp.data.repositories.stocks.ChartRange.OneWeek
+import com.example.stocksapp.data.repositories.stocks.ChartRange.OneYear
+import com.example.stocksapp.data.repositories.stocks.ChartRange.ThreeMonths
 import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onException
 import com.skydoves.sandwich.suspendOnSuccess
@@ -61,32 +64,47 @@ class StocksRepository @Inject constructor(
             if (trackedSymbols.isEmpty()) {
                 emit(emptyList())
             } else {
-                val quotesFlow = fetchQuotes(
+                fetchQuotesAndChartPrices(
                     symbols = trackedSymbols.map { it.symbol },
+                    range = OneWeek,
                     onStart = {},
-                    onError = { onError(it) }
-                )
-                val chartPricesFlow = combine(trackedSymbols.map { trackedSymbol ->
-                    fetchChartPrices(
-                        symbol = trackedSymbol.symbol,
-                        range = OneWeek,
-                        onStart = {},
-                        onError = { onError(it) }
-                    )
-                }) { it.toList() }
-
-                combine(quotesFlow, chartPricesFlow) { quotes, chartPrices ->
-                    trackedSymbols.map { symbol ->
-                        Pair(
-                            first = quotes.first { it.symbol == symbol.symbol },
-                            second = chartPrices.first { it.first().symbol == symbol.symbol }
-                        )
-                    }
-                }.first {
-                    emit(it)
-                    true
-                }
+                    onError = onError
+                ).collect { emit(it) }
             }
+        }
+    }.onStart { onStart() }.flowOn(Dispatchers.IO)
+
+    @WorkerThread
+    private fun fetchQuotesAndChartPrices(
+        symbols: List<String>,
+        range: ChartRange,
+        onStart: () -> Unit,
+        onError: (String) -> Unit
+    ) = flow {
+        val quotesFlow = fetchQuotes(
+            symbols = symbols,
+            onStart = {},
+            onError = { onError(it) }
+        )
+        val chartPricesFlow = combine(symbols.map { symbol ->
+            fetchChartPrices(
+                symbol = symbol,
+                range = range,
+                onStart = {},
+                onError = { onError(it) }
+            )
+        }) { it.toList() }
+
+        combine(quotesFlow, chartPricesFlow) { quotes, chartPrices ->
+            symbols.map { symbol ->
+                Pair(
+                    first = quotes.first { it.symbol == symbol },
+                    second = chartPrices.first { it.first().symbol == symbol }
+                )
+            }
+        }.first {
+            emit(it)
+            true
         }
     }.onStart { onStart() }.flowOn(Dispatchers.IO)
 

@@ -186,7 +186,7 @@ private fun QuoteChange(
     Box(modifier = backgroundModifier.padding(horizontal = 2.dp)) {
         Text(
             text = "${"%+.2f".format(changePercent * 100)}%",
-            style = MaterialTheme.typography.subtitle1.copy(fontSize = 12.sp),
+            style = MaterialTheme.typography.subtitle1.copy(fontSize = 14.sp),
             textAlign = TextAlign.End,
             color = changeColor
         )

@@ -42,7 +42,7 @@ data class QuoteResponse(
     @Json(name = "changePercent") val changePercent: Double,
     @Json(name = "volume") val volume: Long?,
     @Json(name = "avgTotalVolume") val avgTotalVolume: Long,
-    @Json(name = "marketCap") val marketCap: Long,
+    @Json(name = "marketCap") val marketCap: Long?,
     @Json(name = "peRatio") val peRatio: Double?,
     @Json(name = "week52High") val week52High: Double,
     @Json(name = "week52Low") val week52Low: Double,
