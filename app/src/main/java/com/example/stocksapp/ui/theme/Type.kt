@@ -24,7 +24,7 @@ val typography = Typography(
     h3 = TextStyle(
         fontFamily = Inter,
         fontWeight = FontWeight.W600,
-        fontSize = 36.sp
+        fontSize = 38.sp
     ),
     h4 = TextStyle(
         fontFamily = Inter,

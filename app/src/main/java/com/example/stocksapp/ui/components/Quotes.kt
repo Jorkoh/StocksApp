@@ -181,7 +181,7 @@ private fun QuoteChange(
     }
     val backgroundModifier = modifier.background(
         shape = MaterialTheme.shapes.small,
-        color = changeColor.copy(alpha = 0.1f)
+        color = changeColor.copy(alpha = 0.14f)
     )
     Box(modifier = backgroundModifier.padding(horizontal = 2.dp)) {
         Text(

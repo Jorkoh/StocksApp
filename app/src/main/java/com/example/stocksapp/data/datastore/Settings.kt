@@ -37,31 +37,33 @@ class SettingsDataStore(appContext: Context) {
 
     suspend fun setChartRange(chartRange: ChartRange) {
         dataStore.updateData { settings ->
-            val chartRangeProto = when (chartRange) {
-                ChartRange.OneWeek -> Settings.ChartRangeProto.ONE_WEEK
-                ChartRange.OneMonth -> Settings.ChartRangeProto.ONE_MONTH
-                ChartRange.ThreeMonths -> Settings.ChartRangeProto.THREE_MONTHS
-                ChartRange.OneYear -> Settings.ChartRangeProto.ONE_YEAR
-            }
-            settings.toBuilder().setChartRange(chartRangeProto).build()
+            settings.toBuilder().setChartRange(chartRange.toProto()).build()
         }
     }
 
     val chartRange: Flow<ChartRange> = dataStore.data.map { it.chartRange.toApp() }
 
-    private fun ChartRange.toProto() = when (this) {
-        ChartRange.OneWeek -> Settings.ChartRangeProto.ONE_WEEK
-        ChartRange.OneMonth -> Settings.ChartRangeProto.ONE_MONTH
-        ChartRange.ThreeMonths -> Settings.ChartRangeProto.THREE_MONTHS
-        ChartRange.OneYear -> Settings.ChartRangeProto.ONE_YEAR
+    suspend fun setIsDarkMode(isDarkMode: Boolean) {
+        dataStore.updateData { settings ->
+            settings.toBuilder().setIsDarkMode(isDarkMode).build()
+        }
     }
 
-    private fun Settings.ChartRangeProto.toApp() = when (this) {
-        Settings.ChartRangeProto.ONE_WEEK -> ChartRange.OneWeek
-        Settings.ChartRangeProto.ONE_MONTH -> ChartRange.OneMonth
-        Settings.ChartRangeProto.THREE_MONTHS -> ChartRange.ThreeMonths
-        Settings.ChartRangeProto.ONE_YEAR -> ChartRange.OneYear
+    val isDarkMode: Flow<Boolean> = dataStore.data.map { it.isDarkMode }
+}
 
-        Settings.ChartRangeProto.UNRECOGNIZED -> ChartRange.DefaultRange
-    }
+private fun ChartRange.toProto() = when (this) {
+    ChartRange.OneWeek -> Settings.ChartRangeProto.ONE_WEEK
+    ChartRange.OneMonth -> Settings.ChartRangeProto.ONE_MONTH
+    ChartRange.ThreeMonths -> Settings.ChartRangeProto.THREE_MONTHS
+    ChartRange.OneYear -> Settings.ChartRangeProto.ONE_YEAR
+}
+
+private fun Settings.ChartRangeProto.toApp() = when (this) {
+    Settings.ChartRangeProto.ONE_WEEK -> ChartRange.OneWeek
+    Settings.ChartRangeProto.ONE_MONTH -> ChartRange.OneMonth
+    Settings.ChartRangeProto.THREE_MONTHS -> ChartRange.ThreeMonths
+    Settings.ChartRangeProto.ONE_YEAR -> ChartRange.OneYear
+
+    Settings.ChartRangeProto.UNRECOGNIZED -> ChartRange.DefaultRange
 }

@@ -2,6 +2,7 @@ package com.example.stocksapp.ui.components
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateDp
@@ -96,8 +97,19 @@ fun NewsListItem(
         }
     }
 
+    val cardColor by transition.animateColor(
+        transitionSpec = { transitionSpec() },
+        label = "cardColorTransition"
+    ) { state ->
+        when (state) {
+            ListItemState.Collapsed -> MaterialTheme.colors.background
+            ListItemState.Expanded -> MaterialTheme.colors.surface
+        }
+    }
+
     Card(
         elevation = cardElevation,
+        backgroundColor = cardColor,
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)

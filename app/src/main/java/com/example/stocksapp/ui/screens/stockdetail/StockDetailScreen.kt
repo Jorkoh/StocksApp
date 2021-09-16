@@ -85,7 +85,6 @@ fun StockDetailContent(
     onTrackButtonPressed: () -> Unit,
     onChartRangeSelected: (ChartRange) -> Unit
 ) {
-
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -206,7 +205,7 @@ fun PriceSection(
         }
         val backgroundModifier = Modifier.background(
             shape = MaterialTheme.shapes.small,
-            color = changeColor.copy(alpha = 0.1f)
+            color = changeColor.copy(alpha = 0.14f)
         )
         Box(modifier = backgroundModifier.padding(horizontal = 3.dp)) {
             Text(

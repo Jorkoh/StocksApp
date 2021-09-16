@@ -9,12 +9,14 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,6 +29,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.stocksapp.data.datastore.SettingsDataStore
 import com.example.stocksapp.ui.components.CustomBottomBar
 import com.example.stocksapp.ui.screens.RootDestination
 import com.example.stocksapp.ui.screens.Screen
@@ -42,13 +45,15 @@ import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
-fun StocksApp() {
+fun StocksApp(settings: SettingsDataStore) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val systemUiController = rememberSystemUiController()
 
+    val darkMode by settings.isDarkMode.collectAsState(initial = isSystemInDarkTheme())
+
     ProvideWindowInsets(windowInsetsAnimationsEnabled = true) {
-        StocksAppTheme {
+        StocksAppTheme(darkTheme = darkMode) {
             val colors = MaterialTheme.colors
             val currentScreen = Screen.listScreens().fastFirstOrNull {
                 it.route == navBackStackEntry?.destination?.route
@@ -95,7 +100,9 @@ private fun NavigableContent(
         composable(Screen.News.route) {
             NewsScreen(hiltViewModel(it), navController)
         }
-        composable(Screen.Profile.route) { ProfileScreen() }
+        composable(Screen.Profile.route) {
+            ProfileScreen(hiltViewModel(it), navController)
+        }
 
         // Deeper screens
         composable(Screen.StockDetail.route) { backStackEntry ->

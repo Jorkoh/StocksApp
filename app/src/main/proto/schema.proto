@@ -11,4 +11,6 @@ message Settings {
     THREE_MONTHS = 2;
     ONE_YEAR = 3;
   }
+
+  bool is_dark_mode = 2;
 }
