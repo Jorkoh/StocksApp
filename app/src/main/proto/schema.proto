@@ -4,13 +4,15 @@ option java_package = "com.example.stocksapp";
 option java_multiple_files = true;
 
 message Settings {
-  ChartRangeProto chart_range = 1;
+  optional ChartRangeProto chart_range = 1;
+  optional bool is_dark_mode = 2;
+  optional bool show_relevant_news = 3;
+  optional bool only_search_stocks = 4;
+
   enum ChartRangeProto {
     ONE_WEEK = 0;
     ONE_MONTH = 1;
     THREE_MONTHS = 2;
     ONE_YEAR = 3;
   }
-
-  bool is_dark_mode = 2;
 }

@@ -31,6 +31,16 @@
     <string name="wt_symbol_type_name">Warrant</string>
     <string name="unknown_symbol_type_name">Unknown</string>
 
+    <string name="settings_section_title">Your settings</string>
+    <string name="settings_dark_mode">Dark mode</string>
+    <string name="settings_dark_mode_explanation">An alternative look for midnight trading</string>
+    <string name="settings_show_relevant_news">Show relevant news</string>
+    <string name="settings_show_relevant_news_explanation">The news section will show articles relevant to your picks</string>
+    <string name="settings_only_search_stocks">Only search stocks</string>
+    <string name="settings_only_search_stocks_explanation">When searching instruments non-stock results won\'t be visible</string>
+    <string name="settings_view_source_code">View source code</string>
+    <string name="settings_view_source_code_explanation">Access the code of this app and learn how it works</string>
+
     <string name="track">Track</string>
     <string name="tracked">Tracked</string>
     <string name="not_tracked">Not tracked</string>
@@ -38,5 +48,6 @@
     <string name="chart_range_one_month">1M</string>
     <string name="chart_range_three_months">3M</string>
     <string name="chart_range_one_year">1Y</string>
+    <string name="chart_range_all">ALL</string>
     <string name="back">Back</string>
 </resources>

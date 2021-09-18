@@ -107,3 +107,5 @@ interface IEXService {
         }
     }
 }
+
+fun buildLogoURL(symbol: String) = "https://storage.googleapis.com/iexcloud-hl37opg/api/logos/$symbol.png"

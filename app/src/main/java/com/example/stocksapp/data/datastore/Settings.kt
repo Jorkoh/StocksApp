@@ -35,13 +35,24 @@ class SettingsDataStore(appContext: Context) {
 
     private val dataStore = appContext.settingsDataStore
 
+    val chartRange: Flow<ChartRange> = dataStore.data.map {
+        if (it.hasChartRange()) it.chartRange.toApp() else chartRangeDefault
+    }
+    val isDarkMode: Flow<Boolean> = dataStore.data.map {
+        if (it.hasIsDarkMode()) it.isDarkMode else isDarkModeDefault
+    }
+    val showRelevantNews: Flow<Boolean> = dataStore.data.map {
+        if (it.hasShowRelevantNews()) it.showRelevantNews else showRelevantNewsDefault
+    }
+    val onlySearchStocks: Flow<Boolean> = dataStore.data.map {
+        if (it.hasOnlySearchStocks()) it.onlySearchStocks else onlySearchStocksDefault
+    }
+
     suspend fun setChartRange(chartRange: ChartRange) {
         dataStore.updateData { settings ->
             settings.toBuilder().setChartRange(chartRange.toProto()).build()
         }
     }
-
-    val chartRange: Flow<ChartRange> = dataStore.data.map { it.chartRange.toApp() }
 
     suspend fun setIsDarkMode(isDarkMode: Boolean) {
         dataStore.updateData { settings ->
@@ -49,7 +60,24 @@ class SettingsDataStore(appContext: Context) {
         }
     }
 
-    val isDarkMode: Flow<Boolean> = dataStore.data.map { it.isDarkMode }
+    suspend fun setShowRelevantNews(showRelevantNews: Boolean) {
+        dataStore.updateData { settings ->
+            settings.toBuilder().setShowRelevantNews(showRelevantNews).build()
+        }
+    }
+
+    suspend fun setOnlySearchStocks(onlySearchStocks: Boolean) {
+        dataStore.updateData { settings ->
+            settings.toBuilder().setOnlySearchStocks(onlySearchStocks).build()
+        }
+    }
+
+    companion object{
+        val chartRangeDefault = ChartRange.OneWeek
+        const val isDarkModeDefault = false
+        const val showRelevantNewsDefault = true
+        const val onlySearchStocksDefault = false
+    }
 }
 
 private fun ChartRange.toProto() = when (this) {

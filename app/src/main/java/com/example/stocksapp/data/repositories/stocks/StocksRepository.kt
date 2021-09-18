@@ -4,8 +4,10 @@ import androidx.annotation.StringRes
 import androidx.annotation.WorkerThread
 import com.example.stocksapp.R
 import com.example.stocksapp.data.database.StocksDao
+import com.example.stocksapp.data.datastore.SettingsDataStore
 import com.example.stocksapp.data.model.Price
 import com.example.stocksapp.data.model.Quote
+import com.example.stocksapp.data.model.network.SymbolType
 import com.example.stocksapp.data.model.utils.SuccessCompanyInfoMapper
 import com.example.stocksapp.data.model.utils.SuccessNewsMapper
 import com.example.stocksapp.data.model.utils.SuccessQuotesMapper
@@ -34,7 +36,8 @@ import javax.inject.Inject
 
 class StocksRepository @Inject constructor(
     private val IEXService: IEXService,
-    private val stocksDao: StocksDao
+    private val stocksDao: StocksDao,
+    private val settingsDataStore: SettingsDataStore
 ) {
 
     companion object {
@@ -230,7 +233,7 @@ class StocksRepository @Inject constructor(
         stocksDao.getQuotes(
             symbols = symbols,
             timestampCutoff = Instant.now().minus(1, ChronoUnit.HOURS)
-        ).distinctUntilChanged().collect { cachedQuotes -> // TODO why is distinctUntilChanged needed?
+        ).distinctUntilChanged().collect { cachedQuotes ->
             if (cachedQuotes.size != symbols.size) {
                 val missingSymbols = symbols.minus(cachedQuotes.map { it.symbol })
                 // API fetch
@@ -256,7 +259,7 @@ class StocksRepository @Inject constructor(
         stocksDao.getQuotesByActivity(
             isTopActive = true,
             timestampCutoff = Instant.now().minus(1, ChronoUnit.HOURS)
-        ).distinctUntilChanged().collect { cachedQuotes -> // TODO why is distinctUntilChanged needed?
+        ).distinctUntilChanged().collect { cachedQuotes ->
             if (cachedQuotes.isEmpty()) { // TODO can there be cases where this check is not enough?
                 // API fetch
                 IEXService.fetchMostActiveSymbols(MOST_ACTIVE_COUNT).suspendOnSuccess(SuccessQuotesMapper) {
@@ -280,11 +283,11 @@ class StocksRepository @Inject constructor(
     ) = flow {
         stocksDao.getNews(
             timestampCutoff = Instant.now().minus(2, ChronoUnit.HOURS)
-        ).distinctUntilChanged().collect { cachedNews -> // TODO why is distinctUntilChanged needed?
+        ).distinctUntilChanged().collect { cachedNews ->
             if (cachedNews.isEmpty()) {
                 // API fetch
                 val trackedSymbols = stocksDao.getTrackedSymbols().first()
-                val newsSymbols = if (trackedSymbols.isNotEmpty()) {
+                val newsSymbols = if (trackedSymbols.isNotEmpty() && settingsDataStore.showRelevantNews.first()) {
                     // If the user has tracked symbols fetch news from those
                     trackedSymbols.map { it.symbol }
                 } else {
@@ -319,7 +322,7 @@ class StocksRepository @Inject constructor(
         stocksDao.getCompanyInfo(
             symbol = symbol,
             timestampCutoff = Instant.now().minus(7, ChronoUnit.DAYS)
-        ).distinctUntilChanged().collect { cachedCompanyInfo -> // TODO why is distinctUntilChanged needed?
+        ).distinctUntilChanged().collect { cachedCompanyInfo ->
             if (cachedCompanyInfo == null) {
                 // API fetch
                 IEXService.fetchCompanyInfo(symbol).suspendOnSuccess(SuccessCompanyInfoMapper) {
@@ -343,7 +346,13 @@ class StocksRepository @Inject constructor(
         onStart: () -> Unit,
         onError: (String) -> Unit
     ) = flow {
-        val symbols = stocksDao.getSymbolsByQuery(query, limit)
+        val symbols = stocksDao.getSymbolsByQuery(query, limit).let { symbols ->
+            if (settingsDataStore.onlySearchStocks.first()) {
+                symbols.filter { it.type == SymbolType.CommonStock }
+            }else{
+                symbols
+            }
+        }
         emit(symbols)
     }.onStart { onStart() }.flowOn(Dispatchers.IO)
 
@@ -368,7 +377,7 @@ enum class ChartRange(private val urlString: String, @StringRes val uiStringReso
     OneMonth("1m", R.string.chart_range_one_month),
     ThreeMonths("3m", R.string.chart_range_three_months),
     OneYear("1y", R.string.chart_range_one_year);
-    // All("max"); // TODO: Add "All" range support
+    // All("max", R.string.chart_range_all); // TODO: Add "All" range support
 
     companion object {
         val DefaultRange = OneWeek

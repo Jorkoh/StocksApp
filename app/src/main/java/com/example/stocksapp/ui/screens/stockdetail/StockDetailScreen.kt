@@ -49,6 +49,7 @@ import com.example.stocksapp.R
 import com.example.stocksapp.data.model.CompanyInfo
 import com.example.stocksapp.data.model.Quote
 import com.example.stocksapp.data.repositories.stocks.ChartRange
+import com.example.stocksapp.data.repositories.stocks.buildLogoURL
 import com.example.stocksapp.ui.components.CustomChartRangeSelector
 import com.example.stocksapp.ui.components.LoadingIndicator
 import com.example.stocksapp.ui.components.charts.line.LineChart
@@ -317,7 +318,7 @@ private fun CompanyNameAndLogo(symbol: String, companyName: String) {
     ) {
         Image(
             painter = rememberImagePainter(
-                data = "https://storage.googleapis.com/iexcloud-hl37opg/api/logos/$symbol.png",
+                data = buildLogoURL(symbol),
                 builder = {
                     crossfade(true)
                 }

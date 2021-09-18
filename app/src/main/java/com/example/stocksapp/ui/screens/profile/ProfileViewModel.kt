@@ -13,10 +13,24 @@ class ProfileViewModel @Inject constructor(
 ) : ViewModel() {
 
     val isDarkMode = settingsDataStore.isDarkMode
+    val showRelevantNews = settingsDataStore.showRelevantNews
+    val onlySearchStocks = settingsDataStore.onlySearchStocks
 
-    fun SetIsDarkMode(isDarkMode: Boolean) {
+    fun setIsDarkMode(isDarkMode: Boolean) {
         viewModelScope.launch {
             settingsDataStore.setIsDarkMode(isDarkMode)
+        }
+    }
+
+    fun setShowRelevantNews(showRelevantNews: Boolean) {
+        viewModelScope.launch {
+            settingsDataStore.setShowRelevantNews(showRelevantNews)
+        }
+    }
+
+    fun setOnlySearchStocks(onlySearchStocks: Boolean) {
+        viewModelScope.launch {
+            settingsDataStore.setOnlySearchStocks(onlySearchStocks)
         }
     }
 }
