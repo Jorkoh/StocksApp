@@ -16,19 +16,19 @@ Some technologies used to develop Stocks:
 * [Dagger Hilt](https://dagger.dev/hilt/), Dagger dependency injection standardized for Android.
 
 <p align="center">
-  <img src="/readme-resources/graph.gif" width="30%">
-&nbsp; &nbsp; 
-  <img src="/readme-resources/bottom_bar.gif" width="30%">
-&nbsp; &nbsp;
-  <img src="/readme-resources/news.gif" width="30%">
-</p>
-
-<p align="center">
   <img src="/readme-resources/screen1.jpg" width="30%">
 &nbsp; &nbsp; 
   <img src="/readme-resources/screen2.jpg" width="30%">
 &nbsp; &nbsp;
   <img src="/readme-resources/screen3.jpg" width="30%">
+</p>
+
+<p align="center">
+  <img src="/readme-resources/graph.gif" width="30%">
+&nbsp; &nbsp; 
+  <img src="/readme-resources/bottom_bar.gif" width="30%">
+&nbsp; &nbsp;
+  <img src="/readme-resources/news.gif" width="30%">
 </p>
 
 <p align="center">
